@@ -228,31 +228,31 @@ describe Rubydora::DigitalObject do
     end
 
     it "should fetch related objects using sparql" do
-      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'hasPart').and_return([1])
+      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([1])
       @object.parts.should == [1]
     end
 
     it "should add related objects" do
       @mock_repository.should_receive(:add_relationship) do |params|
         params.should have_key(:subject)
-        params[:predicate].should == 'hasPart'
+        params[:predicate].should == 'info:fedora/fedora-system:def/relations-external#hasPart'
         params[:object].should == 'asdf'
       end
       @mock_object = mock(Rubydora::DigitalObject)
       @mock_object.should_receive(:fqpid).and_return('asdf')
-      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'hasPart').and_return([])
+      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([])
       @object.parts << @mock_object
     end
 
     it "should remove related objects" do
       @mock_repository.should_receive(:purge_relationship) do |params|
         params.should have_key(:subject)
-        params[:predicate].should == 'hasPart'
+        params[:predicate].should == 'info:fedora/fedora-system:def/relations-external#hasPart'
         params[:object].should == 'asdf'
       end
       @mock_object = mock(Rubydora::DigitalObject)
       @mock_object.should_receive(:fqpid).and_return('asdf')
-      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'hasPart').and_return([@mock_object])
+      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([@mock_object])
       @object.parts.delete(@mock_object)
     end
   end
