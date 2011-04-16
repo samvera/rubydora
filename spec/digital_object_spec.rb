@@ -1,16 +1,16 @@
 require 'spec_helper'
 
 describe Rubydora::DigitalObject do
-  describe "find" do
+  describe "new" do
     it "should load a DigitalObject instance" do
-      Rubydora::DigitalObject.find("pid").should be_a_kind_of(Rubydora::DigitalObject::Base)
+      Rubydora::DigitalObject.new("pid").should be_a_kind_of(Rubydora::DigitalObject)
     end
   end
 
   describe "profile" do
     before(:each) do
       @mock_repository = mock(Rubydora::Repository)
-      @object = Rubydora::DigitalObject.find 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
     it "should convert object profile to a simple hash" do
@@ -27,19 +27,37 @@ describe Rubydora::DigitalObject do
     end
   end
 
+  describe "new" do
+    before(:each) do
+      @mock_repository = mock(Rubydora::Repository)
+      @mock_repository.should_receive(:object).any_number_of_times.and_raise ""
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+    end
+
+    it "should be new" do
+      @object.new?.should == true
+    end
+
+    it "should call ingest on save" do
+      @object.should_receive(:datastreams).and_return({})
+      @mock_repository.should_receive(:ingest).with(hash_including(:pid => 'pid'))
+      @object.save
+    end
+  end
+
   describe "create" do
     it "should call the Fedora REST API to create a new object" do
       @mock_repository = mock(Rubydora::Repository)
       @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return(nil)
       obj = Rubydora::DigitalObject.create "pid", { :a => 1, :b => 2}, @mock_repository
-      obj.should be_a_kind_of(Rubydora::DigitalObject::Base)
+      obj.should be_a_kind_of(Rubydora::DigitalObject)
     end
   end
 
   describe "retreive" do
     before(:each) do
       @mock_repository = mock(Rubydora::Repository)
-      @object = Rubydora::DigitalObject.find 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
     describe "datastreams" do
@@ -57,7 +75,7 @@ describe Rubydora::DigitalObject do
         @object.datastreams.length.should == 3
 
         ds = @object.datastreams["z"]
-        ds.should be_a_kind_of(Rubydora::Datastream::Base)
+        ds.should be_a_kind_of(Rubydora::Datastream)
         ds.new?.should == true
 
         @object.datastreams.length.should == 4
@@ -67,10 +85,18 @@ describe Rubydora::DigitalObject do
 
   end
 
+  describe "retrieve" do
+
+  end
+
   describe "save" do
     before(:each) do
       @mock_repository = mock(Rubydora::Repository)
-      @object = Rubydora::DigitalObject.find 'pid', @mock_repository
+      @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
+      <objectProfile>
+      </objectProfile>
+      XML
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
     it "should save all dirty datastreams" do
@@ -86,8 +112,15 @@ describe Rubydora::DigitalObject do
       @ds3.should_receive(:empty?).and_return(false)
       @ds3.should_receive(:save)
 
-      @object.should_receive(:datastreams).and_return([@ds1, @ds2, @ds3])
+      @object.should_receive(:datastreams).and_return({:ds1 => @ds1, :ds2 => @ds2, :ds3 => @ds3 })
 
+      @object.save
+    end
+
+    it "should save all dirty attributes" do
+      @object.label = "asdf"
+      @object.should_receive(:datastreams).and_return({})
+      @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
       @object.save
     end
   end
@@ -95,7 +128,7 @@ describe Rubydora::DigitalObject do
   describe "delete" do
     before(:each) do
       @mock_repository = mock()
-      @object = Rubydora::DigitalObject.find 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
     it "should call the Fedora REST API" do
@@ -104,4 +137,123 @@ describe Rubydora::DigitalObject do
     end
   end
 
+  describe "extensions" do
+    module FakeExtension
+    end
+
+    module OtherFakeExtension
+
+    end
+    before(:each) do
+      @mock_repository = mock()
+    end
+
+    after(:each) do
+      Rubydora::DigitalObject.registered_extensions = []
+    end
+
+    it "should be extendable" do
+      Rubydora::DigitalObject.use_extension FakeExtension
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object.is_a?(FakeExtension).should == true
+    end
+
+    it "should be extendable conditionally" do
+      Rubydora::DigitalObject.use_extension(FakeExtension) { |x| true }
+      Rubydora::DigitalObject.use_extension(OtherFakeExtension) { |x| false }
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object.is_a?(FakeExtension).should == true
+      @object.is_a?(OtherFakeExtension).should == false
+    end
+
+    it "should be able to introspect object profiles" do
+      @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
+      <objectProfile>
+        <a>1</a>
+      </objectProfile>
+      XML
+      Rubydora::DigitalObject.use_extension(FakeExtension) { |x| x.profile['a'] == '1' }
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object.is_a?(FakeExtension).should == true
+    end
+
+  end
+
+  describe "models" do
+    before(:each) do
+      @mock_repository = mock()
+      @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
+      <objectProfile>
+      </objectProfile>
+      XML
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+    end
+
+    it "should add models to fedora" do
+      @mock_repository.should_receive(:add_relationship) do |params|
+        params.should have_key(:subject)
+        params[:predicate].should == 'info:fedora/fedora-system:def/model#hasModel'
+        params[:object].should == 'asdf'
+      end
+      @object.models << "asdf"
+    end
+
+    it "should remove models from fedora" do
+      @object.should_receive(:profile).any_number_of_times.and_return({"objModels" => ['asdf']})
+      @mock_repository.should_receive(:purge_relationship) do |params|
+        params.should have_key(:subject)
+        params[:predicate].should == 'info:fedora/fedora-system:def/model#hasModel'
+        params[:object].should == 'asdf'
+      end
+      @object.models.delete("asdf")
+    end
+
+    it "should be able to handle complete model replacemenet" do
+      @object.should_receive(:profile).any_number_of_times.and_return({"objModels" => ['asdf']})
+      @mock_repository.should_receive(:add_relationship).with(instance_of(Hash))
+      @mock_repository.should_receive(:purge_relationship).with(instance_of(Hash))
+      @object.models = '1234'
+
+    end
+  end
+
+  describe "relations" do
+    before(:each) do
+      @mock_repository = mock()
+      @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
+      <objectProfile>
+      </objectProfile>
+      XML
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+    end
+
+    it "should fetch related objects using sparql" do
+      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'hasPart').and_return([1])
+      @object.parts.should == [1]
+    end
+
+    it "should add related objects" do
+      @mock_repository.should_receive(:add_relationship) do |params|
+        params.should have_key(:subject)
+        params[:predicate].should == 'hasPart'
+        params[:object].should == 'asdf'
+      end
+      @mock_object = mock(Rubydora::DigitalObject)
+      @mock_object.should_receive(:fqpid).and_return('asdf')
+      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'hasPart').and_return([])
+      @object.parts << @mock_object
+    end
+
+    it "should remove related objects" do
+      @mock_repository.should_receive(:purge_relationship) do |params|
+        params.should have_key(:subject)
+        params[:predicate].should == 'hasPart'
+        params[:object].should == 'asdf'
+      end
+      @mock_object = mock(Rubydora::DigitalObject)
+      @mock_object.should_receive(:fqpid).and_return('asdf')
+      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'hasPart').and_return([@mock_object])
+      @object.parts.delete(@mock_object)
+    end
+  end
 end

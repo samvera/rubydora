@@ -3,7 +3,12 @@ module Rubydora
   autoload :Repository, "rubydora/repository"
   autoload :ResourceIndex, "rubydora/resource_index"
   autoload :RestApiClient, "rubydora/rest_api_client"
+  autoload :ModelsMixin, "rubydora/models_mixin"
+  autoload :RelationshipsMixin, "rubydora/relationships_mixin"
   autoload :DigitalObject, "rubydora/digital_object"
+  autoload :ExtensionParameters, "rubydora/extension_parameters"
+  autoload :Callbacks, "rubydora/callbacks"
+  autoload :ArrayWithCallback, "rubydora/array_with_callback"
 
   require 'fastercsv'
   require 'restclient'

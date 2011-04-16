@@ -38,7 +38,10 @@ describe Rubydora::RestApiClient do
   end
 
   it "modify_object" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid?format=xml&state=Z"))
+     RestClient::Request.should_receive(:execute) do |params|
+       params.should have_key(:url)
+       params[:url].should =~ /^#{Regexp.escape("http://example.org/objects/mypid?")}.*state=Z/
+     end
     @mock_repository.modify_object :pid => 'mypid', :state => 'Z'
   end
 
@@ -88,7 +91,10 @@ describe Rubydora::RestApiClient do
   end
 
   it "set_datastream_options" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa?format=xml&aparam=true"))
+     RestClient::Request.should_receive(:execute) do |params|
+       params.should have_key(:url)
+       params[:url].should =~ /^#{Regexp.escape("http://example.org/objects/mypid/datastreams/aaa?")}.*aparam=true/ 
+     end
     @mock_repository.set_datastream_options :pid => 'mypid', :dsid => 'aaa', :aparam => true 
   end
 
@@ -104,12 +110,18 @@ describe Rubydora::RestApiClient do
   end
 
   it "add_relationship" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/relationships?subject=z&format=xml"))
+     RestClient::Request.should_receive(:execute) do |params|
+       params.should have_key(:url)
+       params[:url].should =~ /^#{Regexp.escape("http://example.org/objects/mypid/relationships?")}.*subject=z/
+     end
     @mock_repository.add_relationship :pid => 'mypid', :subject => 'z'
   end
 
   it "purge_relationships" do
-    RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/relationships?subject=z&format=xml"))
+     RestClient::Request.should_receive(:execute) do |params|
+       params.should have_key(:url)
+       params[:url].should =~ /^#{Regexp.escape("http://example.org/objects/mypid/relationships?")}.*subject=z/
+     end
     @mock_repository.purge_relationship :pid => 'mypid', :subject => 'z' 
   end
 
