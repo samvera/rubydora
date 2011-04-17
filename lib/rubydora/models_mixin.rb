@@ -1,4 +1,8 @@
 module Rubydora
+  ##
+  # Provide access to registered content models
+  # FIXME: Given additional relationships configuration
+  #        this could be subsumed by Rubydora::RelationshipsMixin
   module ModelsMixin
     def models args = {}
       @models = nil if args.delete(:refetch)

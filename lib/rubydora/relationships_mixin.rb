@@ -45,7 +45,11 @@ module Rubydora
           RUBY
         end
     end
-
+          
+    ##
+    # Provides an accessor to the `predicate` RELS-EXT relationship
+    # Using ArrayWithCallback, will commit any changes to Fedora
+    #
     def relationship predicate, args = {}
       arr = ArrayWithCallback.new(args[:values] || repository.find_by_sparql_relationship(fqpid, predicate))
       arr.on_change << lambda { |arr, diff| relationship_changed(predicate, diff, arr) } 
@@ -53,6 +57,11 @@ module Rubydora
       arr
     end
 
+
+    ##
+    # Given a predicate and a diff between before and after states
+    # commit the appropriate changes to Fedora
+    #
     def relationship_changed predicate, diff, arr = []
       diff[:+] ||= []
       diff[:-] ||= []
