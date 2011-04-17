@@ -181,7 +181,7 @@ describe Rubydora::DigitalObject do
 
   describe "models" do
     before(:each) do
-      @mock_repository = mock()
+      @mock_repository = mock(Rubydora::Repository)
       @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
       <objectProfile>
       </objectProfile>
