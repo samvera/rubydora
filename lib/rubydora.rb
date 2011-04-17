@@ -4,6 +4,7 @@ module Rubydora
   autoload :ResourceIndex, "rubydora/resource_index"
   autoload :RestApiClient, "rubydora/rest_api_client"
   autoload :ModelsMixin, "rubydora/models_mixin"
+  autoload :Ext, "rubydora/ext"
   autoload :RelationshipsMixin, "rubydora/relationships_mixin"
   autoload :DigitalObject, "rubydora/digital_object"
   autoload :ExtensionParameters, "rubydora/extension_parameters"
