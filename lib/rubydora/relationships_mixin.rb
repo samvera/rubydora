@@ -1,7 +1,12 @@
 module Rubydora
+  #
+  # This model inject RELS-EXT-based helper methods 
+  # for Fedora objects
+  #
   module RelationshipsMixin
 
     # FIXME: This should probably be defined on the DigitalObject
+    # Map Rubydora accessors to Fedora RELS-EXT predicates
     RELS_EXT = {"annotations"=>"info:fedora/fedora-system:def/relations-external#hasAnnotation",
                 "has_metadata"=>"info:fedora/fedora-system:def/relations-external#hasMetadata",
                 "description_of"=>"info:fedora/fedora-system:def/relations-external#isDescription_of",
@@ -50,6 +55,10 @@ module Rubydora
     # Provides an accessor to the `predicate` RELS-EXT relationship
     # Using ArrayWithCallback, will commit any changes to Fedora
     #
+    # @param [String] predicate
+    # @param [Hash] args
+    # @option args [Array] :values if nil, will query the resource index for related objects
+    # @return [ArrayWithCallback<Rubydora::DigitalObject>] an array that will call the #relationship_changed callback when values are modified
     def relationship predicate, args = {}
       arr = ArrayWithCallback.new(args[:values] || repository.find_by_sparql_relationship(fqpid, predicate))
       arr.on_change << lambda { |arr, diff| relationship_changed(predicate, diff, arr) } 
@@ -62,6 +71,11 @@ module Rubydora
     # Given a predicate and a diff between before and after states
     # commit the appropriate changes to Fedora
     #
+    # @param [String] predicate
+    # @param [Hash] diff
+    # @option diff [Hash] :+ additions
+    # @option diff [Hash] :- deletions
+    # @param [Array] arr the current relationship state
     def relationship_changed predicate, diff, arr = []
       diff[:+] ||= []
       diff[:-] ||= []
@@ -77,6 +91,8 @@ module Rubydora
       end        
     end
 
+    # accessor to all retrieved relationships
+    # @return [Hash]
     def relationships
       @relationships ||= {}
     end

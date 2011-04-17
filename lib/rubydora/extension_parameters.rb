@@ -1,4 +1,5 @@
 module Rubydora
+# Stolen from projectblacklight.org
   module ExtensionParameters
     def self.included(base)
       base.extend ExtendableClassMethods

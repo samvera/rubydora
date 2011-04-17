@@ -1,53 +1,98 @@
 module Rubydora
+
+  # Provide low-level access to the Fedora Commons REST API
   module RestApiClient
+    # Fedora API documentation available at {https://wiki.duraspace.org/display/FCR30/REST+API}
+    API_DOCUMENTATION = 'https://wiki.duraspace.org/display/FCR30/REST+API'
+    # Create an authorized HTTP client for the Fedora REST API
+    # @param [Hash] config
+    # @option config [String] :url
+    # @option config [String] :user
+    # @option config [String] :password
+    # @return [RestClient::Resource]
     def client config = {}
-      config = @config.merge(config)
-      @client ||= RestClient::Resource.new @config[:url], :user => @config[:user], :password => @config[:password]
+      config = self.config.merge(config)
+      @client ||= RestClient::Resource.new config[:url], :user => config[:user], :password => config[:password]
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @return [String]
     def next_pid options = {}
       client[url_for(object_url() + "/nextPID", options)].post nil
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @return [String]
     def find_objects options = {}
       raise "" if options[:terms] and options[:query]
 
       client[object_url(nil, options)].get
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def object options = {}
       pid = options.delete(:pid)
       client[object_url(pid, options)].get
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def ingest options = {}
       pid = options.delete(:pid) || 'new'
       file = options.delete(:file)
       client[object_url(pid, options)].post file, :content_type => 'text/xml'
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def modify_object options = {}
       pid = options.delete(:pid)
       client[object_url(pid, options)].put nil
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def purge_object options = {}
       pid = options.delete(:pid)
       client[object_url(pid, options)].delete
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def object_versions options = {}
       pid = options.delete(:pid)
       raise "" unless pid
       client[url_for(object_url(pid) + "/versions", options)].get
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def object_xml options = {}
       pid = options.delete(:pid)
       raise "" unless pid
       client[url_for(object_url(pid) + "/objectXML", options)].get
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :dsid
+    # @return [String]
     def datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
@@ -56,12 +101,22 @@ module Rubydora
 
     alias_method :datastreams, :datastream
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :dsid
+    # @return [String]
     def set_datastream_options options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       client[datastream_url(pid, dsid, options)].put nil
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :dsid
+    # @return [String]
     def datastream_versions options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
@@ -69,6 +124,11 @@ module Rubydora
       client[url_for(datastream_url(pid, dsid) + "/versions", options)].get
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :dsid
+    # @return [String]
     def datastream_dissemination options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
@@ -77,6 +137,11 @@ module Rubydora
       client[url_for(datastream_url(pid, dsid) + "/content", options)].get
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :dsid
+    # @return [String]
     def add_datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
@@ -85,6 +150,11 @@ module Rubydora
       client[datastream_url(pid, dsid, options)].post file, :content_type => content_type
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :dsid
+    # @return [String]
     def modify_datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
@@ -93,29 +163,51 @@ module Rubydora
       client[datastream_url(pid, dsid, options)].put file, :content_type => content_type
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :dsid
+    # @return [String]
     def purge_datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       client[datastream_url(pid, dsid, options)].delete
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def relationships options = {}
       pid = options.delete(:pid)
       raise "" unless pid
       client[url_for(object_url(pid) + "/relationships", options)].get
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def add_relationship options = {}
       pid = options.delete(:pid)
       client[url_for(object_url(pid) + "/relationships", options)].post nil
     end
 
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def purge_relationship options = {}
       pid = options.delete(:pid)
       client[url_for(object_url(pid) + "/relationships", options)].delete
     end
 
-
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @option options [String] :sdef
+    # @option options [String] :method
+    # @return [String]
     def dissemination options = {}
       pid = options.delete(:pid)
       sdef = options.delete(:sdef)

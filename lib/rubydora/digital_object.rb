@@ -1,4 +1,12 @@
 module Rubydora
+
+  # This class represents a Fedora object and provides
+  # helpers for managing attributes, datastreams, and
+  # relationships. 
+  #
+  # Using the extension framework, implementors may 
+  # provide additional functionality to this base 
+  # implementation.
   class DigitalObject
     include Rubydora::Callbacks
     register_callback :after_initialize
@@ -8,6 +16,8 @@ module Rubydora
 
 
     attr_reader :pid
+    
+    # mapping object parameters to profile elements
     OBJ_ATTRIBUTES = {:state => :objState, :ownerId => :objOwnerId, :label => :objLabel, :logMessage => nil, :lastModifiedDate => :objLastModDate }
       
     OBJ_ATTRIBUTES.each do |attribute, profile_name|
@@ -21,19 +31,33 @@ module Rubydora
       RUBY
     end
 
+    # find an existing fedora object
+    # TODO: raise an error if the object does not yet exist
+    # @param [String] pid
+    # @param [Rubydora::Repository] context
     def self.find pid, repository = nil
       DigitalObject.new pid, repository
     end
 
+    # create a new fedora object (see also DigitalObject#save)
+    # @param [String] pid
+    # @param [Hash] options
+    # @param [Rubydora::Repository] context
     def self.create pid, options = {}, repository = nil
       repository ||= Rubydora.repository
-
       repository.ingest(options.merge(:pid => pid))
-
       DigitalObject.new pid, repository
     end
 
-
+    ##
+    # Initialize a Rubydora::DigitalObject, which may or
+    # may not already exist in the data store.
+    #
+    # Provides `after_initialize` callback for extensions
+    # 
+    # @param [String] pid
+    # @param [Rubydora::Repository] repository context
+    # @param [Hash] options default attribute values (used esp. for creating new datastreams
     def initialize pid, repository = nil, options = {}
       @pid = pid
       @repository = repository
@@ -45,19 +69,22 @@ module Rubydora
       call_after_initialize
     end
 
-    def fqpid
+    ##
+    # Return a full uri pid (for use in relations, etc
+    def uri
       return pid if pid =~ /.+\/.+/
       "info:fedora/#{pid}"
     end
+    alias_method :fqpid, :uri
 
-    def delete
-      repository.purge_object(:pid => pid)
-    end
-
+    # Does this object already exist?
+    # @return [Boolean]
     def new?
       self.profile.nil?
     end
 
+    # Retrieve the object profile as a hash (and cache it)
+    # @return [Hash] see Fedora #getObject documentation for keys
     def profile
       @profile ||= begin
         profile_xml = repository.object(:pid => pid)
@@ -83,6 +110,8 @@ module Rubydora
       end
     end
 
+    # List of datastreams
+    # @return [Array<Rubydora::Datastream>] 
     def datastreams
       @datastreams ||= begin
         h = Hash.new { |h,k| h[k] = Datastream.new self, k }                
@@ -94,6 +123,13 @@ module Rubydora
       end
     end
 
+    # persist the object to Fedora, either as a new object 
+    # by modifing the existing object
+    #
+    # also will save all `:dirty?` datastreams that already exist 
+    # new datastreams must be directly saved
+    # 
+    # @return [Rubydora::DigitalObject] a new copy of this object
     def save
       if self.new?
         repository.ingest to_api_params.merge(:pid => pid)
@@ -103,8 +139,16 @@ module Rubydora
       end
 
       self.datastreams.select { |dsid, ds| ds.dirty? }.reject {|dsid, ds| ds.empty? }.each { |dsid, ds| ds.save }
+      DigitalObject.new(pid, repository)
     end
 
+    # Purge the object from Fedora
+    # @return [Rubydora::DigitalObject] `self`
+    def delete
+      repository.purge_object(:pid => pid)
+      reset_profile_attributes
+      self
+    end
 
     protected
     def to_api_params
@@ -119,6 +163,14 @@ module Rubydora
     def default_api_params
       { }
     end
+
+    def reset_profile_attributes
+      @profile = nil
+      OBJ_ATTRIBUTES.each do |attribute, profile_name|
+        instance_variable_set("@#{attribute.to_s}", nil) if instance_variable_defined?("@#{attribute.to_s}")
+      end
+    end
+
 
     def repository
       @repository ||= Rubydora.repository

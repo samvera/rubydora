@@ -1,4 +1,7 @@
 module Rubydora
+  # This class represents a Fedora datastream object
+  # and provides helper methods for creating and manipulating
+  # them. 
   class Datastream
     include Rubydora::Callbacks
     register_callback :after_initialize
@@ -7,19 +10,30 @@ module Rubydora
 
     attr_reader :digital_object, :dsid
                                                                    
+
+    # mapping datastream attributes (and api parameters) to datastream profile names
     DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil}
     
+    # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
-      class_eval <<-RUBY
-      def #{attribute.to_s}
-        @#{attribute.to_s} || profile['#{profile_name.to_s}']
-      end
+      class_eval %Q{
+        def #{attribute.to_s}
+          @#{attribute.to_s} || profile['#{profile_name.to_s}']
+        end
 
-      attr_writer :#{attribute.to_s}
-
-      RUBY
+        attr_writer :#{attribute.to_s}
+      }
     end
 
+    ##
+    # Initialize a Rubydora::Datastream object, which may or
+    # may not already exist in the datastore.
+    #
+    # Provides `after_initialize` callback for extensions
+    # 
+    # @param [Rubydora::DigitalObject]
+    # @param [String] Datastream ID
+    # @param [Hash] default attribute values (used esp. for creating new datastreams
     def initialize digital_object, dsid, options = {}
       @digital_object = digital_object
       @dsid = dsid
@@ -30,14 +44,20 @@ module Rubydora
       call_after_initialize
     end
 
+    # Does this datastream already exist?
+    # @return [Boolean]
     def new?
       profile.nil?
     end
 
+    # Retrieve the content of the datastream (and cache it)
+    # @return [String]
     def content
       @content ||= repository.datastream_dissemination :pid => digital_object.pid, :dsid => dsid
     end
 
+    # Retrieve the datastream profile as a hash (and cache it)
+    # @return [Hash] see Fedora #getDatastream documentation for values
     def profile
       @profile ||= begin
         profile_xml = repository.datastream(:pid => digital_object.pid, :dsid => dsid)
@@ -58,21 +78,35 @@ module Rubydora
       end
     end
 
+    # Has this datastream been modified, but not yet saved?
+    # @return [Boolean]
     def dirty?
       DS_ATTRIBUTES.any? { |attribute, profile_name| instance_variable_defined?("@#{attribute.to_s}") } || new?
     end
 
+    # Add datastream to Fedora
+    # @return [Rubydora::Datastream]
     def create
       repository.add_datastream to_api_params.merge({ :pid => digital_object.pid, :dsid => dsid })
+      reset_profile_attributes
+      Datastream.new(digital_object, dsid)
     end
 
+    # Modify or save the datastream
+    # @return [Rubydora::Datastream]
     def save
       return create if new?
       repository.modify_datastream to_api_params.merge({ :pid => digital_object.pid, :dsid => dsid })
+      reset_profile_attributes
+      Datastream.new(digital_object, dsid)
     end
 
+    # Purge the datastream from Fedora
+    # @return [Rubydora::Datastream] `self`
     def delete
       repository.purge_datastream(:pid => digital_object.pid, :dsid => dsid) unless self.new?
+      reset_profile_attributes
+      self
     end
 
     protected
@@ -87,6 +121,13 @@ module Rubydora
 
     def default_api_params
       { :controlGroup => 'M', :dsState => 'A', :checksumType => 'NONE', :versionable => true}
+    end
+
+    def reset_profile_attributes
+      @profile = nil
+      DS_ATTRIBUTES.each do |attribute, profile_name|
+        instance_variable_set("@#{attribute.to_s}", nil) if instance_variable_defined?("@#{attribute.to_s}")
+      end
     end
 
     def repository

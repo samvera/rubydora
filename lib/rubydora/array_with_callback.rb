@@ -17,11 +17,13 @@ module Rubydora
       RUBY
     end
 
+    # duck-typing Rubydora::Callbacks @hooks and accessor
     def on_change
       @hooks ||= {}
       @hooks[:on_change] ||= []
     end
 
+    # duck-typing Rubydora::Callbacks call_* methods
     def call_on_change changes = {}
       self.on_change.each do |h|
         h.call(self, changes)
