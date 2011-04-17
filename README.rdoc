@@ -1,6 +1,10 @@
 = rubydora
 
-Description goes here.
+Rubydora is a low-level Fedora Commons REST API consumer, providing direct access to REST API methods, as well as a primitive ruby abstraction.
+
+== Installation
+
+gem install rubydora
 
 == Contributing to rubydora
  
