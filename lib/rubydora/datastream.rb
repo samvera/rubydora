@@ -1,9 +1,9 @@
 module Rubydora
   class Datastream
-    class << self
-      include Rubydora::Callbacks
-    end
+    include Rubydora::Callbacks
+    register_callback :after_initialize
     include Rubydora::ExtensionParameters
+
 
     attr_reader :digital_object, :dsid
                                                                    
@@ -27,9 +27,7 @@ module Rubydora
         self.send(:"#{key}=", value)
       end
 
-      self.class.hooks.each do |h|
-        instance_eval &h
-      end
+      call_after_initialize
     end
 
     def new?

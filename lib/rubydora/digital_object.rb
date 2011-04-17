@@ -1,11 +1,11 @@
 module Rubydora
   class DigitalObject
-    class << self
-      include Rubydora::Callbacks
-    end
+    include Rubydora::Callbacks
+    register_callback :after_initialize
     include Rubydora::ExtensionParameters
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
+
 
     attr_reader :pid
     OBJ_ATTRIBUTES = {:state => :objState, :ownerId => :objOwnerId, :label => :objLabel, :logMessage => nil, :lastModifiedDate => :objLastModDate }
@@ -42,9 +42,7 @@ module Rubydora
         self.send(:"#{key}=", value)
       end
 
-      self.class.hooks.each do |h|
-        instance_eval &h
-      end
+      call_after_initialize
     end
 
     def fqpid

@@ -1,26 +1,44 @@
 module Rubydora
-# Class level methods for altering object instances
+
+# Provides class level methods for handling
+# callback methods that alter object instances
   module Callbacks
-    
-    # method that only accepts a block
-    # The block is executed when an object is created via #new -> SolrDoc.new
-    # The blocks scope is the instance of the object.
-    def after_initialize(&blk)
-      hooks << blk
+    def self.included(base)
+      base.extend ExtendableClassMethods
     end
-    
-    # Removes the current set of after_initialize blocks.
-    # You would use this if you wanted to open a class back up,
-    # but clear out the previously defined blocks.
-    def clear_after_initialize_blocks!
-      @hooks = []
+
+    module ExtendableClassMethods
+        # creates the @hooks container ("hooks" are blocks or procs).
+        # returns an array
+        def hooks
+          @hooks ||= {}
+        end
+
+        def register_callback *attrs
+        attrs.each do |method_name|  
+          next if methods.include? method_name.to_s
+          instance_eval %Q{
+            def #{method_name}(&blk)
+              self.hooks[:#{method_name}] ||= []
+              self.hooks[:#{method_name}] << blk
+            end
+
+            def clear_#{method_name}_blocks!
+              self.hooks[:#{method_name}] = []
+            end
+          }
+
+          class_eval %Q{
+            def call_#{method_name}
+              self.class.hooks[:#{method_name}] ||= []
+              self.class.hooks[:#{method_name}].each do |h|
+                instance_eval &h
+              end
+            end
+
+          }
+        end
+      end
     end
-    
-    # creates the @hooks container ("hooks" are blocks or procs).
-    # returns an array
-    def hooks
-      @hooks ||= []
-    end
-    
   end
 end
