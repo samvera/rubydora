@@ -146,8 +146,8 @@ module Rubydora
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       file = options.delete(:file)
-      content_type = options.delete(:content_type) || options[:mimeType] || 'text/plain'
-      client[datastream_url(pid, dsid, options)].post file, :content_type => content_type
+      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
+      client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -159,8 +159,8 @@ module Rubydora
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       file = options.delete(:file)
-      content_type = options.delete(:content_type) || options[:mimeType] || 'text/plain'
-      client[datastream_url(pid, dsid, options)].put file, :content_type => content_type
+      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
+      client[datastream_url(pid, dsid, options)].put file, :content_type => content_type.to_s
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}

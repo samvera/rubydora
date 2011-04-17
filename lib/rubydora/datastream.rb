@@ -53,6 +53,12 @@ module Rubydora
     def content
       @content ||= repository.datastream_dissemination :pid => digital_object.pid, :dsid => dsid
     end
+    alias_method :read, :content
+
+    def content= content
+       @content = nil
+       repository.modify_datastream :pid => digital_object.pid, :dsid => dsid, :file => content  
+    end
 
     # Retrieve the datastream profile as a hash (and cache it)
     # @return [Hash] see Fedora #getDatastream documentation for keys

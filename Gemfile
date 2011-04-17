@@ -3,6 +3,7 @@ source "http://rubygems.org"
 gem "fastercsv"
 gem "rest-client"
 gem "nokogiri"
+gem "mime-types"
 
 # Add dependencies required to use your gem here.
 # Example:
