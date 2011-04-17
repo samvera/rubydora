@@ -1,6 +1,7 @@
 module Rubydora
-# Stolen from projectblacklight.org
+# Copied in part from projectblacklight.org
   module ExtensionParameters
+    # setup extension support
     def self.included(base)
       base.extend ExtendableClassMethods
 
@@ -15,6 +16,7 @@ module Rubydora
       end
     end
 
+    # try to apply registered extensions
     def apply_extensions
       self.class.registered_extensions.each do |registration|
         self.extend( registration[:module_obj] ) if registration[:condition_proc].nil? || registration[:condition_proc].call( self )
@@ -26,10 +28,15 @@ module Rubydora
   module ExtendableClassMethods
     attr_writer :registered_extensions
 
+    # registered_extensions accessor
+    # @return [Array]
     def registered_extensions
       @registered_extensions ||= []
     end
 
+    # register extensions
+    # @param [Module] module_obj
+    # @yield &condition
     def use_extension( module_obj, &condition )
       registered_extensions << {:module_obj => module_obj, :condition_proc => condition}    
     end

@@ -25,7 +25,7 @@ module Rubydora
       def #{attribute.to_s}
         @#{attribute.to_s} || profile['#{profile_name.to_s}']
       end
-
+                     
       attr_writer :#{attribute.to_s}
 
       RUBY
@@ -151,6 +151,8 @@ module Rubydora
     end
 
     protected
+    # datastream parameters 
+    # @return [Hash]
     def to_api_params
       h = default_api_params
       OBJ_ATTRIBUTES.each do |attribute, profile_name|
@@ -160,10 +162,14 @@ module Rubydora
       h
     end
 
+    # default datastream parameters
+    # @return [Hash]
     def default_api_params
       { }
     end
 
+    # reset all profile attributes
+    # @return [Hash]
     def reset_profile_attributes
       @profile = nil
       OBJ_ATTRIBUTES.each do |attribute, profile_name|
@@ -171,7 +177,8 @@ module Rubydora
       end
     end
 
-
+    # repository reference from the digital object
+    # @return [Rubydora::Repository]
     def repository
       @repository ||= Rubydora.repository
     end

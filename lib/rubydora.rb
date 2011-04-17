@@ -1,3 +1,4 @@
+# Fedora Commons REST API module
 module Rubydora
   autoload :Datastream, "rubydora/datastream"
   autoload :Repository, "rubydora/repository"
@@ -15,18 +16,26 @@ module Rubydora
   require 'restclient'
   require 'nokogiri'
 
+  # @return [String] version
   def self.version
     @version ||= File.read(File.join(File.dirname(__FILE__), '..', 'VERSION')).chomp
   end
 
+  # version string
   VERSION = self.version
 
+  # Connect to Fedora Repository
+  # @return Rubydora::Repository
   def self.connect *args
     Repository.new *args
   end
 
   def self.repository
-    nil 
+    @repository ||= self.connect(self.default_config)
+  end
+
+  def self.default_config
+    {}
   end
 
 end

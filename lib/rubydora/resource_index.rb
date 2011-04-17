@@ -1,4 +1,5 @@
 module Rubydora
+  # Fedora resource index helpers
   module ResourceIndex
     # Find new objects using a sparql query
     # @param [String] query SPARQL query

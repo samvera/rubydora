@@ -7,9 +7,7 @@ module Rubydora
     register_callback :after_initialize
     include Rubydora::ExtensionParameters
 
-
     attr_reader :digital_object, :dsid
-                                                                   
 
     # mapping datastream attributes (and api parameters) to datastream profile names
     DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil}
@@ -57,7 +55,7 @@ module Rubydora
     end
 
     # Retrieve the datastream profile as a hash (and cache it)
-    # @return [Hash] see Fedora #getDatastream documentation for values
+    # @return [Hash] see Fedora #getDatastream documentation for keys
     def profile
       @profile ||= begin
         profile_xml = repository.datastream(:pid => digital_object.pid, :dsid => dsid)
@@ -110,6 +108,8 @@ module Rubydora
     end
 
     protected
+    # datastream parameters 
+    # @return [Hash]
     def to_api_params
       h = default_api_params
       DS_ATTRIBUTES.each do |attribute, profile_name|
@@ -119,10 +119,14 @@ module Rubydora
       h
     end
 
+    # default datastream parameters
+    # @return [Hash]
     def default_api_params
       { :controlGroup => 'M', :dsState => 'A', :checksumType => 'NONE', :versionable => true}
     end
 
+    # reset all profile attributes
+    # @return [Hash]
     def reset_profile_attributes
       @profile = nil
       DS_ATTRIBUTES.each do |attribute, profile_name|
@@ -130,6 +134,8 @@ module Rubydora
       end
     end
 
+    # repository reference from the digital object
+    # @return [Rubydora::Repository]
     def repository
       digital_object.repository
     end

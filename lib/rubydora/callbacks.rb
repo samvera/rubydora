@@ -3,18 +3,22 @@ module Rubydora
 # Provides class level methods for handling
 # callback methods that alter object instances
   module Callbacks
+    # 
     def self.included(base)
       base.extend ExtendableClassMethods
     end
 
+    # hooks support
     module ExtendableClassMethods
-        # creates the @hooks container ("hooks" are blocks or procs).
-        # returns an array
-        def hooks
-          @hooks ||= {}
-        end
+      # creates the @hooks container ("hooks" are blocks or procs).
+      # returns an array
+      def hooks
+        @hooks ||= {}
+      end
 
-        def register_callback *attrs
+      # register callback procs
+      # @param [Array<Symbol>] hook name
+      def register_callback *attrs
         attrs.each do |method_name|  
           next if methods.include? method_name.to_s
           instance_eval %Q{
