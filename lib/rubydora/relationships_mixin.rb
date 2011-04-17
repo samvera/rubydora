@@ -29,27 +29,32 @@ module Rubydora
         # FIXME: ugly, but functional..
         RELS_EXT.each do |name, property|
           base.class_eval <<-RUBY
-            def #{name.to_s}
-              relationships[:#{name.to_s}] ||= ArrayWithCallback.new(repository.find_by_sparql_relationship(fqpid, '#{property.to_s}'))
-              relationships[:#{name.to_s}] ||= ArrayWithCallback.new
-              relationships[:#{name.to_s}].hooks << lambda { |arr, diff| relationship_#{name.to_s}_changed(arr, diff) } if @relationships[:#{name.to_s}].hooks.empty?
-               relationships[:#{name.to_s}] 
-            end
-
-            def relationship_#{name.to_s}_changed arr, diff
-              diff[:+] ||= []
-              diff[:-] ||= []
-
-              diff[:+].each do |o| 
-                repository.add_relationship :subject => fqpid, :predicate => '#{property.to_s}', :object => o.fqpid
-              end        
-
-              diff[:-].each do |o| 
-                repository.purge_relationship :subject => fqpid, :predicate => '#{property.to_s}', :object => o.fqpid
-              end        
+            def #{name.to_s} refetch = false
+              relationships[:#{name}] = nil if refetch
+              relationships[:#{name}] ||= relationship('#{property}')
             end
           RUBY
         end
+    end
+
+    def relationship predicate
+      arr = ArrayWithCallback.new(repository.find_by_sparql_relationship(fqpid, predicate))
+      arr.hooks << lambda { |arr, diff| relationship_changed(predicate, diff, arr) } 
+
+      arr
+    end
+
+    def relationship_changed predicate, diff, arr = []
+      diff[:+] ||= []
+      diff[:-] ||= []
+
+      diff[:+].each do |o| 
+        repository.add_relationship :subject => fqpid, :predicate => predicate, :object => o.fqpid
+      end        
+
+      diff[:-].each do |o| 
+        repository.purge_relationship :subject => fqpid, :predicate => predicate, :object => o.fqpid
+      end        
     end
 
     def relationships
