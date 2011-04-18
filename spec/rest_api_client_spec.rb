@@ -18,7 +18,7 @@ describe Rubydora::RestApiClient do
   end
 
   it "should find objects" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects?query=a&format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects?query=a&resultFormat=xml"))
     @mock_repository.find_objects :query => 'a'
   end
 
@@ -28,12 +28,12 @@ describe Rubydora::RestApiClient do
   end
   
   it "ingest" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/new?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/new"))
     @mock_repository.ingest
   end
 
   it "ingest with pid" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid"))
     @mock_repository.ingest :pid => 'mypid'
   end
 
@@ -46,7 +46,7 @@ describe Rubydora::RestApiClient do
   end
 
   it "purge_object" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid"))
     @mock_repository.purge_object :pid => 'mypid'
   end
 
@@ -76,17 +76,17 @@ describe Rubydora::RestApiClient do
   end
 
   it "add_datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa"))
     @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa' 
   end
 
   it "modify_datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa"))
     @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa' 
   end
 
   it "purge_datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa"))
     @mock_repository.purge_datastream :pid => 'mypid', :dsid => 'aaa' 
   end
 
@@ -112,7 +112,7 @@ describe Rubydora::RestApiClient do
   it "add_relationship" do
      RestClient::Request.should_receive(:execute) do |params|
        params.should have_key(:url)
-       params[:url].should =~ /^#{Regexp.escape("http://example.org/objects/mypid/relationships?")}.*subject=z/
+       params[:url].should =~ /^#{Regexp.escape("http://example.org/objects/mypid/relationships/new?")}.*subject=z/
      end
     @mock_repository.add_relationship :pid => 'mypid', :subject => 'z'
   end
@@ -136,7 +136,7 @@ describe Rubydora::RestApiClient do
   end
 
   it "dissemination" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/methods/sdef/method?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/methods/sdef/method"))
     @mock_repository.dissemination :pid => 'mypid', :sdef => 'sdef', :method => 'method'
   end
 
