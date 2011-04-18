@@ -11,8 +11,9 @@ module Rubydora
       class_eval <<-RUBY
         def #{method.to_s} *args, &blk
           old = self.dup
-          super(*args, &blk)
+          res = super(*args, &blk)
           call_on_change({:+ => self - old, :- => old - self})
+          res
         end
       RUBY
     end
