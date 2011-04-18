@@ -71,6 +71,7 @@ describe Rubydora::DigitalObject do
 
       it "should allow other datastreams to be added" do
         @mock_repository.should_receive(:datastreams).with(:pid => 'pid').and_return("<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>")
+        @mock_repository.should_receive(:datastream).with(:pid => 'pid', :dsid => 'z').and_raise("")
 
         @object.datastreams.length.should == 3
 
@@ -105,11 +106,11 @@ describe Rubydora::DigitalObject do
       @ds1.should_not_receive(:save)
       @ds2 = mock()
       @ds2.should_receive(:dirty?).and_return(true)
-      @ds2.should_receive(:empty?).and_return(true)
+      @ds2.should_receive(:new?).and_return(true)
       @ds2.should_not_receive(:save)
       @ds3 = mock()
       @ds3.should_receive(:dirty?).and_return(true)
-      @ds3.should_receive(:empty?).and_return(false)
+      @ds3.should_receive(:new?).and_return(false)
       @ds3.should_receive(:save)
 
       @object.should_receive(:datastreams).and_return({:ds1 => @ds1, :ds2 => @ds2, :ds3 => @ds3 })
