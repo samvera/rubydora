@@ -17,7 +17,7 @@ module Rubydora
     def find_by_sparql_relationship subject, predicate
       find_by_sparql <<-RELSEXT
         SELECT ?pid FROM <#ri> WHERE {
-          #{subject} #{predicate} ?pid 
+          <#{subject}> <#{predicate}> ?pid 
         }
       RELSEXT
     end
@@ -34,7 +34,7 @@ module Rubydora
     # @param [String] query
     # @param [Hash] options
     def risearch query, options = {}
-      request_params = { :dt => 'on', :format => 'CSV', :lang => 'sparql', :limit => nil, :query => query, type => 'tuples' }.merge(options)
+      request_params = { :dt => 'on', :format => 'CSV', :lang => 'sparql', :limit => nil, :query => query, :type => 'tuples' }.merge(options)
 
       self.client['risearch'].post request_params
     end
