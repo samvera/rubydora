@@ -18,7 +18,10 @@ describe Rubydora::RestApiClient do
   end
 
   it "should find objects" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects?query=a&resultFormat=xml"))
+     RestClient::Request.should_receive(:execute) do |params|
+       params.should have_key(:url)
+       params[:url].should =~ /^#{Regexp.escape("http://example.org/objects?")}.*query=a/
+     end
     @mock_repository.find_objects :query => 'a'
   end
 
