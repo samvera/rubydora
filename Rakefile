@@ -15,8 +15,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "rubydora"
   gem.homepage = "http://github.com/cbeer/rubydora"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Fedora Commons REST API ruby library}
+  gem.description = %Q{Fedora Commons REST API ruby library : REQUIRES FCREPO 3.4+}
   gem.email = "chris@cbeer.info"
   gem.authors = ["Chris Beer"]
 end
