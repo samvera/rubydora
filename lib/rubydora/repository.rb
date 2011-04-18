@@ -58,6 +58,7 @@ module Rubydora
     # Raise an error if unable to connect to the API endpoint
     def ping
       raise "Unable to establish connection to Fedora Repository" unless profile
+      true
     end
 
     protected

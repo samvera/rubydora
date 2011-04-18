@@ -10,7 +10,7 @@ module Rubydora
     attr_reader :digital_object, :dsid
 
     # mapping datastream attributes (and api parameters) to datastream profile names
-    DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil}
+    DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :file => nil}
     
     # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
@@ -56,8 +56,10 @@ module Rubydora
     alias_method :read, :content
 
     def content= content
-       @content = nil
-       repository.modify_datastream :pid => digital_object.pid, :dsid => dsid, :file => content  
+       @file = content
+       @content = content.dup
+       @content &&= @content.read if @content.respond_to? :read
+       @content &&= @content.to_s if @content.respond_to? :read
     end
 
     # Retrieve the datastream profile as a hash (and cache it)

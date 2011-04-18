@@ -122,7 +122,7 @@ module Rubydora
         doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each { |ds| h[ds['dsid']] = Datastream.new self, ds['dsid'] }
         h
       rescue RestClient::ResourceNotFound
-        []
+        h = Hash.new { |h,k| h[k] = Datastream.new self, k }                
       end
     end
 
