@@ -29,6 +29,7 @@ module Rubydora
                 "collection_members"=>"info:fedora/fedora-system:def/relations-external#hasCollectionMember",
                 "members"=>"info:fedora/fedora-system:def/relations-external#hasMember"}
 
+    # generate accessor methods for each RELS_EXT property
     def self.included(base)
 
         # FIXME: ugly, but functional..

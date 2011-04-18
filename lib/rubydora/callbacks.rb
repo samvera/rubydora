@@ -3,7 +3,8 @@ module Rubydora
 # Provides class level methods for handling
 # callback methods that alter object instances
   module Callbacks
-    # 
+    # add callback framework to base class
+    # @param [Class] base 
     def self.included(base)
       base.extend ExtendableClassMethods
     end

@@ -21,6 +21,8 @@ module Rubydora
       DigitalObject.find(pid, self)
     end
 
+    # repository profile (from API-A-LITE data)
+    # @return [Hash]
     def profile
       @profile ||= begin
         profile_xml = client['describe?xml=true'].get
@@ -48,16 +50,19 @@ module Rubydora
       end
     end
 
+    # @return [Float] repository version
     def version
       @version ||= profile['repositoryVersion'].to_f rescue nil
     end
 
+    # Raise an error if unable to connect to the API endpoint
     def ping
       raise "Unable to establish connection to Fedora Repository" unless profile
     end
 
     protected
 
+    # Load fallback API implementations for older versions of Fedora
     def load_api_abstraction
       return unless version
 

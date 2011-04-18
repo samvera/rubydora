@@ -12,6 +12,8 @@ module Rubydora::Ext
 
     # Datastreams mixin
     module DatastreamMixin
+      # Initialize solr mapping logic
+      # @param [Class] base
       def self.included(base)
         base.instance_eval %Q{
           class << self; attr_accessor :solr_mapping_logic end
@@ -36,6 +38,8 @@ module Rubydora::Ext
 
     # DigitalObject mixin
     module DigitalObjectMixin
+      # Initialize solr mapping logic
+      # @param [Class] base 
       def self.included(base)
         base.instance_eval %Q{
           class << self; attr_accessor :solr_mapping_logic end

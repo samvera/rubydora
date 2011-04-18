@@ -5,12 +5,6 @@ module Rubydora
     def self.included(base)
       base.extend ExtendableClassMethods
 
-      base.class_eval do
-        def self.extension_parameters
-          @extension_parameters ||= {}
-        end
-      end
-
       base.after_initialize do
         apply_extensions
       end

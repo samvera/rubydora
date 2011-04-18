@@ -225,20 +225,39 @@ module Rubydora
     
     private
 
+    # Generate a REST API compatible URI 
+    # @param [String] base base URI
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
     def url_for base, options = nil
       return base unless options.is_a? Hash
       "#{base}" + (("?#{options.map { |key, value|  "#{CGI::escape(key.to_s)}=#{CGI::escape(value.to_s)}"}.join("&")  }" if options and not options.empty?) || '')
     end
 
+    # Generate a base object REST API endpoint URI
+    # @param [String] pid
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
     def object_url pid = nil, options = nil
       url_for("objects" + (("/#{CGI::escape(pid.to_s.gsub('info:fedora/', ''))}" if pid) || ''), options)
     end
 
+    # Generate a base object dissemination REST API endpoint URI
+    # @param [String] pid
+    # @param [String] sdef
+    # @param [String] method
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
     def dissemination_url pid, sdef = nil, method = nil, options = nil
       raise "" unless pid
       url_for(object_url(pid) + "/methods" +  (("/#{CGI::escape(sdef)}" if sdef) || '') +  (("/#{CGI::escape(method)}" if method) || ''), options)
     end
 
+    # Generate a base datastream REST API endpoint URI
+    # @param [String] pid
+    # @param [String] dsid
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
     def datastream_url pid, dsid = nil, options = nil
       raise "" unless pid
       url_for(object_url(pid) + "/datastreams" + (("/#{CGI::escape(dsid)}" if dsid) || ''), options)
