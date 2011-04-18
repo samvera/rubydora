@@ -101,6 +101,7 @@ module Rubydora
                      sum
                    end
         h.select { |key, value| value.length == 1 }.each do |key, value|
+          next if key == "objModels"
           h[key] = value.first
         end
 
@@ -120,6 +121,8 @@ module Rubydora
         doc = Nokogiri::XML(datastreams_xml)
         doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each { |ds| h[ds['dsid']] = Datastream.new self, ds['dsid'] }
         h
+      rescue RestClient::ResourceNotFound
+        []
       end
     end
 
@@ -138,7 +141,7 @@ module Rubydora
         repository.modify_object p.merge(:pid => pid) unless p.empty?
       end
 
-      self.datastreams.select { |dsid, ds| ds.dirty? }.reject {|dsid, ds| ds.empty? }.each { |dsid, ds| ds.save }
+      self.datastreams.select { |dsid, ds| ds.dirty? }.reject {|dsid, ds| ds.new? }.each { |dsid, ds| ds.save }
       DigitalObject.new(pid, repository)
     end
 
@@ -148,6 +151,12 @@ module Rubydora
       repository.purge_object(:pid => pid)
       reset_profile_attributes
       self
+    end
+
+    # repository reference from the digital object
+    # @return [Rubydora::Repository]
+    def repository
+      @repository ||= Rubydora.repository
     end
 
     protected
@@ -175,12 +184,6 @@ module Rubydora
       OBJ_ATTRIBUTES.each do |attribute, profile_name|
         instance_variable_set("@#{attribute.to_s}", nil) if instance_variable_defined?("@#{attribute.to_s}")
       end
-    end
-
-    # repository reference from the digital object
-    # @return [Rubydora::Repository]
-    def repository
-      @repository ||= Rubydora.repository
     end
 
   end
