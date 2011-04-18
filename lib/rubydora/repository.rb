@@ -66,7 +66,7 @@ module Rubydora
 
       if version < 3.4
         require 'rubydora/rest_api_client/v33'
-        self.include Rubydora::RestApiClient::V33
+        self.extend Rubydora::RestApiClient::V33
       end
 
       true
