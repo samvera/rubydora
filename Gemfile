@@ -5,6 +5,10 @@ gem "rest-client"
 gem "nokogiri"
 gem "mime-types"
 
+group :soap do
+  gem "soap4r"
+end
+
 # Add dependencies required to use your gem here.
 # Example:
 #   gem "activesupport", ">= 2.3.5"
