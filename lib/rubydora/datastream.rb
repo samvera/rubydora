@@ -109,6 +109,7 @@ module Rubydora
     # @return [Rubydora::Datastream] `self`
     def delete
       repository.purge_datastream(:pid => digital_object.pid, :dsid => dsid) unless self.new?
+      digital_object.datastreams.delete(dsid)
       reset_profile_attributes
       self
     end
@@ -128,7 +129,7 @@ module Rubydora
     # default datastream parameters
     # @return [Hash]
     def default_api_params
-      { :controlGroup => 'M', :dsState => 'A', :checksumType => 'NONE', :versionable => true}
+      { :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true}
     end
 
     # reset all profile attributes
