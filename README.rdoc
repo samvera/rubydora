@@ -40,13 +40,13 @@ gem install rubydora
 
  > ds = obj.datastreams['File']
  => #<Rubydora::Datastream:0x1017f26a8 @dsid="File" ...>
-ruby-1.8.7-p302 > ds.controlGroup = 'R'
+ > ds.controlGroup = 'R'
  => "R"
  > ds.dsLocation = 'http://example.org/index.html'
  => "http://example.org/index.html"
  > ds.dsLabel = 'Example redirect datastream'
  => "Example redirect datastream"
-> ds.mimeType = 'text/html'
+ > ds.mimeType = 'text/html'
  => "text/html"
  > ds.save 
  => #<Rubydora::Datastream:0x10177a568 @dsid="File" ...> 
