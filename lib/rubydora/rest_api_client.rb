@@ -223,8 +223,6 @@ module Rubydora
       client[dissemination_url(pid,sdef,method,options)].get
     end
     
-    private
-
     # Generate a REST API compatible URI 
     # @param [String] base base URI
     # @param [Hash] options to convert to URL parameters
