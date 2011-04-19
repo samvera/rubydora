@@ -42,6 +42,11 @@ module Rubydora
       call_after_initialize
     end
 
+    # Helper method to get digital object pid
+    def pid
+      digital_object.pid
+    end
+
     # Does this datastream already exist?
     # @return [Boolean]
     def new?
@@ -51,10 +56,19 @@ module Rubydora
     # Retrieve the content of the datastream (and cache it)
     # @return [String]
     def content
-      @content ||= repository.datastream_dissemination :pid => digital_object.pid, :dsid => dsid
+      @content ||= repository.datastream_dissemination :pid => pid, :dsid => dsid
     end
     alias_method :read, :content
 
+    # Get the URL for the datastream content
+    # @return [String]
+    def url
+      repository.datastream_url(pid, dsid) + "/content"
+    end
+
+    # Set the content of the datastream
+    # @param [String or IO] 
+    # @return [String or IO]
     def content= content
        @file = content
        @content = content.dup
@@ -66,7 +80,7 @@ module Rubydora
     # @return [Hash] see Fedora #getDatastream documentation for keys
     def profile
       @profile ||= begin
-        profile_xml = repository.datastream(:pid => digital_object.pid, :dsid => dsid)
+        profile_xml = repository.datastream(:pid => pid, :dsid => dsid)
         profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/access/"' unless profile_xml =~ /xmlns=/
         doc = Nokogiri::XML(profile_xml)
         h = doc.xpath('/access:datastreamProfile/*', {'access' => "http://www.fedora.info/definitions/1/0/access/"} ).inject({}) do |sum, node|
@@ -93,7 +107,7 @@ module Rubydora
     # Add datastream to Fedora
     # @return [Rubydora::Datastream]
     def create
-      repository.add_datastream to_api_params.merge({ :pid => digital_object.pid, :dsid => dsid })
+      repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
       reset_profile_attributes
       Datastream.new(digital_object, dsid)
     end
@@ -102,7 +116,7 @@ module Rubydora
     # @return [Rubydora::Datastream]
     def save
       return create if new?
-      repository.modify_datastream to_api_params.merge({ :pid => digital_object.pid, :dsid => dsid })
+      repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
       reset_profile_attributes
       Datastream.new(digital_object, dsid)
     end
@@ -110,7 +124,7 @@ module Rubydora
     # Purge the datastream from Fedora
     # @return [Rubydora::Datastream] `self`
     def delete
-      repository.purge_datastream(:pid => digital_object.pid, :dsid => dsid) unless self.new?
+      repository.purge_datastream(:pid => pid, :dsid => dsid) unless self.new?
       digital_object.datastreams.delete(dsid)
       reset_profile_attributes
       self
