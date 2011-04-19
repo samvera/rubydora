@@ -125,6 +125,7 @@ module Rubydora
         h = Hash.new { |h,k| h[k] = Datastream.new self, k }                
       end
     end
+    alias_method :datastream, :datastreams
 
     # persist the object to Fedora, either as a new object 
     # by modifing the existing object
