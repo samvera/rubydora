@@ -79,7 +79,7 @@ module Rubydora::Ext
 
       # add solr document attributes from the object datastreams
       # @param [Hash] doc Solr document object (pass-by-reference)
-      def datstreams_to_solr doc
+      def datastreams_to_solr doc
         datastreams.each do |dsid, ds|
           doc['disseminates_s'] ||= []
           doc['disseminates_s'] << [dsid]
