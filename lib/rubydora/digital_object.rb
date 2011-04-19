@@ -126,6 +126,7 @@ module Rubydora
       end
     end
     alias_method :datastream, :datastreams
+    alias_method :[], :datastreams
 
     # persist the object to Fedora, either as a new object 
     # by modifing the existing object
