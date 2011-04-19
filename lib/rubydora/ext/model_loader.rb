@@ -23,7 +23,7 @@ module Rubydora::Ext
         self.module_names(document).each do |model|
           document.class.extension_parameters[:ModelLoaderMixin][:namespaces].each do |ns|
             begin
-              mod = self.string_to_constant [ns, model.gsub('info:fedora/', '').gsub(':', '/').downcase].compact.map { |x| x.to_s }.join("::")
+              mod = self.string_to_constant [ns, model].compact.map { |x| x.to_s }.join("/")
               document.send(:extend, mod)
             rescue NameError
             end
@@ -46,7 +46,9 @@ module Rubydora::Ext
 
       private
       def self.module_names(document)
-        document.send(document.class.extension_parameters[:ModelLoaderMixin][:method])
+        arr = document.send(document.class.extension_parameters[:ModelLoaderMixin][:method])
+        arr &&= [arr] unless arr.is_a? Array
+        arr.map { |x| x.gsub('info:fedora/', '').downcase.gsub(/[^a-z0-9_:]+/, '_').gsub(':', '/').gsub(/_{2,}/, '_').gsub(/^_|_$/, '')  }
       end
     end
   end
