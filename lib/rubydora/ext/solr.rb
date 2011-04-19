@@ -91,7 +91,7 @@ module Rubydora::Ext
       # @param [Hash] doc Solr document object (pass-by-reference)
       def relations_to_solr doc
         self.repository.sparql("SELECT ?relation ?object FROM <#ri> WHERE {
-   #{uri} ?relation ?object
+   <#{uri}> ?relation ?object
 }").each do |row|
           solr_field = "ri_#{row['relation'].split('#').last}_s"
           doc[solr_field] ||= []
