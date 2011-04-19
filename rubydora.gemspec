@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rubydora}
-  s.version = "0.0.2"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Chris Beer"]
-  s.date = %q{2011-04-18}
+  s.date = %q{2011-04-19}
   s.description = %q{Fedora Commons REST API ruby library : REQUIRES FCREPO 3.4+}
   s.email = %q{chris@cbeer.info}
   s.extra_rdoc_files = [
@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
     "lib/rubydora/datastream.rb",
     "lib/rubydora/digital_object.rb",
     "lib/rubydora/ext.rb",
+    "lib/rubydora/ext/model_loader.rb",
     "lib/rubydora/ext/solr.rb",
     "lib/rubydora/extension_parameters.rb",
     "lib/rubydora/models_mixin.rb",
@@ -39,7 +40,9 @@ Gem::Specification.new do |s|
     "rubydora.gemspec",
     "spec/datastream_spec.rb",
     "spec/digital_object_spec.rb",
+    "spec/ext_model_loader_spec.rb",
     "spec/ext_solr_spec.rb",
+    "spec/extension_parameters_spec.rb",
     "spec/integration_test_spec.rb",
     "spec/repository_spec.rb",
     "spec/resource_index_spec.rb",
@@ -49,12 +52,14 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/cbeer/rubydora}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.5.3}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{Fedora Commons REST API ruby library}
   s.test_files = [
     "spec/datastream_spec.rb",
     "spec/digital_object_spec.rb",
+    "spec/ext_model_loader_spec.rb",
     "spec/ext_solr_spec.rb",
+    "spec/extension_parameters_spec.rb",
     "spec/integration_test_spec.rb",
     "spec/repository_spec.rb",
     "spec/resource_index_spec.rb",
@@ -63,6 +68,7 @@ Gem::Specification.new do |s|
   ]
 
   if s.respond_to? :specification_version then
+    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
