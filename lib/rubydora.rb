@@ -36,6 +36,13 @@ module Rubydora
     @repository ||= self.connect(self.default_config)
   end
 
+  # Set the default Fedora Repository
+  # @param [Rubydora::Repository] repository
+  # @return Rubydora::Repository
+  def self.repository= repository
+    @repository = repository
+  end
+
   # Default repository connection information
   # TODO: read ENV variables?
   # @return Hash
