@@ -5,8 +5,9 @@ module Rubydora
     def self.included(base)
       base.extend ExtendableClassMethods
 
-      # Provide a class-level hash for extension parameters
       base.class_eval do
+        # Provide a class-level hash for extension parameters
+        # @return [Hash]
         def self.extension_parameters
           ## This variable should NOT be @@, since we're in a class method,
           # it's just @ to be a class variable. Confusing, but it
