@@ -51,6 +51,11 @@ describe Rubydora::Repository do
       @repository.should_receive(:profile).and_return nil
       lambda { @repository.ping }.should raise_error
     end
+
+    it "should return true if a connection is established" do
+      @repository.should_receive(:profile).and_return true
+      @repository.ping.should == true
+    end
   end
 
 
