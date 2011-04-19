@@ -63,7 +63,7 @@ module Rubydora::Ext
           send(method_name, doc)
         end
 
-        doc.reject { |k,v| v.nil? or v.empty? }
+        doc.reject { |k,v| v.nil? or (v.respond_to?(:empty?) and v.empty?) }
       end
 
       # add solr document attributes from the object profile
