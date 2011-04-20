@@ -59,7 +59,7 @@ module Rubydora
     # @param [Rubydora::Repository] repository context
     # @param [Hash] options default attribute values (used esp. for creating new datastreams
     def initialize pid, repository = nil, options = {}
-      @pid = pid
+      @pid = pid.gsub('info:fedora/', '')
       @repository = repository
 
       options.each do |key, value|
