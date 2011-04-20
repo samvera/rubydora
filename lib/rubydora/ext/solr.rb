@@ -82,7 +82,7 @@ module Rubydora::Ext
       def datastreams_to_solr doc
         datastreams.each do |dsid, ds|
           doc['disseminates_s'] ||= []
-          doc['disseminates_s'] << [dsid]
+          doc['disseminates_s'] << dsid
           ds.to_solr(doc)
         end
       end
