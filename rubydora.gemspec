@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rubydora}
-  s.version = "0.0.4"
+  s.version = "0.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Chris Beer"]
-  s.date = %q{2011-04-19}
+  s.date = %q{2011-04-21}
   s.description = %q{Fedora Commons REST API ruby library : REQUIRES FCREPO 3.4+}
   s.email = %q{chris@cbeer.info}
   s.extra_rdoc_files = [
@@ -37,6 +37,7 @@ Gem::Specification.new do |s|
     "lib/rubydora/resource_index.rb",
     "lib/rubydora/rest_api_client.rb",
     "lib/rubydora/rest_api_client/v33.rb",
+    "lib/rubydora/soap.rb",
     "rubydora.gemspec",
     "spec/datastream_spec.rb",
     "spec/digital_object_spec.rb",
@@ -47,6 +48,7 @@ Gem::Specification.new do |s|
     "spec/repository_spec.rb",
     "spec/resource_index_spec.rb",
     "spec/rest_api_client_spec.rb",
+    "spec/soap_spec.rb",
     "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/cbeer/rubydora}
@@ -64,6 +66,7 @@ Gem::Specification.new do |s|
     "spec/repository_spec.rb",
     "spec/resource_index_spec.rb",
     "spec/rest_api_client_spec.rb",
+    "spec/soap_spec.rb",
     "spec/spec_helper.rb"
   ]
 
