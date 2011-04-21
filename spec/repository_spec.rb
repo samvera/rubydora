@@ -69,6 +69,11 @@ end
       @mock_repository = ApiAbstractionTestClass.new
       @mock_repository.should be_a_kind_of(Rubydora::RestApiClient::V33)
     end
+
+    it "should automatically load the SOAP endpoint when needed" do
+      @mock_repository = ApiAbstractionTestClass.new
+      @mock_repository.should be_a_kind_of(Rubydora::Soap)
+    end
   end
 
 describe "find_by_sparql" do
