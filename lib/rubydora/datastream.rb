@@ -50,7 +50,7 @@ module Rubydora
     # Does this datastream already exist?
     # @return [Boolean]
     def new?
-      profile.nil?
+      profile.empty?
     end
 
     # Retrieve the content of the datastream (and cache it)
@@ -81,9 +81,9 @@ module Rubydora
     def profile
       @profile ||= begin
         profile_xml = repository.datastream(:pid => pid, :dsid => dsid)
-        profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/access/"' unless profile_xml =~ /xmlns=/
+        profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
         doc = Nokogiri::XML(profile_xml)
-        h = doc.xpath('/access:datastreamProfile/*', {'access' => "http://www.fedora.info/definitions/1/0/access/"} ).inject({}) do |sum, node|
+        h = doc.xpath('/management:datastreamProfile/*', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).inject({}) do |sum, node|
                      sum[node.name] ||= []
                      sum[node.name] << node.text
                      sum
@@ -94,7 +94,7 @@ module Rubydora
 
         h
       rescue
-         nil
+        {}
       end
     end
 
