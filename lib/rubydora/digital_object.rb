@@ -45,8 +45,8 @@ module Rubydora
     # @param [Rubydora::Repository] context
     def self.create pid, options = {}, repository = nil
       repository ||= Rubydora.repository
-      repository.ingest(options.merge(:pid => pid))
-      DigitalObject.new pid, repository
+      assigned_pid = repository.ingest(options.merge(:pid => pid))
+      DigitalObject.new assigned_pid, repository
     end
 
     ##
