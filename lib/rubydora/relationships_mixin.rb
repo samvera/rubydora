@@ -91,12 +91,12 @@ module Rubydora
     end
 
     def add_relationship predicate, object
-      obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || o )
+      obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || object )
       repository.add_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
     end
 
     def purge_relationship predicate, object
-      obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || o )
+      obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || object )
       repository.purge_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
     end
 
