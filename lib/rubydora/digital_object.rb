@@ -107,7 +107,7 @@ module Rubydora
 
         h
       rescue  
-        []
+        {}
       end
     end
 
