@@ -127,10 +127,11 @@ module Rubydora
     end
     alias_method :datastream, :datastreams
 
-    def get_datastream dsid
+    # provide an hash-like way to access datastreams 
+    def fetch dsid
       datastreams[dsid]
     end
-    alias_method :[], :get_datastream
+    alias_method :[], :fetch
 
     # persist the object to Fedora, either as a new object 
     # by modifing the existing object
@@ -167,6 +168,9 @@ module Rubydora
     end
 
     protected
+    # set the pid of the object
+    # @param [String] pid
+    # @return [String] the base pid
     def pid= pid
       @pid = pid.gsub('info:fedora/', '')
     end
@@ -197,10 +201,12 @@ module Rubydora
       end
     end
 
+    # reset the datastreams cache
     def reset_datastreams
       @datastreams = nil
     end
 
+    # reset local data so that it is requested from Fedora
     def reset
       reset_profile_attributes
       reset_datastreams

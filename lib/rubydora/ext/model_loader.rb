@@ -31,6 +31,9 @@ module Rubydora::Ext
         end
       end
 
+      # convert a model string to a Ruby class (see ActiveSupport::Inflector#constantize)
+      # @param [String] lower_case_and_underscored_word
+      # @return [Module]
       def self.string_to_constant lower_case_and_underscored_word
         camel_cased_word = lower_case_and_underscored_word.to_s.gsub(/\/(.?)/) { "::#{$1.upcase}" }.gsub(/(?:^|_)(.)/) { $1.upcase }
 
