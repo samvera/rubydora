@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Chris Beer"]
-  s.date = %q{2011-04-21}
+  s.date = %q{2011-04-22}
   s.description = %q{Fedora Commons REST API ruby library : REQUIRES FCREPO 3.4+}
   s.email = %q{chris@cbeer.info}
   s.extra_rdoc_files = [
