@@ -21,6 +21,11 @@ module Rubydora
       DigitalObject.find(pid, self)
     end
 
+    # {include:DigitalObject.create}
+    def create pid, options = {}
+      DigitalObject.create(pid, options = {}, self)
+    end
+
     # repository profile (from API-A-LITE data)
     # @return [Hash]
     def profile
