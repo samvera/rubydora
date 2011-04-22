@@ -82,14 +82,22 @@ module Rubydora
       diff[:-] ||= []
 
       diff[:+].each do |o| 
-        obj_uri = (( o.fqpid if o.respond_to? :fqpid ) || ( o.uri if o.respond_to? :uri ) || (o.to_s if o.respond_to? :to_s?) || o )
-        repository.add_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
+        add_relationship(predicate, o)
       end        
 
       diff[:-].each do |o| 
-        obj_uri = (( o.fqpid if o.respond_to? :fqpid ) || ( o.uri if o.respond_to? :uri ) || (o.to_s if o.respond_to? :to_s?) || o )
-        repository.purge_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
+        purge_relationship(predicate, o)
       end        
+    end
+
+    def add_relationship predicate, object
+      obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || o )
+      repository.add_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
+    end
+
+    def purge_relationship predicate, object
+      obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || o )
+      repository.purge_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
     end
 
     # accessor to all retrieved relationships
