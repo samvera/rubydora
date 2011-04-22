@@ -141,7 +141,7 @@ module Rubydora
     # @return [Rubydora::DigitalObject] a new copy of this object
     def save
       if self.new?
-        repository.ingest to_api_params.merge(:pid => pid)
+        pid = repository.ingest to_api_params.merge(:pid => pid)
       else                       
         p = to_api_params
         repository.modify_object p.merge(:pid => pid) unless p.empty?
