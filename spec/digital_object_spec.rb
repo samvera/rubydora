@@ -79,7 +79,7 @@ describe Rubydora::DigitalObject do
 
       it "should allow other datastreams to be added" do
         @mock_repository.should_receive(:datastreams).with(:pid => 'pid').and_return("<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>")
-        @mock_repository.should_receive(:datastream).with(:pid => 'pid', :dsid => 'z').and_raise("")
+        @mock_repository.should_receive(:datastream).with(:pid => 'pid', :dsid => 'z').and_raise(RestClient::ResourceNotFound)
 
         @object.datastreams.length.should == 3
 
@@ -88,6 +88,13 @@ describe Rubydora::DigitalObject do
         ds.new?.should == true
 
         @object.datastreams.length.should == 4
+      end
+
+      it "should let datastreams be accessed via hash notation" do
+        @mock_repository.should_receive(:datastreams).with(:pid => 'pid').and_return("<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>")
+
+        @object['a'].should be_a_kind_of(Rubydora::Datastream)
+        @object['a'].should == @object.datastreams['a']
       end
       
     end
@@ -133,6 +140,14 @@ describe Rubydora::DigitalObject do
       @object.should_receive(:datastreams).and_return({})
       @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
       @object.save
+    end
+
+    it "should reset the object state on save" do
+      @object.label = "asdf"
+      @object.should_receive(:datastreams).and_return({})
+      @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
+      @object.profile.should_not be_nil
+      expect { @object.save }.to change { @object.instance_variable_get('@profile') }.to nil
     end
   end
 
