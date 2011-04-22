@@ -59,7 +59,7 @@ module Rubydora
     # @param [Rubydora::Repository] repository context
     # @param [Hash] options default attribute values (used esp. for creating new datastreams
     def initialize pid, repository = nil, options = {}
-      @pid = pid.gsub('info:fedora/', '')
+      self.pid = pid
       @repository = repository
 
       options.each do |key, value|
@@ -141,21 +141,22 @@ module Rubydora
     # @return [Rubydora::DigitalObject] a new copy of this object
     def save
       if self.new?
-        pid = repository.ingest to_api_params.merge(:pid => pid)
+        self.pid = repository.ingest to_api_params.merge(:pid => pid)
       else                       
         p = to_api_params
         repository.modify_object p.merge(:pid => pid) unless p.empty?
       end
 
       self.datastreams.select { |dsid, ds| ds.dirty? }.reject {|dsid, ds| ds.new? }.each { |dsid, ds| ds.save }
-      DigitalObject.new(pid, repository)
+      reset
+      self
     end
 
     # Purge the object from Fedora
     # @return [Rubydora::DigitalObject] `self`
     def delete
       repository.purge_object(:pid => pid)
-      reset_profile_attributes
+      reset
       self
     end
 
@@ -166,6 +167,10 @@ module Rubydora
     end
 
     protected
+    def pid= pid
+      @pid = pid.gsub('info:fedora/', '')
+    end
+
     # datastream parameters 
     # @return [Hash]
     def to_api_params
@@ -190,6 +195,16 @@ module Rubydora
       OBJ_ATTRIBUTES.each do |attribute, profile_name|
         instance_variable_set("@#{attribute.to_s}", nil) if instance_variable_defined?("@#{attribute.to_s}")
       end
+    end
+
+    def reset_datastreams
+      @datastreams = nil
+    end
+
+    def reset
+      reset_profile_attributes
+      reset_datastreams
+      self
     end
 
   end

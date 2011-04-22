@@ -15,7 +15,7 @@ describe "Integration testing against a live Fedora repository" do
   it "should create an object" do
     obj = @repository.find('test:1')
     obj.new?.should == true
-    obj = obj.save
+    obj.save
     obj.new?.should == false
   end
 
@@ -52,7 +52,7 @@ describe "Integration testing against a live Fedora repository" do
 
   it "should create a managed datastream" do
     obj = @repository.find('test:1')
-    obj = obj.save
+    obj.save
     ds = obj.datastreams["Test"]
 
     ds.content = open(__FILE__).read

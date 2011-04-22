@@ -40,7 +40,7 @@ describe Rubydora::DigitalObject do
 
     it "should call ingest on save" do
       @object.should_receive(:datastreams).and_return({})
-      @mock_repository.should_receive(:ingest).with(hash_including(:pid => 'pid'))
+      @mock_repository.should_receive(:ingest).with(hash_including(:pid => 'pid')).and_return('pid')
       @object.save
     end
   end
@@ -106,6 +106,7 @@ describe Rubydora::DigitalObject do
         <not>empty</not>
       </objectProfile>
       XML
+
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
@@ -146,7 +147,6 @@ describe Rubydora::DigitalObject do
       @object.delete
     end
   end
-
 
   describe "models" do
     before(:each) do
