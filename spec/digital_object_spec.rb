@@ -48,9 +48,17 @@ describe Rubydora::DigitalObject do
   describe "create" do
     it "should call the Fedora REST API to create a new object" do
       @mock_repository = mock(Rubydora::Repository)
-      @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return(nil)
+      @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
       obj = Rubydora::DigitalObject.create "pid", { :a => 1, :b => 2}, @mock_repository
       obj.should be_a_kind_of(Rubydora::DigitalObject)
+    end
+
+    it "should return a new object with the Fedora response pid when no pid is provided" do
+      @mock_repository = mock(Rubydora::Repository)
+      @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
+      obj = Rubydora::DigitalObject.create "new", { :a => 1, :b => 2}, @mock_repository
+      obj.should be_a_kind_of(Rubydora::DigitalObject)
+      obj.pid.should == "pid"
     end
   end
 
@@ -95,6 +103,7 @@ describe Rubydora::DigitalObject do
       @mock_repository = mock(Rubydora::Repository)
       @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
       <objectProfile>
+        <not>empty</not>
       </objectProfile>
       XML
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository

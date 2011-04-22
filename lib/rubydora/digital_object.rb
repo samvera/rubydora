@@ -80,7 +80,7 @@ module Rubydora
     # Does this object already exist?
     # @return [Boolean]
     def new?
-      self.profile.nil?
+      self.profile.empty?
     end
 
     # Retrieve the object profile as a hash (and cache it)
@@ -107,7 +107,7 @@ module Rubydora
 
         h
       rescue  
-        nil
+        []
       end
     end
 
