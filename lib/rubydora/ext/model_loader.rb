@@ -25,7 +25,7 @@ module Rubydora::Ext
             begin
               mod = self.string_to_constant [ns, model].compact.map { |x| x.to_s }.join("/")
               document.send(:extend, mod)
-            rescue NameError
+            rescue NameError, LoadError
             end
           end
         end
