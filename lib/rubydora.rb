@@ -1,4 +1,6 @@
 # Fedora Commons REST API module
+require 'active_model'
+
 module Rubydora
   autoload :Datastream, "rubydora/datastream"
   autoload :Repository, "rubydora/repository"

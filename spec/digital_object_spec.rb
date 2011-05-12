@@ -117,16 +117,16 @@ describe Rubydora::DigitalObject do
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
-    it "should save all dirty datastreams" do
+    it "should save all changed datastreams" do
       @ds1 = mock()
-      @ds1.should_receive(:dirty?).and_return(false)
+      @ds1.should_receive(:changed?).and_return(false)
       @ds1.should_not_receive(:save)
       @ds2 = mock()
-      @ds2.should_receive(:dirty?).and_return(true)
+      @ds2.should_receive(:changed?).and_return(true)
       @ds2.should_receive(:new?).and_return(true)
       @ds2.should_not_receive(:save)
       @ds3 = mock()
-      @ds3.should_receive(:dirty?).and_return(true)
+      @ds3.should_receive(:changed?).and_return(true)
       @ds3.should_receive(:new?).and_return(false)
       @ds3.should_receive(:save)
 
@@ -135,7 +135,7 @@ describe Rubydora::DigitalObject do
       @object.save
     end
 
-    it "should save all dirty attributes" do
+    it "should save all changed attributes" do
       @object.label = "asdf"
       @object.should_receive(:datastreams).and_return({})
       @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))

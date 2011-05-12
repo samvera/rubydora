@@ -4,6 +4,8 @@ gem "fastercsv"
 gem "rest-client"
 gem "nokogiri"
 gem "mime-types"
+gem "activesupport", ">= 3.0"
+gem "activemodel", ">= 3.0"
 
 group :soap do
   gem "soap4r"

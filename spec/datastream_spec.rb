@@ -16,8 +16,7 @@ describe Rubydora::Datastream do
     end
 
     it "should be dirty" do
-      @mock_repository.should_receive(:datastream).and_raise("")
-      @datastream.dirty?.should == true
+      @datastream.changed?.should == false
     end
 
     it "should call the appropriate api on save" do
@@ -51,7 +50,7 @@ describe Rubydora::Datastream do
 
     it "should not be new" do
       @datastream.new?.should == false
-      @datastream.dirty?.should == false
+      @datastream.changed?.should == false
     end
 
     it "should provide attribute defaults from dsProfile" do

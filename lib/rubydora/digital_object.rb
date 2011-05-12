@@ -8,8 +8,9 @@ module Rubydora
   # provide additional functionality to this base 
   # implementation.
   class DigitalObject
-    include Rubydora::Callbacks
-    register_callback :after_initialize
+    extend ActiveModel::Callbacks
+    define_model_callbacks :initialize, :only => :after
+    include ActiveModel::Dirty
     include Rubydora::ExtensionParameters
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
@@ -19,15 +20,19 @@ module Rubydora
     
     # mapping object parameters to profile elements
     OBJ_ATTRIBUTES = {:state => :objState, :ownerId => :objOwnerId, :label => :objLabel, :logMessage => nil, :lastModifiedDate => :objLastModDate }
+
+    define_attribute_methods OBJ_ATTRIBUTES.keys
       
     OBJ_ATTRIBUTES.each do |attribute, profile_name|
       class_eval <<-RUBY
       def #{attribute.to_s}
         @#{attribute.to_s} || profile['#{profile_name.to_s}']
       end
-                     
-      attr_writer :#{attribute.to_s}
 
+      def #{attribute.to_s}= val
+        #{attribute.to_s}_will_change! unless val == @#{attribute.to_s}
+        @#{attribute.to_s} = val
+      end
       RUBY
     end
 
@@ -59,14 +64,14 @@ module Rubydora
     # @param [Rubydora::Repository] repository context
     # @param [Hash] options default attribute values (used esp. for creating new datastreams
     def initialize pid, repository = nil, options = {}
-      self.pid = pid
-      @repository = repository
+      _run_initialize_callbacks do
+        self.pid = pid
+        @repository = repository
 
-      options.each do |key, value|
-        self.send(:"#{key}=", value)
+        options.each do |key, value|
+          self.send(:"#{key}=", value)
+        end
       end
-
-      call_after_initialize
     end
 
     ##
@@ -148,7 +153,7 @@ module Rubydora
         repository.modify_object p.merge(:pid => pid) unless p.empty?
       end
 
-      self.datastreams.select { |dsid, ds| ds.dirty? }.reject {|dsid, ds| ds.new? }.each { |dsid, ds| ds.save }
+      self.datastreams.select { |dsid, ds| ds.changed? }.reject {|dsid, ds| ds.new? }.each { |dsid, ds| ds.save }
       reset
       self
     end
@@ -196,9 +201,7 @@ module Rubydora
     # @return [Hash]
     def reset_profile_attributes
       @profile = nil
-      OBJ_ATTRIBUTES.each do |attribute, profile_name|
-        instance_variable_set("@#{attribute.to_s}", nil) if instance_variable_defined?("@#{attribute.to_s}")
-      end
+      @changed_attributes = {}
     end
 
     # reset the datastreams cache

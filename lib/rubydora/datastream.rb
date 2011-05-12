@@ -3,23 +3,31 @@ module Rubydora
   # and provides helper methods for creating and manipulating
   # them. 
   class Datastream
-    include Rubydora::Callbacks
-    register_callback :after_initialize
+    extend ActiveModel::Callbacks
+    define_model_callbacks :initialize, :only => :after
+
+    include ActiveModel::Dirty
+
     include Rubydora::ExtensionParameters
 
     attr_reader :digital_object, :dsid
 
     # mapping datastream attributes (and api parameters) to datastream profile names
     DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :file => nil}
+
+    define_attribute_methods DS_ATTRIBUTES.keys
     
     # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
       class_eval %Q{
-        def #{attribute.to_s}
-          @#{attribute.to_s} || profile['#{profile_name.to_s}']
-        end
+      def #{attribute.to_s}
+        (@#{attribute} || profile['#{profile_name.to_s}']).to_s
+      end
 
-        attr_writer :#{attribute.to_s}
+      def #{attribute.to_s}= val
+        #{attribute.to_s}_will_change! unless val == @#{attribute.to_s}
+        @#{attribute.to_s} = val
+      end
       }
     end
 
@@ -31,15 +39,15 @@ module Rubydora
     # 
     # @param [Rubydora::DigitalObject]
     # @param [String] Datastream ID
-    # @param [Hash] default attribute values (used esp. for creating new datastreams
+    # @param [Hash] default attribute values (used esp. for creating new datastreams)
     def initialize digital_object, dsid, options = {}
+      _run_initialize_callbacks do
       @digital_object = digital_object
       @dsid = dsid
       options.each do |key, value|
         self.send(:"#{key}=", value)
       end
-
-      call_after_initialize
+      end
     end
 
     # Helper method to get digital object pid
@@ -98,12 +106,6 @@ module Rubydora
       end
     end
 
-    # Has this datastream been modified, but not yet saved?
-    # @return [Boolean]
-    def dirty?
-      DS_ATTRIBUTES.any? { |attribute, profile_name| instance_variable_defined?("@#{attribute.to_s}") } || new?
-    end
-
     # Add datastream to Fedora
     # @return [Rubydora::Datastream]
     def create
@@ -152,9 +154,7 @@ module Rubydora
     # @return [Hash]
     def reset_profile_attributes
       @profile = nil
-      DS_ATTRIBUTES.each do |attribute, profile_name|
-        instance_variable_set("@#{attribute.to_s}", nil) if instance_variable_defined?("@#{attribute.to_s}")
-      end
+      @changed_attributes = {}
     end
 
     # repository reference from the digital object
