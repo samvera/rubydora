@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rubydora}
-  s.version = "0.0.6"
+  s.version = "0.0.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Chris Beer"]
-  s.date = %q{2011-04-22}
+  s.date = %q{2011-05-12}
   s.description = %q{Fedora Commons REST API ruby library : REQUIRES FCREPO 3.4+}
   s.email = %q{chris@cbeer.info}
   s.extra_rdoc_files = [
@@ -54,7 +54,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/cbeer/rubydora}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.5.3}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{Fedora Commons REST API ruby library}
   s.test_files = [
     "spec/datastream_spec.rb",
@@ -71,6 +71,7 @@ Gem::Specification.new do |s|
   ]
 
   if s.respond_to? :specification_version then
+    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
@@ -78,6 +79,8 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rest-client>, [">= 0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<mime-types>, [">= 0"])
+      s.add_runtime_dependency(%q<activesupport>, [">= 3.0"])
+      s.add_runtime_dependency(%q<activemodel>, [">= 3.0"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5.1"])
@@ -89,6 +92,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rest-client>, [">= 0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<mime-types>, [">= 0"])
+      s.add_dependency(%q<activesupport>, [">= 3.0"])
+      s.add_dependency(%q<activemodel>, [">= 3.0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.5.1"])
@@ -101,6 +106,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rest-client>, [">= 0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<mime-types>, [">= 0"])
+    s.add_dependency(%q<activesupport>, [">= 3.0"])
+    s.add_dependency(%q<activemodel>, [">= 3.0"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.5.1"])
