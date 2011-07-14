@@ -26,7 +26,11 @@ module Rubydora
     # @param [String] query SPARQL query
     # @return [FasterCSV::Table]
     def sparql query
-      FasterCSV.parse(self.risearch(query), :headers => true)
+      if CSV.const_defined? :Reader
+        FasterCSV.parse(self.risearch(query), :headers => true)
+      else
+        CSV.parse(self.risearch(query), :headers => true)
+      end
     end
 
     protected
