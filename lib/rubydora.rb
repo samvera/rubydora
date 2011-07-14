@@ -15,17 +15,15 @@ module Rubydora
   autoload :Callbacks, "rubydora/callbacks"
   autoload :ArrayWithCallback, "rubydora/array_with_callback"
 
-  require 'fastercsv'
+
+  require 'csv'
+  if CSV.const_defined? :Reader
+    require 'fastercsv'
+  end
   require 'restclient'
   require 'nokogiri'
 
-  # @return [String] version
-  def self.version
-    @version ||= File.read(File.join(File.dirname(__FILE__), '..', 'VERSION')).chomp
-  end
-
-  # version string
-  VERSION = self.version
+  require 'rubydora/version'
 
   # Connect to Fedora Repository
   # @return Rubydora::Repository
