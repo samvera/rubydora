@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.authors = ["Chris Beer"]
   s.email = ["chris@cbeer.info"]
+  s.summary = %q{Fedora Commons REST API ruby library }
   s.description = %q{Fedora Commons REST API ruby library : REQUIRES FCREPO 3.4+}
   s.homepage = "http://github.com/cbeer/rubydora"
 
