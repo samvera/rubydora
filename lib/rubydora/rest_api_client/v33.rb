@@ -14,13 +14,13 @@ module Rubydora::RestApiClient
     # {include:RestApiClient#add_relationship}
     def add_relationship options = {}
       pid = options.delete(:pid) || options[:subject]
-      self.soap.addRelationship(:pid => pid, :relationship => options[:predicate], :object => options[:object], :isLiteral => false, :datatype => nil)
+      self.soap.request :add_relationship, :pid => pid, :relationship => options[:predicate], :object => options[:object], :isLiteral => false, :datatype => nil
     end
 
     # {include:RestApiClient#purge_relationship}
     def purge_relationship options = {}
       pid = options.delete(:pid) || options[:subject]
-      self.soap.purgeRelationship(:pid => pid, :relationship => options[:predicate], :object => options[:object], :isLiteral => false, :datatype => nil)
+      self.soap.request :purge_relationship, :pid => pid, :relationship => options[:predicate], :object => options[:object], :isLiteral => false, :datatype => nil
     end
 
   end

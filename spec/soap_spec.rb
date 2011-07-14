@@ -7,6 +7,6 @@ describe Rubydora::Soap do
   end
 
   it "should provide a SOAP endpoint accessor" do
-     @repository.soap.should be_a_kind_of(SOAP::RPC::Driver)
+     @repository.soap.should be_a_kind_of(Savon::Client)
   end
 end
