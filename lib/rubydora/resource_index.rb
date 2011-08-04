@@ -1,3 +1,5 @@
+require 'enumerator'
+
 module Rubydora
   # Fedora resource index helpers
   module ResourceIndex
@@ -7,7 +9,12 @@ module Rubydora
     # @option options [String] :binding the SPARQL binding name to create new objects from
     # @return [Array<Rubydora::DigitalObject>]
     def find_by_sparql query, options = { :binding => 'pid' }
-      self.sparql(query).map { |x| self.find(x[options[:binding]]) rescue nil }
+      return to_enum(:find_by_sparql, query, options).to_a unless block_given?
+
+      self.sparql(query).each do |x| 
+        obj = self.find(x[options[:binding]]) rescue nil
+        yield obj if obj
+      end
     end
 
     # Find new objects by their relationship to a subject
