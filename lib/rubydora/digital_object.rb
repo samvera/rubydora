@@ -121,13 +121,18 @@ module Rubydora
     def datastreams
       @datastreams ||= begin
         h = Hash.new { |h,k| h[k] = Datastream.new self, k }                
-        datastreams_xml = repository.datastreams(:pid => pid)
-        datastreams_xml.gsub! '<objectDatastreams', '<objectDatastreams xmlns="http://www.fedora.info/definitions/1/0/access/"' unless datastreams_xml =~ /xmlns=/
-        doc = Nokogiri::XML(datastreams_xml)
-        doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each { |ds| h[ds['dsid']] = Datastream.new self, ds['dsid'] }
+
+        begin
+          datastreams_xml = repository.datastreams(:pid => pid)
+          datastreams_xml.gsub! '<objectDatastreams', '<objectDatastreams xmlns="http://www.fedora.info/definitions/1/0/access/"' unless datastreams_xml =~ /xmlns=/
+          doc = Nokogiri::XML(datastreams_xml)
+          doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds| 
+            h[ds['dsid']] = Datastream.new self, ds['dsid'] 
+          end
+        rescue RestClient::ResourceNotFound
+        end
+
         h
-      rescue RestClient::ResourceNotFound
-        h = Hash.new { |h,k| h[k] = Datastream.new self, k }                
       end
     end
     alias_method :datastream, :datastreams
