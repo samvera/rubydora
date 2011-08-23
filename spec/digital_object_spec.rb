@@ -43,6 +43,14 @@ describe Rubydora::DigitalObject do
       @mock_repository.should_receive(:ingest).with(hash_including(:pid => 'pid')).and_return('pid')
       @object.save
     end
+
+    it "should create a new Fedora object with a generated PID if no PID is provided" do 
+      object = Rubydora::DigitalObject.new nil, @mock_repository
+      @mock_repository.should_receive(:ingest).with(hash_including(:pid => nil)).and_return('pid')
+      @mock_repository.should_receive(:datastreams).with(hash_including(:pid => 'pid')).and_raise(RestClient::ResourceNotFound)
+      object.save
+      object.pid.should == 'pid'
+    end
   end
 
   describe "create" do
