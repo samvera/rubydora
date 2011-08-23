@@ -176,8 +176,8 @@ module Rubydora
     # set the pid of the object
     # @param [String] pid
     # @return [String] the base pid
-    def pid= pid
-      @pid = pid.gsub('info:fedora/', '')
+    def pid= pid=nil
+      @pid = pid.gsub('info:fedora/', '') if pid
     end
 
     # datastream parameters 
