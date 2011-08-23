@@ -41,7 +41,7 @@ module Rubydora
     # @param [String] pid
     # @param [Rubydora::Repository] context
     def self.find pid, repository = nil
-      DigitalObject.new pid, repository
+      self.new pid, repository
     end
 
     # create a new fedora object (see also DigitalObject#save)
@@ -51,7 +51,7 @@ module Rubydora
     def self.create pid, options = {}, repository = nil
       repository ||= Rubydora.repository
       assigned_pid = repository.ingest(options.merge(:pid => pid))
-      DigitalObject.new assigned_pid, repository
+      self.new assigned_pid, repository
     end
 
     ##
