@@ -12,7 +12,7 @@ module Rubydora
     # @return [RestClient::Resource]
     def client config = {}
       config = self.config.merge(config)
-      @client ||= RestClient::Resource.new config[:url], :user => config[:user], :password => config[:password]
+      @client ||= RestClient::Resource.new(config[:url], :user => config[:user], :password => config[:password], :timeout => config[:timeout], :open_timeout => config[:timeout])
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
