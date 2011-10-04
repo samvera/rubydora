@@ -93,6 +93,13 @@ describe Rubydora::Datastream do
       @datastream.save
     end
 
+    it "should be marked as changed when the content is updated" do
+      @datastream.changed?.should be_false
+      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+      @datastream.content = "test"
+      @datastream.changed?.should be_true
+    end
+
   end
 
 end

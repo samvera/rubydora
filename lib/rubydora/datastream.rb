@@ -15,7 +15,7 @@ module Rubydora
     # mapping datastream attributes (and api parameters) to datastream profile names
     DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :file => nil}
 
-    define_attribute_methods DS_ATTRIBUTES.keys
+    define_attribute_methods DS_ATTRIBUTES.keys + [:content]
     
     # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
@@ -64,7 +64,10 @@ module Rubydora
     # Retrieve the content of the datastream (and cache it)
     # @return [String]
     def content
-      @content ||= repository.datastream_dissemination :pid => pid, :dsid => dsid
+      begin
+        @content ||= repository.datastream_dissemination :pid => pid, :dsid => dsid
+      rescue RestClient::ResourceNotFound
+      end
     end
     alias_method :read, :content
 
@@ -78,6 +81,7 @@ module Rubydora
     # @param [String or IO] 
     # @return [String or IO]
     def content= content
+       content_will_change!
        @file = content
        @content = content.dup
        @content &&= @content.read if @content.respond_to? :read
