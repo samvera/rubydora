@@ -13,9 +13,9 @@ module Rubydora
     attr_reader :digital_object, :dsid
 
     # mapping datastream attributes (and api parameters) to datastream profile names
-    DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :file => nil}
+    DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :content => nil}
 
-    define_attribute_methods DS_ATTRIBUTES.keys + [:content]
+    define_attribute_methods DS_ATTRIBUTES.keys
     
     # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
@@ -68,6 +68,8 @@ module Rubydora
         @content ||= repository.datastream_dissemination :pid => pid, :dsid => dsid
       rescue RestClient::ResourceNotFound
       end
+
+      (@content.read and @content.rewind if @content.is_a? IO) || @content
     end
     alias_method :read, :content
 
@@ -80,12 +82,9 @@ module Rubydora
     # Set the content of the datastream
     # @param [String or IO] 
     # @return [String or IO]
-    def content= content
+    def content= new_content
        content_will_change!
-       @file = content
-       @content = content.dup
-       @content &&= @content.read if @content.respond_to? :read
-       @content &&= @content.to_s if @content.respond_to? :read
+       @content = new_content
     end
 
     # Retrieve the datastream profile as a hash (and cache it)
