@@ -69,7 +69,8 @@ module Rubydora
       rescue RestClient::ResourceNotFound
       end
 
-      (@content.read and @content.rewind if @content.is_a? IO) || @content
+      content = @content.read and @content.rewind if @content.kind_of? IO
+      content ||= @content
     end
     alias_method :read, :content
 

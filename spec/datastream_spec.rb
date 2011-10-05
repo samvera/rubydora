@@ -63,6 +63,17 @@ describe Rubydora::Datastream do
       @datastream.content.should == "asdf"
     end
 
+    it "should rewind IO-type contents" do
+      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+      @mock_io = File.open('rubydora.gemspec')
+      @mock_io.should_receive(:rewind)
+
+      @datastream.content = @mock_io
+
+      @datastream.content.should be_a(String)
+
+    end
+
 
   end
 
