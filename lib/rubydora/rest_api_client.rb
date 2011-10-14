@@ -151,9 +151,9 @@ module Rubydora
     def add_datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
-      file = options.delete(:file)
+      file = options.delete(:content)
       content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
-      client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s
+      client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -164,9 +164,9 @@ module Rubydora
     def modify_datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
-      file = options.delete(:file)
+      file = options.delete(:content)
       content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
-      client[datastream_url(pid, dsid, options)].put file, :content_type => content_type.to_s
+      client[datastream_url(pid, dsid, options)].put file, :content_type => content_type.to_s, :multipart => true
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}

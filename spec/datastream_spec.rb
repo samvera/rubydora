@@ -63,6 +63,17 @@ describe Rubydora::Datastream do
       @datastream.content.should == "asdf"
     end
 
+    it "should rewind IO-type contents" do
+      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+      @mock_io = File.open('rubydora.gemspec')
+      @mock_io.should_receive(:rewind)
+
+      @datastream.content = @mock_io
+
+      @datastream.content.should be_a(String)
+
+    end
+
 
   end
 
@@ -90,6 +101,13 @@ describe Rubydora::Datastream do
     it "should call the appropriate api with any dirty attributes" do
       @mock_repository.should_receive(:modify_datastream).with(hash_including(:dsLabel => "New Label"))
       @datastream.dsLabel = "New Label"
+      @datastream.save
+    end
+
+    it "should update the datastream when the content is changed" do
+      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+      @mock_repository.should_receive(:modify_datastream).with(hash_including(:content => 'test'))
+      @datastream.content = "test"
       @datastream.save
     end
 
