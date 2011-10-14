@@ -67,6 +67,7 @@ module Rubydora
       _run_initialize_callbacks do
         self.pid = pid
         @repository = repository
+        @new = true
 
         options.each do |key, value|
           self.send(:"#{key}=", value)
@@ -85,7 +86,8 @@ module Rubydora
     # Does this object already exist?
     # @return [Boolean]
     def new?
-      self.profile.empty?
+      self.profile  ### Make sure we've checked the repository at least once
+      @new
     end
 
     # Retrieve the object profile as a hash (and cache it)
@@ -109,9 +111,10 @@ module Rubydora
           next if key == "objModels"
           h[key] = value.first
         end
+        @new = false
 
         h
-      rescue  
+      rescue Exception => e
         {}
       end
     end

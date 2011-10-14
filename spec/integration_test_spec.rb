@@ -19,6 +19,13 @@ describe "Integration testing against a live Fedora repository" do
     obj.new?.should == false
   end
 
+  it "new should not return true until the profile is read" do
+    obj = @repository.find('test:1')
+    obj.save
+    new_obj = Rubydora::DigitalObject.new('test:1', @repository)
+    new_obj.new?.should == false 
+  end
+
   it "should have default datastreams" do
     obj = @repository.find('test:1')
     obj.datastreams.keys.should include("DC")

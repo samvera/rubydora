@@ -126,7 +126,7 @@ module Rubydora
     def datastream_versions options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
-      raise "" unless dsid
+      raise ArgumentError, "Must supply dsid" unless dsid
       options[:format] ||= 'xml'
       client[url_for(datastream_url(pid, dsid) + "/versions", options)].get
     end
