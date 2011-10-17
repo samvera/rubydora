@@ -88,6 +88,12 @@ module Rubydora
        @content = new_content
     end
 
+    # Content_will_change! would be dynamically created by ActiveModel::Dirty, but it would eagerly load the content.
+    # We don't want to do that.
+    def content_will_change!
+      changed_attributes[:content] = nil
+    end
+
     # Retrieve the datastream profile as a hash (and cache it)
     # @return [Hash] see Fedora #getDatastream documentation for keys
     def profile

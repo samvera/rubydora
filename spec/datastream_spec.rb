@@ -64,7 +64,6 @@ describe Rubydora::Datastream do
     end
 
     it "should rewind IO-type contents" do
-      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
       @mock_io = File.open('rubydora.gemspec')
       @mock_io.should_receive(:rewind)
 
@@ -105,7 +104,6 @@ describe Rubydora::Datastream do
     end
 
     it "should update the datastream when the content is changed" do
-      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
       @mock_repository.should_receive(:modify_datastream).with(hash_including(:content => 'test'))
       @datastream.content = "test"
       @datastream.save
@@ -113,7 +111,6 @@ describe Rubydora::Datastream do
 
     it "should be marked as changed when the content is updated" do
       @datastream.changed?.should be_false
-      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
       @datastream.content = "test"
       @datastream.changed?.should be_true
     end
