@@ -4,7 +4,9 @@ module Rubydora
   # them. 
   class Datastream
     extend ActiveModel::Callbacks
+    define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, :only => :after
+
 
     include ActiveModel::Dirty
 
@@ -119,27 +121,33 @@ module Rubydora
     # Add datastream to Fedora
     # @return [Rubydora::Datastream]
     def create
-      repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
-      reset_profile_attributes
-      Datastream.new(digital_object, dsid)
+      run_callbacks :create do
+        repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
+        reset_profile_attributes
+        Datastream.new(digital_object, dsid)
+      end
     end
 
     # Modify or save the datastream
     # @return [Rubydora::Datastream]
     def save
-      return create if new?
-      repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
-      reset_profile_attributes
-      Datastream.new(digital_object, dsid)
+      run_callbacks :save do
+        return create if new?
+        repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
+        reset_profile_attributes
+        Datastream.new(digital_object, dsid)
+      end
     end
 
     # Purge the datastream from Fedora
     # @return [Rubydora::Datastream] `self`
     def delete
-      repository.purge_datastream(:pid => pid, :dsid => dsid) unless self.new?
-      digital_object.datastreams.delete(dsid)
-      reset_profile_attributes
-      self
+      run_callbacks :destroy do
+        repository.purge_datastream(:pid => pid, :dsid => dsid) unless self.new?
+        digital_object.datastreams.delete(dsid)
+        reset_profile_attributes
+        self
+      end
     end
 
     protected

@@ -9,6 +9,7 @@ module Rubydora
   # implementation.
   class DigitalObject
     extend ActiveModel::Callbacks
+    define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, :only => :after
     include ActiveModel::Dirty
     include Rubydora::ExtensionParameters
@@ -51,6 +52,7 @@ module Rubydora
     def self.create pid, options = {}, repository = nil
       repository ||= Rubydora.repository
       assigned_pid = repository.ingest(options.merge(:pid => pid))
+
       self.new assigned_pid, repository
     end
 
@@ -154,11 +156,15 @@ module Rubydora
     # 
     # @return [Rubydora::DigitalObject] a new copy of this object
     def save
-      if self.new?
-        self.pid = repository.ingest to_api_params.merge(:pid => pid)
-      else                       
-        p = to_api_params
-        repository.modify_object p.merge(:pid => pid) unless p.empty?
+      run_callbacks :save do
+        if self.new?
+          run_callbacks :create do
+            self.pid = repository.ingest to_api_params.merge(:pid => pid)
+          end
+        else                       
+          p = to_api_params
+          repository.modify_object p.merge(:pid => pid) unless p.empty?
+        end
       end
 
       self.datastreams.select { |dsid, ds| ds.changed? }.reject {|dsid, ds| ds.new? }.each { |dsid, ds| ds.save }
@@ -169,9 +175,11 @@ module Rubydora
     # Purge the object from Fedora
     # @return [Rubydora::DigitalObject] `self`
     def delete
-      repository.purge_object(:pid => pid)
-      reset
-      self
+      run_callbacks :destroy do
+        repository.purge_object(:pid => pid)
+        reset
+        self
+      end
     end
 
     # repository reference from the digital object
