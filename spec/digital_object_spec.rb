@@ -73,12 +73,14 @@ describe Rubydora::DigitalObject do
   describe "retreive" do
     before(:each) do
       @mock_repository = mock(Rubydora::Repository)
+      @mock_repository.stub :datastreams do |hash|
+        "<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>"
+      end
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
     describe "datastreams" do
       it "should provide a hash populated by the existing datastreams" do
-        @mock_repository.should_receive(:datastreams).with(:pid => 'pid').and_return("<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>")
 
         @object.datastreams.should have_key("a")
         @object.datastreams.should have_key("b")
@@ -86,7 +88,6 @@ describe Rubydora::DigitalObject do
       end
 
       it "should allow other datastreams to be added" do
-        @mock_repository.should_receive(:datastreams).with(:pid => 'pid').and_return("<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>")
         @mock_repository.should_receive(:datastream).with(:pid => 'pid', :dsid => 'z').and_raise(RestClient::ResourceNotFound)
 
         @object.datastreams.length.should == 3
@@ -99,10 +100,19 @@ describe Rubydora::DigitalObject do
       end
 
       it "should let datastreams be accessed via hash notation" do
-        @mock_repository.should_receive(:datastreams).with(:pid => 'pid').and_return("<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>")
 
         @object['a'].should be_a_kind_of(Rubydora::Datastream)
         @object['a'].should == @object.datastreams['a']
+      end
+
+      it "should provide a way to override the type of datastream object to use" do
+        class MyCustomDatastreamClass < Rubydora::Datastream; end
+        object = Rubydora::DigitalObject.new 'pid', @mock_repository
+        object.stub(:datastream_object_for) do |dsid|
+          MyCustomDatastreamClass.new(self, dsid)
+        end
+
+        object.datastreams['asdf'].should be_a_kind_of(MyCustomDatastreamClass)
       end
       
     end
