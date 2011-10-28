@@ -92,6 +92,16 @@ describe "Integration testing against a live Fedora repository" do
     obj.datastreams.keys.should_not include("Test")
   end
 
+  it "should save changed datastreams when the object is saved" do
+    obj = @repository.find('test:1')
+    obj.datastreams["new_ds"].content = "XXX"
+    obj.datastreams["empty_ds"].new?
+    obj.save
+
+    obj.datastreams["new_ds"].new?.should == false
+    obj.datastreams["empty_ds"].new?.should == true
+  end
+
 
   after(:all) do
     @repository.find('test:1').delete rescue nil

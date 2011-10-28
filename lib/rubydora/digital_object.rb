@@ -167,7 +167,7 @@ module Rubydora
         end
       end
 
-      self.datastreams.select { |dsid, ds| ds.changed? }.reject {|dsid, ds| ds.new? }.each { |dsid, ds| ds.save }
+      self.datastreams.select { |dsid, ds| ds.changed? }.each { |dsid, ds| ds.save }
       reset
       self
     end

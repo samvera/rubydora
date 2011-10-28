@@ -135,22 +135,57 @@ describe Rubydora::DigitalObject do
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
-    it "should save all changed datastreams" do
-      @ds1 = mock()
-      @ds1.should_receive(:changed?).and_return(false)
-      @ds1.should_not_receive(:save)
-      @ds2 = mock()
-      @ds2.should_receive(:changed?).and_return(true)
-      @ds2.should_receive(:new?).and_return(true)
-      @ds2.should_not_receive(:save)
-      @ds3 = mock()
-      @ds3.should_receive(:changed?).and_return(true)
-      @ds3.should_receive(:new?).and_return(false)
-      @ds3.should_receive(:save)
+    describe "saving an object's datastreams" do
+      before do
+        @new_ds = mock(Rubydora::Datastream)
+        @new_ds.stub(:new? => true, :changed? => true, :content_changed? => true, :content => 'XXX')
+        @new_empty_ds = mock(Rubydora::Datastream)
+        @new_empty_ds.stub(:new? => true, :changed? => false, :content_changed? => false, :content => nil)
+        @existing_ds = mock(Rubydora::Datastream)
+        @existing_ds.stub(:new? => false, :changed? => false, :content_changed? => false, :content => 'YYY')
+        @changed_attr_ds = mock(Rubydora::Datastream)
+        @changed_attr_ds.stub(:new? => false, :changed? => true, :content_changed? => false, :content => 'YYY')
+        @changed_ds = mock(Rubydora::Datastream)
+        @changed_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => 'ZZZ')
+        @changed_empty_ds = mock(Rubydora::Datastream)
+        @changed_empty_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => nil)
 
-      @object.should_receive(:datastreams).and_return({:ds1 => @ds1, :ds2 => @ds2, :ds3 => @ds3 })
+      end
+      it "should save a new datastream with content" do
+        @object.stub(:datastreams) { { :new_ds => @new_ds } }
+        @new_ds.should_receive(:save)
+        @object.save
+      end
 
-      @object.save
+      it "should save a datastream whose content has changed" do
+        @object.stub(:datastreams) { { :changed_ds => @changed_ds } }
+        @changed_ds.should_receive(:save)
+        @object.save
+      end
+
+      it "should save a datastream whose attributes have changed" do
+        @object.stub(:datastreams) { { :changed_attr_ds => @changed_attr_ds } }
+        @changed_attr_ds.should_receive(:save)
+        @object.save
+      end
+
+      it "should save an existing datastream whose content is nil" do
+        @object.stub(:datastreams) { { :changed_empty_ds => @changed_empty_ds } }
+        @changed_empty_ds.should_receive(:save)
+        @object.save
+      end
+
+      it "should not save a datastream that is unchanged" do
+        @object.stub(:datastreams) { { :existing_ds => @existing_ds } }
+        @existing_ds.should_not_receive(:save)
+        @object.save
+      end
+
+      it "should not save a new datastream that never received content" do
+        @object.stub(:datastreams) { { :new_empty_ds => @new_empty_ds } }
+        @new_empty_ds.should_not_receive(:save)
+        @object.save
+      end
     end
 
     it "should save all changed attributes" do
