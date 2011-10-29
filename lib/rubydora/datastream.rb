@@ -16,6 +16,7 @@ module Rubydora
 
     # mapping datastream attributes (and api parameters) to datastream profile names
     DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :content => nil}
+    DS_DEFAULT_ATTRIBUTES = { :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true }
 
     define_attribute_methods DS_ATTRIBUTES.keys
     
@@ -23,7 +24,7 @@ module Rubydora
     DS_ATTRIBUTES.each do |attribute, profile_name|
       class_eval %Q{
       def #{attribute.to_s}
-        (@#{attribute} || profile['#{profile_name.to_s}']).to_s
+        @#{attribute} || profile['#{profile_name.to_s}'] || DS_DEFAULT_ATTRIBUTES[:#{attribute}]
       end
 
       def #{attribute.to_s}= val
@@ -155,8 +156,8 @@ module Rubydora
     # @return [Hash]
     def to_api_params
       h = default_api_params
-      changes.keys.select { |x| DS_ATTRIBUTES.key? x.to_sym }.each do |attribute|
-        h[attribute.to_sym] = send(attribute) unless send(attribute).nil?
+      changes.keys.map { |x| x.to_sym }.select { |x| DS_ATTRIBUTES.key? x }.each do |attribute|
+        h[attribute] = send(attribute) if send(attribute)
       end
 
       h
@@ -165,7 +166,7 @@ module Rubydora
     # default datastream parameters
     # @return [Hash]
     def default_api_params
-      return ({ :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true}) if new?
+      return DS_DEFAULT_ATTRIBUTES.dup if new?
       {}
     end
 

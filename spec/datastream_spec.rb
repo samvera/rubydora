@@ -4,14 +4,13 @@ describe Rubydora::Datastream do
   describe "create" do
     before(:each) do
       @mock_repository = mock(Rubydora::Repository)
+      @mock_repository.stub(:datastream) { raise("") }
       @mock_object = mock(Rubydora::DigitalObject)
-      @mock_object.should_receive(:repository).any_number_of_times.and_return(@mock_repository)
-      @mock_object.should_receive(:pid).any_number_of_times.and_return 'pid'
+      @mock_object.stub(:repository => @mock_repository, :pid => 'pid')
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
     end
 
     it "should be new" do
-      @mock_repository.should_receive(:datastream).and_raise("")
       @datastream.new?.should == true
     end
 
@@ -19,14 +18,21 @@ describe Rubydora::Datastream do
       @datastream.changed?.should == false
     end
 
+    it "should have default values" do
+      @datastream.controlGroup == "M"
+      @datastream.dsState.should == "A"
+      @datastream.checksumType.should == "DISABLED"
+      @datastream.versionable.should == true
+      @datastream.changed.should be_empty
+    end
+
+
     it "should call the appropriate api on save" do
-      @mock_repository.should_receive(:datastream).and_raise("")
       @mock_repository.should_receive(:add_datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A'))
       @datastream.save
     end
 
     it "should be able to override defaults" do
-      @mock_repository.should_receive(:datastream).and_raise("")
       @mock_repository.should_receive(:add_datastream).with(hash_including(:controlGroup => 'E'))
       @datastream.controlGroup = 'E'
       @datastream.save

@@ -22,12 +22,14 @@ module Rubydora
     # mapping object parameters to profile elements
     OBJ_ATTRIBUTES = {:state => :objState, :ownerId => :objOwnerId, :label => :objLabel, :logMessage => nil, :lastModifiedDate => :objLastModDate }
 
+    OBJ_DEFAULT_ATTRIBUTES = { }
+
     define_attribute_methods OBJ_ATTRIBUTES.keys
       
     OBJ_ATTRIBUTES.each do |attribute, profile_name|
       class_eval <<-RUBY
       def #{attribute.to_s}
-        @#{attribute.to_s} || profile['#{profile_name.to_s}']
+        @#{attribute} || profile['#{profile_name.to_s}'] || OBJ_DEFAULT_ATTRIBUTES[:#{attribute}]
       end
 
       def #{attribute.to_s}= val
@@ -210,7 +212,7 @@ module Rubydora
     # default datastream parameters
     # @return [Hash]
     def default_api_params
-      { }
+      OBJ_DEFAULT_ATTRIBUTES.dup
     end
 
     # reset all profile attributes
