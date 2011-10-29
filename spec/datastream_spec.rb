@@ -1,12 +1,15 @@
 require 'spec_helper'
 
 describe Rubydora::Datastream do
+  before do
+    @mock_repository = mock(Rubydora::Repository)
+    @mock_object = mock(Rubydora::DigitalObject)
+    @mock_object.stub(:repository => @mock_repository, :pid => 'pid')
+  end
+
   describe "create" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
       @mock_repository.stub(:datastream) { raise("") }
-      @mock_object = mock(Rubydora::DigitalObject)
-      @mock_object.stub(:repository => @mock_repository, :pid => 'pid')
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
     end
 
@@ -41,10 +44,6 @@ describe Rubydora::Datastream do
 
   describe "retrieve" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
-      @mock_object = mock(Rubydora::DigitalObject)
-      @mock_object.should_receive(:repository).any_number_of_times.and_return(@mock_repository)
-      @mock_object.should_receive(:pid).any_number_of_times.and_return 'pid'
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
       @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
         <datastreamProfile>
@@ -85,10 +84,6 @@ describe Rubydora::Datastream do
   describe "update" do
 
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
-      @mock_object = mock(Rubydora::DigitalObject)
-      @mock_object.should_receive(:repository).any_number_of_times.and_return(@mock_repository)
-      @mock_object.should_receive(:pid).any_number_of_times.and_return 'pid'
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
       @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
         <datastreamProfile>
@@ -125,10 +120,8 @@ describe Rubydora::Datastream do
 
   describe "to_api_params" do
     before(:each) do
-      @mock_object = mock(Rubydora::DigitalObject)
-      @mock_object.should_receive(:repository).any_number_of_times.and_return(@mock_repository)
-      @mock_object.should_receive(:pid).any_number_of_times.and_return 'pid'
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      @datastream.stub(:profile) { {} }
     end
     it "should compile parameters to hash" do
       @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
