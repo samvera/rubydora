@@ -200,8 +200,8 @@ module Rubydora
     # @return [Hash]
     def to_api_params
       h = default_api_params
-      OBJ_ATTRIBUTES.each do |attribute, profile_name|
-        h[attribute] = instance_variable_get("@#{attribute.to_s}") if instance_variable_defined?("@#{attribute.to_s}")
+      changes.keys.select { |x| OBJ_ATTRIBUTES.key? x.to_sym }.each do |attribute|
+        h[attribute.to_sym] = send(attribute) unless send(attribute).nil?
       end
 
       h

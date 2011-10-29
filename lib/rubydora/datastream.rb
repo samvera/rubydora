@@ -155,8 +155,8 @@ module Rubydora
     # @return [Hash]
     def to_api_params
       h = default_api_params
-      DS_ATTRIBUTES.each do |attribute, profile_name|
-        h[attribute] = instance_variable_get("@#{attribute.to_s}") unless instance_variable_get("@#{attribute.to_s}").nil?
+      changes.keys.select { |x| DS_ATTRIBUTES.key? x.to_sym }.each do |attribute|
+        h[attribute.to_sym] = send(attribute) unless send(attribute).nil?
       end
 
       h
@@ -165,7 +165,8 @@ module Rubydora
     # default datastream parameters
     # @return [Hash]
     def default_api_params
-      { :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true}
+      return ({ :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true}) if new?
+      {}
     end
 
     # reset all profile attributes
