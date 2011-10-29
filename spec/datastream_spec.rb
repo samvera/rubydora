@@ -117,5 +117,22 @@ describe Rubydora::Datastream do
 
   end
 
+  describe "to_api_params" do
+    before(:each) do
+      @mock_object = mock(Rubydora::DigitalObject)
+      @mock_object.should_receive(:repository).any_number_of_times.and_return(@mock_repository)
+      @mock_object.should_receive(:pid).any_number_of_times.and_return 'pid'
+      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+    end
+    it "should compile parameters to hash" do
+      @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
+       :controlGroup=>"M", :dsState=>"A"}
+    end
+    it "should not send parameters that are set to nil" do
+      @datastream.dsLabel = nil
+      @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
+       :controlGroup=>"M", :dsState=>"A"}
+    end
+  end
 end
 

@@ -293,4 +293,14 @@ describe Rubydora::DigitalObject do
       @object.parts.delete(@mock_object)
     end
   end
+
+  describe "to_api_params" do
+    before(:each) do
+      @mock_repository = mock(Rubydora::Repository)
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+    end
+    it "should compile parameters to hash" do
+      @object.send(:to_api_params).should == {}
+    end
+  end
 end

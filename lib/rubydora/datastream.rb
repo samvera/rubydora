@@ -156,7 +156,7 @@ module Rubydora
     def to_api_params
       h = default_api_params
       DS_ATTRIBUTES.each do |attribute, profile_name|
-        h[attribute] = instance_variable_get("@#{attribute.to_s}") if instance_variable_defined?("@#{attribute.to_s}")
+        h[attribute] = instance_variable_get("@#{attribute.to_s}") unless instance_variable_get("@#{attribute.to_s}").nil?
       end
 
       h
