@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe Rubydora::DigitalObject do
+  before do
+    @mock_repository = mock(Rubydora::Repository)
+
+  end
   describe "new" do
     it "should load a DigitalObject instance" do
       Rubydora::DigitalObject.new("pid").should be_a_kind_of(Rubydora::DigitalObject)
@@ -9,7 +13,6 @@ describe Rubydora::DigitalObject do
 
   describe "profile" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
@@ -29,8 +32,7 @@ describe Rubydora::DigitalObject do
 
   describe "new" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
-      @mock_repository.should_receive(:object).any_number_of_times.and_raise ""
+      @mock_repository.stub(:object) { raise "" }
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
@@ -39,7 +41,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should call ingest on save" do
-      @object.should_receive(:datastreams).and_return({})
+      @object.stub(:datastreams) { {} }
       @mock_repository.should_receive(:ingest).with(hash_including(:pid => 'pid')).and_return('pid')
       @object.save
     end
@@ -55,14 +57,12 @@ describe Rubydora::DigitalObject do
 
   describe "create" do
     it "should call the Fedora REST API to create a new object" do
-      @mock_repository = mock(Rubydora::Repository)
       @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
       obj = Rubydora::DigitalObject.create "pid", { :a => 1, :b => 2}, @mock_repository
       obj.should be_a_kind_of(Rubydora::DigitalObject)
     end
 
     it "should return a new object with the Fedora response pid when no pid is provided" do
-      @mock_repository = mock(Rubydora::Repository)
       @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
       obj = Rubydora::DigitalObject.create "new", { :a => 1, :b => 2}, @mock_repository
       obj.should be_a_kind_of(Rubydora::DigitalObject)
@@ -72,7 +72,6 @@ describe Rubydora::DigitalObject do
 
   describe "retreive" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
       @mock_repository.stub :datastreams do |hash|
         "<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>"
       end
@@ -125,12 +124,12 @@ describe Rubydora::DigitalObject do
 
   describe "save" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
-      @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
+      @mock_repository.stub(:object) { <<-XML
       <objectProfile>
         <not>empty</not>
       </objectProfile>
       XML
+      }
 
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
@@ -206,7 +205,6 @@ describe Rubydora::DigitalObject do
 
   describe "delete" do
     before(:each) do
-      @mock_repository = mock()
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
@@ -218,11 +216,11 @@ describe Rubydora::DigitalObject do
 
   describe "models" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
-      @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
+      @mock_repository.stub(:object) { <<-XML
       <objectProfile>
       </objectProfile>
       XML
+      }
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
@@ -256,11 +254,11 @@ describe Rubydora::DigitalObject do
 
   describe "relations" do
     before(:each) do
-      @mock_repository = mock()
-      @mock_repository.should_receive(:object).any_number_of_times.with({:pid => 'pid'}).and_return <<-XML
+      @mock_repository.stub(:object) { <<-XML
       <objectProfile>
       </objectProfile>
       XML
+      }
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
@@ -296,7 +294,6 @@ describe Rubydora::DigitalObject do
 
   describe "to_api_params" do
     before(:each) do
-      @mock_repository = mock(Rubydora::Repository)
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
     it "should compile parameters to hash" do
