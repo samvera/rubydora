@@ -193,14 +193,6 @@ describe Rubydora::DigitalObject do
       @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
       @object.save
     end
-
-    it "should reset the object state on save" do
-      @object.label = "asdf"
-      @object.should_receive(:datastreams).and_return({})
-      @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
-      @object.profile.should_not be_nil
-      expect { @object.save }.to change { @object.instance_variable_get('@profile') }.to nil
-    end
   end
 
   describe "delete" do

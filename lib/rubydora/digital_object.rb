@@ -170,7 +170,6 @@ module Rubydora
       end
 
       self.datastreams.select { |dsid, ds| ds.changed? }.each { |dsid, ds| ds.save }
-      reset
       self
     end
 
@@ -179,8 +178,10 @@ module Rubydora
     def delete
       run_callbacks :destroy do
         repository.purge_object(:pid => pid)
-        reset
-        self
+        @datastreams = nil
+        @profile = nil
+        @pid = nil
+        nil
       end
     end
 
@@ -213,25 +214,6 @@ module Rubydora
     # @return [Hash]
     def default_api_params
       OBJ_DEFAULT_ATTRIBUTES.dup
-    end
-
-    # reset all profile attributes
-    # @return [Hash]
-    def reset_profile_attributes
-      @profile = nil
-      @changed_attributes = {}
-    end
-
-    # reset the datastreams cache
-    def reset_datastreams
-      @datastreams = nil
-    end
-
-    # reset local data so that it is requested from Fedora
-    def reset
-      reset_profile_attributes
-      reset_datastreams
-      self
     end
 
     # instantiate a datastream object for a dsid
