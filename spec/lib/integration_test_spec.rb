@@ -102,6 +102,20 @@ describe "Integration testing against a live Fedora repository" do
     obj.datastreams["empty_ds"].new?.should == true
   end
 
+  it "should update datastream attributes without changing the content" do
+    obj = @repository.find('test:1')
+    obj.datastreams["my_ds"].content = "XXX"
+    obj.save
+
+    obj = @repository.find('test:1')
+    obj.datastreams["my_ds"].dsLabel = "New Label"
+    obj.save
+
+    obj = @repository.find('test:1')
+    obj.datastreams["my_ds"].content.should == "XXX"
+    obj.datastreams["my_ds"].dsLabel.should == "New Label"
+  end
+
 
   after(:all) do
     @repository.find('test:1').delete rescue nil
