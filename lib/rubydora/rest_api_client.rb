@@ -20,7 +20,12 @@ module Rubydora
     # @return [String]
     def next_pid options = {}
       options[:format] ||= 'xml'
-      client[url_for(object_url() + "/nextPID", options)].post nil
+      begin
+        return client[url_for(object_url() + "/nextPID", options)].post nil
+      rescue => e
+        logger.error e.response
+        raise "Error getting nextPID. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -30,7 +35,12 @@ module Rubydora
       raise "" if options[:terms] and options[:query]
       options[:resultFormat] ||= 'xml'
 
-      client[object_url(nil, options)].get
+      begin
+        return client[object_url(nil, options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error finding objects. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -40,7 +50,12 @@ module Rubydora
     def object options = {}
       pid = options.delete(:pid)
       options[:format] ||= 'xml'
-      client[object_url(pid, options)].get
+      begin
+        return client[object_url(pid, options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -50,7 +65,12 @@ module Rubydora
     def ingest options = {}
       pid = options.delete(:pid) || 'new'
       file = options.delete(:file)
-      client[object_url(pid, options)].post file, :content_type => 'text/xml'
+      begin
+        return client[object_url(pid, options)].post file, :content_type => 'text/xml'
+      rescue => e
+        logger.error e.response
+        raise "Error ingesting object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -59,7 +79,12 @@ module Rubydora
     # @return [String]
     def modify_object options = {}
       pid = options.delete(:pid)
-      client[object_url(pid, options)].put nil
+      begin
+        return client[object_url(pid, options)].put nil
+      rescue => e
+        logger.error e.response
+        raise "Error modifying object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -68,7 +93,12 @@ module Rubydora
     # @return [String]
     def purge_object options = {}
       pid = options.delete(:pid)
-      client[object_url(pid, options)].delete
+      begin
+        return client[object_url(pid, options)].delete
+      rescue => e
+        logger.error e.response
+        raise "Error purging object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -79,7 +109,12 @@ module Rubydora
       pid = options.delete(:pid)
       options[:format] ||= 'xml'
       raise "" unless pid
-      client[url_for(object_url(pid) + "/versions", options)].get
+      begin
+        return client[url_for(object_url(pid) + "/versions", options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting versions for object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -90,7 +125,12 @@ module Rubydora
       pid = options.delete(:pid)
       raise "" unless pid
       options[:format] ||= 'xml'
-      client[url_for(object_url(pid) + "/objectXML", options)].get
+      begin
+        return client[url_for(object_url(pid) + "/objectXML", options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting objectXML for object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -102,7 +142,12 @@ module Rubydora
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       options[:format] ||= 'xml'
-      client[datastream_url(pid, dsid, options)].get
+      begin
+        return client[datastream_url(pid, dsid, options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting datastream #{dsid} for object #{pid}. See logger for details"
+      end
     end
 
     alias_method :datastreams, :datastream
@@ -115,7 +160,12 @@ module Rubydora
     def set_datastream_options options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
-      client[datastream_url(pid, dsid, options)].put nil
+      begin
+        return client[datastream_url(pid, dsid, options)].put nil
+      rescue => e
+        logger.error e.response
+        raise "Error setting datastream options on #{dsid} for object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -128,7 +178,12 @@ module Rubydora
       dsid = options.delete(:dsid)
       raise ArgumentError, "Must supply dsid" unless dsid
       options[:format] ||= 'xml'
-      client[url_for(datastream_url(pid, dsid) + "/versions", options)].get
+      begin
+        return client[url_for(datastream_url(pid, dsid) + "/versions", options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting versions for datastream #{dsid} for object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -140,7 +195,12 @@ module Rubydora
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       raise "" unless dsid
-      client[url_for(datastream_url(pid, dsid) + "/content", options)].get
+      begin
+        return client[url_for(datastream_url(pid, dsid) + "/content", options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting dissemination for datastream #{dsid} for object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -153,7 +213,12 @@ module Rubydora
       dsid = options.delete(:dsid)
       file = options.delete(:content)
       content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
-      client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
+      begin
+        return client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
+      rescue => e
+        logger.error e.response
+        raise "Error adding datastream #{dsid} for object #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -166,7 +231,13 @@ module Rubydora
       dsid = options.delete(:dsid)
       file = options.delete(:content)
       content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
-      client[datastream_url(pid, dsid, options)].put file, :content_type => content_type.to_s, :multipart => true
+
+      begin
+        return client[datastream_url(pid, dsid, options)].put(file, {:content_type => content_type.to_s, :multipart => true})
+      rescue => e
+        logger.error e.response
+        raise "Error modifying datastream #{dsid} for #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -177,7 +248,12 @@ module Rubydora
     def purge_datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
-      client[datastream_url(pid, dsid, options)].delete
+      begin
+        client[datastream_url(pid, dsid, options)].delete
+      rescue => e
+        logger.error e.response
+        raise "Error purging datastream #{dsid} for #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -188,7 +264,12 @@ module Rubydora
       pid = options.delete(:pid) || options[:subject]
       raise "" unless pid
       options[:format] ||= 'xml'
-      client[url_for(object_url(pid) + "/relationships", options)].get
+      begin
+        return client[url_for(object_url(pid) + "/relationships", options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting relationships for #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -197,7 +278,12 @@ module Rubydora
     # @return [String]
     def add_relationship options = {}
       pid = options.delete(:pid) || options[:subject]
-      client[url_for(object_url(pid) + "/relationships/new", options)].post nil
+      begin
+        return client[url_for(object_url(pid) + "/relationships/new", options)].post nil
+      rescue => e
+        logger.error e.response
+        raise "Error adding relationship for #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -206,7 +292,12 @@ module Rubydora
     # @return [String]
     def purge_relationship options = {}
       pid = options.delete(:pid) || options[:subject]
-      client[url_for(object_url(pid) + "/relationships", options)].delete
+      begin
+        return client[url_for(object_url(pid) + "/relationships", options)].delete
+      rescue => e
+        logger.error e.response
+        raise "Error purging relationships for #{pid}. See logger for details"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
@@ -220,7 +311,12 @@ module Rubydora
       sdef = options.delete(:sdef)
       method = options.delete(:method)
       options[:format] ||= 'xml' unless pid and sdef and method
-      client[dissemination_url(pid,sdef,method,options)].get
+      begin
+        return client[dissemination_url(pid,sdef,method,options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error getting dissemination for #{pid}. See logger for details"
+      end
     end
     
     # Generate a REST API compatible URI 
