@@ -152,7 +152,7 @@ module Rubydora
         raise e
       rescue => e
         logger.error e.response
-        raise "Error getting datastream #{dsid} for object #{pid}. See logger for details"
+        raise "Error getting datastream '#{dsid}' for object #{pid}. See logger for details"
       end
     end
 
@@ -203,6 +203,8 @@ module Rubydora
       raise "" unless dsid
       begin
         return client[url_for(datastream_url(pid, dsid) + "/content", options)].get
+      rescue RestClient::ResourceNotFound => e
+        raise e
       rescue => e
         logger.error e.response
         raise "Error getting dissemination for datastream #{dsid} for object #{pid}. See logger for details"
