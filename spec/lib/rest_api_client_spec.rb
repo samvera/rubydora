@@ -1,8 +1,11 @@
 require 'spec_helper' 
+require 'loggable'
 
 describe Rubydora::RestApiClient do
   class MockRepository
     include Rubydora::RestApiClient
+    include Loggable
+
 
     attr_accessor :config
   end
@@ -25,9 +28,15 @@ describe Rubydora::RestApiClient do
     @mock_repository.find_objects :query => 'a'
   end
 
+
   it "should show object properties" do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/z?format=xml"))
     @mock_repository.object :pid => 'z'
+  end
+
+  it "should raise not found exception when retrieving object" do
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/z?format=xml")).and_raise( RestClient::ResourceNotFound)
+    lambda {@mock_repository.object(:pid => 'z')}.should raise_error RestClient::ResourceNotFound
   end
   
   it "ingest" do
@@ -53,6 +62,11 @@ describe Rubydora::RestApiClient do
     @mock_repository.purge_object :pid => 'mypid'
   end
 
+  it "should raise not found exception when purging" do
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid")).and_raise( RestClient::ResourceNotFound)
+    lambda {@mock_repository.purge_object(:pid => 'mypid')}.should raise_error RestClient::ResourceNotFound
+  end
+
   it "object_versions" do
      RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/versions?format=xml"))
     @mock_repository.object_versions :pid => 'mypid'
@@ -71,6 +85,11 @@ describe Rubydora::RestApiClient do
   it "datastream" do
      RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa?format=xml"))
     @mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'
+  end
+
+  it "should raise not found exception when getting a datastream" do
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa?format=xml")).and_raise( RestClient::ResourceNotFound)
+    lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
   end
 
   it "datastream_dissemination" do

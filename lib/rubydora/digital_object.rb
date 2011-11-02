@@ -160,9 +160,8 @@ module Rubydora
     def save
       run_callbacks :save do
         if self.new?
-          run_callbacks :create do
-            self.pid = repository.ingest to_api_params.merge(:pid => pid)
-          end
+          self.pid = repository.ingest to_api_params.merge(:pid => pid)
+          @profile = nil #will cause a reload with updated data
         else                       
           p = to_api_params
           repository.modify_object p.merge(:pid => pid) unless p.empty?
@@ -176,13 +175,14 @@ module Rubydora
     # Purge the object from Fedora
     # @return [Rubydora::DigitalObject] `self`
     def delete
+      my_pid = pid
       run_callbacks :destroy do
-        repository.purge_object(:pid => pid)
         @datastreams = nil
         @profile = nil
         @pid = nil
         nil
       end
+      repository.purge_object(:pid => my_pid) ##This can have a meaningful exception, don't put it in the callback
     end
 
     # repository reference from the digital object

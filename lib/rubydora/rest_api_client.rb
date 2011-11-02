@@ -52,6 +52,8 @@ module Rubydora
       options[:format] ||= 'xml'
       begin
         return client[object_url(pid, options)].get
+      rescue RestClient::ResourceNotFound => e
+        raise e
       rescue => e
         logger.error e.response
         raise "Error getting object #{pid}. See logger for details"
@@ -95,6 +97,8 @@ module Rubydora
       pid = options.delete(:pid)
       begin
         return client[object_url(pid, options)].delete
+      rescue RestClient::ResourceNotFound => e
+        raise e
       rescue => e
         logger.error e.response
         raise "Error purging object #{pid}. See logger for details"
@@ -144,6 +148,8 @@ module Rubydora
       options[:format] ||= 'xml'
       begin
         return client[datastream_url(pid, dsid, options)].get
+      rescue RestClient::ResourceNotFound => e
+        raise e
       rescue => e
         logger.error e.response
         raise "Error getting datastream #{dsid} for object #{pid}. See logger for details"
