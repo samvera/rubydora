@@ -42,19 +42,8 @@ describe "Integration testing against a live Fedora repository" do
     obj.new?.should == false
   end
 
-  it "should create parts" do
-    obj = @repository.find('test:1')
-    obj2 = @repository.find('test:2')
-    obj.parts << obj2
-  end
-
   it "should persist parts" do
     obj = @repository.find('test:1')
-  end
-
-  it "should have a RELS-EXT datastream" do
-    obj = @repository.find('test:1')
-    obj.datastreams.keys.should include("RELS-EXT")
   end
 
   it "should create a managed datastream" do
