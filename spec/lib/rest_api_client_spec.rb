@@ -30,6 +30,12 @@ describe Rubydora::RestApiClient do
     client.options[:ssl_client_key].should be_a_kind_of(OpenSSL::PKey::PKey)
   end
 
+  it "should raise an exception if client is called twice with different options" do
+    client = @mock_repository.client
+    lambda { client.should == @mock_repository.client }.should_not raise_error
+    lambda { @mock_repository.client(:timeout => 120) }.should raise_error(ArgumentError)
+  end
+  
   it "should call nextPID" do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/nextPID?format=xml"))
     @mock_repository.next_pid
