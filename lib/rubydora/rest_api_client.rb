@@ -12,11 +12,16 @@ module Rubydora
     # @option config [String] :password
     # @return [RestClient::Resource]
     def client config = {}
-      config = self.config.merge(config)
-      url = config[:url]
-      config.delete_if { |k,v| not VALID_CLIENT_OPTIONS.include?(k) }
-      config[:open_timeout] ||= config[:timeout]
-      @client ||= RestClient::Resource.new(url, config)
+      client_config = self.config.merge(config)
+      if config.empty? or @config_hash.nil? or (client_config.hash == @config_hash)
+        @config_hash = client_config.hash
+        url = client_config[:url]
+        client_config.delete_if { |k,v| not VALID_CLIENT_OPTIONS.include?(k) }
+        client_config[:open_timeout] ||= client_config[:timeout]
+        @client ||= RestClient::Resource.new(url, client_config)
+      else
+        raise ArgumentError, "Attemping to re-initialize #{self.class}#client with different configuration parameters"
+      end
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}

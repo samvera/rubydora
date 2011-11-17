@@ -7,7 +7,7 @@ describe Rubydora::Repository do
 
   describe "client" do
     it "should return a RestClient resource" do
-      client = @repository.client :url => 'http://example.org', :user => 'fedoraAdmin', :password => 'fedoraAdmin'
+      client = @repository.client
 
       client.should be_a_kind_of(RestClient::Resource)
     end
