@@ -4,6 +4,7 @@ module Rubydora
   module RestApiClient
     # Fedora API documentation available at {https://wiki.duraspace.org/display/FCR30/REST+API}
     API_DOCUMENTATION = 'https://wiki.duraspace.org/display/FCR30/REST+API'
+    VALID_CLIENT_OPTIONS = [:user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
     # Create an authorized HTTP client for the Fedora REST API
     # @param [Hash] config
     # @option config [String] :url
@@ -12,7 +13,10 @@ module Rubydora
     # @return [RestClient::Resource]
     def client config = {}
       config = self.config.merge(config)
-      @client ||= RestClient::Resource.new(config[:url], :user => config[:user], :password => config[:password], :timeout => config[:timeout], :open_timeout => config[:timeout])
+      url = config[:url]
+      config.delete_if { |k,v| not VALID_CLIENT_OPTIONS.include?(k) }
+      config[:open_timeout] ||= config[:timeout]
+      @client ||= RestClient::Resource.new(url, config)
     end
 
     # {include:RestApiClient::API_DOCUMENTATION}
