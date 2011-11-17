@@ -15,6 +15,21 @@ describe Rubydora::RestApiClient do
     @mock_repository.config = { :url => 'http://example.org',:user => 'fedoraAdmin', :password => 'fedoraAdmin'}
   end
 
+  it "should create a REST client" do
+    client = @mock_repository.client
+    
+    client.should be_a_kind_of(RestClient::Resource)
+    client.options[:user].should == 'fedoraAdmin'
+  end
+  
+  it "should create a REST client with a client certificate" do
+    client = @mock_repository.client :ssl_client_cert => OpenSSL::X509::Certificate.new, :ssl_client_key => OpenSSL::PKey::RSA.new
+
+    client.options[:user].should == 'fedoraAdmin'
+    client.options[:ssl_client_cert].should be_a_kind_of(OpenSSL::X509::Certificate)
+    client.options[:ssl_client_key].should be_a_kind_of(OpenSSL::PKey::PKey)
+  end
+
   it "should call nextPID" do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/nextPID?format=xml"))
     @mock_repository.next_pid
