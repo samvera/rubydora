@@ -131,11 +131,11 @@ describe Rubydora::RestApiClient do
 
   describe "modify datastream" do
     it "should not set mime-type when it's not provided" do
-       RestClient::Request.should_receive(:execute).with(:url => "http://example.org/objects/mypid/datastreams/aaa",:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{:multipart=>true})
+       RestClient::Request.should_receive(:execute).with(:url => "http://example.org/objects/mypid/datastreams/aaa",:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa' 
     end
     it "should pass the provided mimeType header" do
-       RestClient::Request.should_receive(:execute).with(:url => "http://example.org/objects/mypid/datastreams/aaa?mimeType=application%2Fjson",:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{:content_type=>'application/json', :multipart=>true})
+       RestClient::Request.should_receive(:execute).with(:url => "http://example.org/objects/mypid/datastreams/aaa?mimeType=application%2Fjson",:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :mimeType=>'application/json'
     end
   end

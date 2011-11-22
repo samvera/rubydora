@@ -229,7 +229,7 @@ module Rubydora
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       file = options.delete(:content)
-      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
+      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
       begin
         return client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
       rescue => e
@@ -247,13 +247,16 @@ module Rubydora
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       file = options.delete(:content)
-      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) 
+      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
 
-      params = {:multipart => true}
-      params[:content_type] = content_type if content_type
+      rest_client_options = {}
+      if file
+        rest_client_options[:multipart] = true
+        rest_client_options[:content_type] = content_type
+      end
 
       begin
-        return client[datastream_url(pid, dsid, options)].put(file, params)
+        return client[datastream_url(pid, dsid, options)].put(file, rest_client_options)
       rescue => e
         logger.error e.response
         raise "Error modifying datastream #{dsid} for #{pid}. See logger for details"

@@ -160,6 +160,8 @@ module Rubydora
         h[attribute] = send(attribute) if send(attribute)
       end
 
+      h[:mimeType] ||= self.mimeType if self.mimeType
+
       h
     end
 

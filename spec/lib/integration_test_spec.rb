@@ -6,6 +6,8 @@ describe "Integration testing against a live Fedora repository" do
   REPOSITORY_CONFIG = { :url => 'http://localhost:8983/fedora', :user => 'fedoraAdmin', :password => 'fedoraAdmin' }
   before(:all) do
     @repository = Rubydora.connect REPOSITORY_CONFIG
+    @repository.find('test:1').delete rescue nil
+    @repository.find('test:2').delete rescue nil
   end
 
   it "should connect" do
@@ -91,9 +93,10 @@ describe "Integration testing against a live Fedora repository" do
     obj.datastreams["empty_ds"].new?.should == true
   end
 
-  it "should update datastream attributes without changing the content" do
+  it "should update datastream attributes without changing the content (or mime type)" do
     obj = @repository.find('test:1')
     obj.datastreams["my_ds"].content = "XXX"
+    obj.datastreams["my_ds"].mimeType = "application/x-text"
     obj.save
 
     obj = @repository.find('test:1')
@@ -103,6 +106,62 @@ describe "Integration testing against a live Fedora repository" do
     obj = @repository.find('test:1')
     obj.datastreams["my_ds"].content.should == "XXX"
     obj.datastreams["my_ds"].dsLabel.should == "New Label"
+    obj.datastreams["my_ds"].mimeType.should == "application/x-text"
+  end
+
+  context "mime types" do
+    before(:each) do
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].delete rescue nil
+    end
+
+    it "should default to application/octet-stream" do
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].content = "XXX"
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].mimeType.should == "application/octet-stream"
+    end
+
+    it "should allow the user to specify a mimetype" do
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].content = "XXX"
+      obj.datastreams["my_ds"].mimeType = "text/plain"
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].mimeType.should == "text/plain"
+    end
+
+    it "should preserve the mimetype on update" do
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].content = "XXX"
+      obj.datastreams["my_ds"].mimeType = "text/plain"
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].content = "ZZZ"
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].mimeType.should == "text/plain"
+    end
+
+    it "should allow the mimetype to be changed" do
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].content = "XXX"
+      obj.datastreams["my_ds"].mimeType = "text/plain"
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].mimeType = "application/json"
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].mimeType.should == "application/json"
+    end
+
   end
 
 
