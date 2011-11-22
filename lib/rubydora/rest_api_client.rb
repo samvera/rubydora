@@ -40,12 +40,16 @@ module Rubydora
     # {include:RestApiClient::API_DOCUMENTATION}
     # @param [Hash] options
     # @return [String]
-    def find_objects options = {}
+    def find_objects options = {}, &block_response
       raise "" if options[:terms] and options[:query]
       options[:resultFormat] ||= 'xml'
 
       begin
-        return client[object_url(nil, options)].get
+        resource = client[object_url(nil, options)]
+        if block_given?
+          resource.options[:block_response] = block_response
+        end 
+        return resource.get
       rescue => e
         logger.error e.response
         raise "Error finding objects. See logger for details"
@@ -335,13 +339,17 @@ module Rubydora
     # @option options [String] :sdef
     # @option options [String] :method
     # @return [String]
-    def dissemination options = {}
+    def dissemination options = {}, &block_response
       pid = options.delete(:pid)
       sdef = options.delete(:sdef)
       method = options.delete(:method)
       options[:format] ||= 'xml' unless pid and sdef and method
       begin
-        return client[dissemination_url(pid,sdef,method,options)].get
+        resource = client[dissemination_url(pid,sdef,method,options)]
+        if block_given?
+          resource.options[:block_response] = block_response
+        end
+        return resource.get
       rescue => e
         logger.error e.response
         raise "Error getting dissemination for #{pid}. See logger for details"

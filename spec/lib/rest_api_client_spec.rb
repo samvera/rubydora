@@ -204,4 +204,10 @@ describe Rubydora::RestApiClient do
     @mock_repository.dissemination :pid => 'mypid', :sdef => 'sdef', :method => 'method'
   end
 
+  it "should pass a block to the rest client to process the response in datastream_dissemination" do
+     _proc = lambda { |x| x }
+     RestClient::Request.should_receive(:execute).with(hash_including(:block_response => _proc))
+     @mock_repository.dissemination :pid => 'mypid', :sdef => 'sdef', :method => 'method', &_proc
+  end
+
 end
