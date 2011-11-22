@@ -247,10 +247,13 @@ module Rubydora
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
       file = options.delete(:content)
-      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'text/plain'
+      content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) 
+
+      params = {:multipart => true}
+      params[:content_type] = content_type if content_type
 
       begin
-        return client[datastream_url(pid, dsid, options)].put(file, {:content_type => content_type.to_s, :multipart => true})
+        return client[datastream_url(pid, dsid, options)].put(file, params)
       rescue => e
         logger.error e.response
         raise "Error modifying datastream #{dsid} for #{pid}. See logger for details"

@@ -11,21 +11,23 @@ describe Rubydora::RestApiClient do
   end
 
   before(:each) do
+    @fedora_user = 'fedoraAdmin'
+    @fedora_password = 'fedoraAdmin'
     @mock_repository = MockRepository.new
-    @mock_repository.config = { :url => 'http://example.org',:user => 'fedoraAdmin', :password => 'fedoraAdmin'}
+    @mock_repository.config = { :url => 'http://example.org',:user => @fedora_user, :password => @fedora_password}
   end
 
   it "should create a REST client" do
     client = @mock_repository.client
     
     client.should be_a_kind_of(RestClient::Resource)
-    client.options[:user].should == 'fedoraAdmin'
+    client.options[:user].should == @fedora_user
   end
   
   it "should create a REST client with a client certificate" do
     client = @mock_repository.client :ssl_client_cert => OpenSSL::X509::Certificate.new, :ssl_client_key => OpenSSL::PKey::RSA.new
 
-    client.options[:user].should == 'fedoraAdmin'
+    client.options[:user].should == @fedora_user
     client.options[:ssl_client_cert].should be_a_kind_of(OpenSSL::X509::Certificate)
     client.options[:ssl_client_key].should be_a_kind_of(OpenSSL::PKey::PKey)
   end
@@ -127,9 +129,15 @@ describe Rubydora::RestApiClient do
     @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa' 
   end
 
-  it "modify_datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa"))
-    @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa' 
+  describe "modify datastream" do
+    it "should not set mime-type when it's not provided" do
+       RestClient::Request.should_receive(:execute).with(:url => "http://example.org/objects/mypid/datastreams/aaa",:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{:multipart=>true})
+      @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa' 
+    end
+    it "should pass the provided mimeType header" do
+       RestClient::Request.should_receive(:execute).with(:url => "http://example.org/objects/mypid/datastreams/aaa?mimeType=application%2Fjson",:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{:content_type=>'application/json', :multipart=>true})
+      @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :mimeType=>'application/json'
+    end
   end
 
   it "purge_datastream" do
