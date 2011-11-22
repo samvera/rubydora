@@ -157,12 +157,10 @@ module Rubydora
     def to_api_params
       h = default_api_params
       valid_changed_attributes = changes.keys.map { |x| x.to_sym }.select { |x| DS_ATTRIBUTES.key? x }
-      ## if we don't provide a mimeType, fedora will set it to application/x-www-form-urlencoded
+      ## if we don't provide a mimeType, application/octet-stream will be used instead
       (valid_changed_attributes | [:mimeType]).each do |attribute|
         h[attribute] = send(attribute) if send(attribute)
       end
-
-      h[:mimeType] ||= self.mimeType if self.mimeType
 
       h
     end
