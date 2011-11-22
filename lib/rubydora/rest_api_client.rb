@@ -206,12 +206,18 @@ module Rubydora
     # @option options [String] :pid
     # @option options [String] :dsid
     # @return [String]
-    def datastream_dissemination options = {}
+    def datastream_dissemination options = {}, &block_response
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
-      raise "" unless dsid
+      method = options.delete(:method)
+      method ||= :get
+      raise self.class.name + "#datastream_dissemination requires a DSID" unless dsid
       begin
-        return client[url_for(datastream_url(pid, dsid) + "/content", options)].get
+        resource = client[url_for(datastream_url(pid, dsid) + "/content", options)]
+        if block_given?
+          resource.options[:block_response] = block_response
+        end
+        return resource.send(method)
       rescue RestClient::ResourceNotFound => e
         raise e
       rescue => e

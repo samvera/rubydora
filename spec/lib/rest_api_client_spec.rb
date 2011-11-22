@@ -119,6 +119,15 @@ describe Rubydora::RestApiClient do
      RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/content"))
     @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa'
   end
+  it "should allow http methods besides GET on datastream_dissemination" do
+     RestClient::Request.should_receive(:execute).with(hash_including(:method => :head))
+    @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa', :method => :head
+  end
+  it "should pass a block to the rest client to process the response in datastream_dissemination" do
+     _proc = lambda { |x| x }
+     RestClient::Request.should_receive(:execute).with(hash_including(:block_response => _proc))
+    @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa', &_proc
+  end
   it "should raise not found exception when retrieving datastream_dissemination" do
      RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/content")).and_raise( RestClient::ResourceNotFound)
     lambda {@mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
