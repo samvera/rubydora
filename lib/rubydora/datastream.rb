@@ -156,7 +156,9 @@ module Rubydora
     # @return [Hash]
     def to_api_params
       h = default_api_params
-      changes.keys.map { |x| x.to_sym }.select { |x| DS_ATTRIBUTES.key? x }.each do |attribute|
+      valid_changed_attributes = changes.keys.map { |x| x.to_sym }.select { |x| DS_ATTRIBUTES.key? x }
+      ## if we don't provide a mimeType, fedora will set it to application/x-www-form-urlencoded
+      (valid_changed_attributes | [:mimeType]).each do |attribute|
         h[attribute] = send(attribute) if send(attribute)
       end
 

@@ -119,18 +119,38 @@ describe Rubydora::Datastream do
   end
 
   describe "to_api_params" do
-    before(:each) do
-      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @datastream.stub(:profile) { {} }
+
+    describe "with existing properties" do
+      before(:each) do
+        @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @datastream.stub(:profile) { {'dsMIME' => 'application/rdf+xml', 'dsChecksumType' =>'DISABLED', 'dsVersionable'=>true, 'dsControlGroup'=>'M', 'dsState'=>'A'} }
+      end
+      it "should not set unchanged values except for mimeType" do
+        @datastream.send(:to_api_params).should == {:mimeType=>'application/rdf+xml'}
+      end
+      it "should send changed params except those set to nil" do
+        @datastream.dsLabel = nil
+        @datastream.mimeType = 'application/json'
+        @datastream.controlGroup = 'X'
+        @datastream.send(:to_api_params).should == {:controlGroup=>"X", :mimeType=>"application/json"}
+      end
     end
-    it "should compile parameters to hash" do
-      @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
-       :controlGroup=>"M", :dsState=>"A"}
-    end
-    it "should not send parameters that are set to nil" do
-      @datastream.dsLabel = nil
-      @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
-       :controlGroup=>"M", :dsState=>"A"}
+
+
+    describe "without existing properties" do
+      before(:each) do
+        @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @datastream.stub(:profile) { {} }
+      end
+      it "should compile parameters to hash" do
+        @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
+         :controlGroup=>"M", :dsState=>"A"}
+      end
+      it "should not send parameters that are set to nil" do
+        @datastream.dsLabel = nil
+        @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
+         :controlGroup=>"M", :dsState=>"A"}
+      end
     end
   end
 end
