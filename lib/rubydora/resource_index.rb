@@ -40,7 +40,6 @@ module Rubydora
       end
     end
 
-    protected
     # Run a raw query against the Fedora risearch resource index
     # @param [String] query
     # @param [Hash] options

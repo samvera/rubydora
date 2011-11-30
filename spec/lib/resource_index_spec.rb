@@ -23,6 +23,6 @@ describe Rubydora::ResourceIndex do
     @mock_risearch.should_receive(:post).with(hash_including(:dt => 'on', :format => 'CSV', :lang => 'sparql', :limit => nil, :query => 'placeholder SPARQL query', :type => 'tuples' ))
     @mock_client.should_receive(:[]).with('risearch').and_return(@mock_risearch)
     @mock_repository.should_receive(:client).and_return(@mock_client)
-    @mock_repository.send(:risearch, 'placeholder SPARQL query')
+    @mock_repository.risearch 'placeholder SPARQL query'
   end
 end
