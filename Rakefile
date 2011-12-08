@@ -22,14 +22,9 @@ RSpec::Core::RakeTask.new do |t|
   # Put spec opts in a file named .rspec in root
 end
 
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "rubydora #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+require 'yard'
+YARD::Rake::YardocTask.new do |t|
+  t.options = ["--readme", "README.rdoc"]
 end
 
 desc "Open an irb session preloaded with this library"
