@@ -8,6 +8,7 @@ describe "Integration testing against a live Fedora repository" do
     @repository = Rubydora.connect REPOSITORY_CONFIG
     @repository.find('test:1').delete rescue nil
     @repository.find('test:2').delete rescue nil
+    @repository.find('test:3').delete rescue nil
   end
 
   it "should connect" do
@@ -42,6 +43,21 @@ describe "Integration testing against a live Fedora repository" do
     obj = @repository.find('test:2')
     obj.save
     obj.new?.should == false
+  end
+
+  it "should create and update object labels" do
+    obj = @repository.find('test:3')
+    obj.label = 'asdf'
+    obj.save
+
+    obj = @repository.find('test:3')
+    obj.label.should == 'asdf'
+    obj.label = 'qwerty'
+    obj.save
+
+    obj = @repository.find('test:3')
+    obj.label.should == 'qwerty'
+
   end
 
   it "should persist parts" do
