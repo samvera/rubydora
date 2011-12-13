@@ -120,7 +120,7 @@ module Rubydora
         h
       rescue Exception => e
         {}
-      end
+      end.freeze
     end
 
     # List of datastreams

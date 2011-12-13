@@ -28,6 +28,14 @@ describe Rubydora::DigitalObject do
       h['objModels'].should == ['3', '4']
 
     end
+
+    it "should be frozen (to prevent modification)" do
+      @mock_repository.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
+      h = @object.profile
+
+      expect { h['asdf'] = 'asdf' }.to raise_error
+
+    end
   end
 
   describe "new" do
