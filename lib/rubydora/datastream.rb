@@ -34,6 +34,15 @@ module Rubydora
       }
     end
 
+    DS_READONLY_ATTRIBUTES = { :createDate => :dsCreateDate, :size => :dsSize, :versionID => :dsVersionID }
+    DS_READONLY_ATTRIBUTES.each do |attribute, profile_name|
+      class_eval %Q{
+      def #{attribute.to_s}
+        @#{attribute} || profile['#{profile_name.to_s}'] || DS_DEFAULT_ATTRIBUTES[:#{attribute}]
+      end
+      }
+    end
+
     ##
     # Initialize a Rubydora::Datastream object, which may or
     # may not already exist in the datastore.
