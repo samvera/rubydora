@@ -2,7 +2,7 @@ require 'spec_helper'
 
 
 # These tests require a fedora repository with the resource index enabled (and with syncUpdates = true)
-describe "Integration testing against a live Fedora repository" do
+describe "Integration testing against a live Fedora repository", :integration => true do
   REPOSITORY_CONFIG = { :url => 'http://localhost:8983/fedora', :user => 'fedoraAdmin', :password => 'fedoraAdmin' }
   before(:all) do
     @repository = Rubydora.connect REPOSITORY_CONFIG
