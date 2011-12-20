@@ -34,14 +34,28 @@ module Rubydora
       }
     end
 
-    DS_READONLY_ATTRIBUTES = { :createDate => :dsCreateDate, :size => :dsSize, :versionID => :dsVersionID }
-    DS_READONLY_ATTRIBUTES.each do |attribute, profile_name|
+    DS_READONLY_ATTRIBUTES = [ :dsCreateDate , :dsSize, :dsVersionID ]
+    DS_READONLY_ATTRIBUTES.each do |attribute|
       class_eval %Q{
       def #{attribute.to_s}
-        @#{attribute} || profile['#{profile_name.to_s}'] || DS_DEFAULT_ATTRIBUTES[:#{attribute}]
+        @#{attribute} || profile['#{attribute.to_s}'] || DS_DEFAULT_ATTRIBUTES[:#{attribute}]
       end
       }
     end
+
+
+    # Create humanized accessors for the DS attribute  (dsState -> state, dsCreateDate -> createDate)
+    (DS_ATTRIBUTES.keys + DS_READONLY_ATTRIBUTES).select { |k| k.to_s =~ /^ds/ }.each do |attribute|
+      simple_attribute = attribute.to_s.sub(/^ds/, '')
+      simple_attribute = simple_attribute[0].chr.downcase + simple_attribute[1..-1]
+
+      alias_method simple_attribute, attribute
+
+      if self.respond_to? "#{attribute}="
+        alias_method "#{simple_attribute}=", "#{attribute}="
+      end
+    end
+
 
     ##
     # Initialize a Rubydora::Datastream object, which may or

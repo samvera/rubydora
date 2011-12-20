@@ -93,6 +93,18 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.datastreams["Test"].content.should match( "Integration testing against a live Fedora repository")
   end
 
+  it "should have profile attributes" do
+    require 'time'
+    obj = @repository.find('test:1')
+    ds = obj.datastreams["Test"]
+
+    ds.versionID.should == "Test.0"
+    (Time.now - Time.parse(ds.dsCreateDate)).should be < 60*60 # 1 hour
+    ds.state.should == "A"
+    ds.controlGroup.should == "M"
+    ds.size.to_i.should be > 100
+  end
+
   it "should delete datastreams" do
     obj = @repository.find('test:1')
     ds = obj.datastreams["Test"].delete
