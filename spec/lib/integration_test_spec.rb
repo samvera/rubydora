@@ -153,6 +153,17 @@ describe "Integration testing against a live Fedora repository", :integration =>
       expect { ds.dsLabel = 'asdf' }.to raise_error
       expect { ds.content = 'asdf' }.to raise_error
     end
+
+    it "should access the content of older datastreams" do
+      obj = @repository.find('test:1')
+
+      ds = obj.datastreams["my_ds"]
+      ds.content = "YYY"
+      ds.save
+
+      versions = obj.datastreams["my_ds"].versions
+      versions.map { |x| x.content }.should include("XXX", "YYY") 
+    end
   end
 
   context "mime types" do
