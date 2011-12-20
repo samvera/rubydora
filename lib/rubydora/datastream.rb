@@ -19,7 +19,7 @@ module Rubydora
     DS_DEFAULT_ATTRIBUTES = { :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true }
 
     define_attribute_methods DS_ATTRIBUTES.keys
-    
+ 
     # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
       class_eval %Q{
@@ -158,6 +158,7 @@ module Rubydora
     # Add datastream to Fedora
     # @return [Rubydora::Datastream]
     def create
+      check_if_read_only
       run_callbacks :create do
         repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
         reset_profile_attributes
@@ -168,6 +169,7 @@ module Rubydora
     # Modify or save the datastream
     # @return [Rubydora::Datastream]
     def save
+      check_if_read_only
       run_callbacks :save do
         return create if new?
         repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
@@ -179,6 +181,7 @@ module Rubydora
     # Purge the datastream from Fedora
     # @return [Rubydora::Datastream] `self`
     def delete
+      check_if_read_only
       run_callbacks :destroy do
         repository.purge_datastream(:pid => pid, :dsid => dsid) unless self.new?
         digital_object.datastreams.delete(dsid)
@@ -225,9 +228,13 @@ module Rubydora
       @asOfDateTime = val
     end
 
+    def check_if_read_only
+      raise "Can't change values on older versions" if @asOfDateTime
+    end
+
     private
     def attribute_will_change! *args
-      raise "Can't change values on older versions" if @asOfDateTime
+      check_if_read_only
       super
     end
   end

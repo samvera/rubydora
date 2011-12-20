@@ -118,6 +118,36 @@ describe Rubydora::Datastream do
 
   end
 
+  describe "should check if an object is read-only" do
+    before(:each) do
+      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+        <datastreamProfile>
+          <dsLocation>some:uri</dsLocation>
+          <dsLabel>label</dsLabel>
+        </datastreamProfile>
+      XML
+    end
+
+    it "before updating attributes" do
+      @datastream.should_receive(:check_if_read_only)
+      @datastream.dsLabel = 'New Label'
+    end
+
+    it "before saving an object" do
+      @mock_repository.should_receive(:modify_datastream)
+      @datastream.should_receive(:check_if_read_only)
+      @datastream.save
+    end
+
+    it "before deleting an object" do
+      @mock_repository.should_receive(:purge_datastream)
+      @mock_object.should_receive(:datastreams).and_return([])
+      @datastream.should_receive(:check_if_read_only)
+      @datastream.delete
+    end
+  end
+
   describe "to_api_params" do
 
     describe "with existing properties" do
