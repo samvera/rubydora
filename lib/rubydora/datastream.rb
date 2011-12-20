@@ -136,6 +136,9 @@ module Rubydora
           h[key] = value.first
         end
 
+        h['dsSize'] &&= h['dsSize'].to_i rescue h['dsSize']
+        h['dsCreateDate'] &&= Time.parse(h['dsCreateDate']) rescue h['dsCreateDate']
+
         h
       rescue
         {}
