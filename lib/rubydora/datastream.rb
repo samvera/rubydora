@@ -132,28 +132,35 @@ module Rubydora
 
     # Retrieve the datastream profile as a hash (and cache it)
     # @return [Hash] see Fedora #getDatastream documentation for keys
-    def profile
+    def profile profile_xml = nil
       @profile ||= begin
-        profile_xml = repository.datastream(:pid => pid, :dsid => dsid)
-        profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
-        doc = Nokogiri::XML(profile_xml)
-        h = doc.xpath('/management:datastreamProfile/*', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).inject({}) do |sum, node|
-                     sum[node.name] ||= []
-                     sum[node.name] << node.text
-                     sum
-                   end
-        h.select { |key, value| value.length == 1 }.each do |key, value|
-          h[key] = value.first
-        end
+        profile_xml ||= repository.datastream(:pid => pid, :dsid => dsid)
+        self.profile_xml_to_hash(profile_xml)
 
-        h['dsSize'] &&= h['dsSize'].to_i rescue h['dsSize']
-        h['dsCreateDate'] &&= Time.parse(h['dsCreateDate']) rescue h['dsCreateDate']
-
-        h
       rescue
         {}
       end
     end
+    alias_method :profile=, :profile
+
+    def profile_xml_to_hash profile_xml
+      profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
+      doc = Nokogiri::XML(profile_xml)
+      h = doc.xpath('/management:datastreamProfile/*', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).inject({}) do |sum, node|
+                   sum[node.name] ||= []
+                   sum[node.name] << node.text
+                   sum
+                 end
+      h.select { |key, value| value.length == 1 }.each do |key, value|
+        h[key] = value.first
+      end
+
+      h['dsSize'] &&= h['dsSize'].to_i rescue h['dsSize']
+      h['dsCreateDate'] &&= Time.parse(h['dsCreateDate']) rescue h['dsCreateDate']
+
+      h
+    end
+
 
     # Add datastream to Fedora
     # @return [Rubydora::Datastream]
