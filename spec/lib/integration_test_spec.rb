@@ -180,6 +180,23 @@ describe "Integration testing against a live Fedora repository", :integration =>
 
   end
 
+  describe "search" do
+
+    it "should return an array of fedora objects" do
+      objects = @repository.search('')
+
+      objects.map { |x| x.pid }.should include('test:1', 'test:2')
+    end
+
+    it "should include our new objects" do
+      pids = []
+      @repository.search('') { |obj| pids << obj.pid }
+
+      pids.should include('test:1', 'test:2')
+    end
+
+  end
+
 
   after(:all) do
     @repository.find('test:1').delete rescue nil
