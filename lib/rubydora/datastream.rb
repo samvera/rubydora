@@ -161,6 +161,14 @@ module Rubydora
       h
     end
 
+    def versions
+      versions_xml = repository.datastream_versions(:pid => pid, :dsid => dsid)
+      versions_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless versions_xml =~ /xmlns=/
+      doc = Nokogiri::XML(versions_xml)
+      doc.xpath('//management:datastreamProfile', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).map do |ds|
+        self.class.new @pid, @dsid, :profile => ds.to_s, :asOfDateTime => ds.xpath('management:dsCreateDate', 'management' => "http://www.fedora.info/definitions/1/0/management/").text
+      end
+    end
 
     # Add datastream to Fedora
     # @return [Rubydora::Datastream]

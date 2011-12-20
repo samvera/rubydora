@@ -137,11 +137,22 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.datastreams["my_ds"].mimeType.should == "application/x-text"
   end
 
-  it "should have versions" do
-    obj = @repository.find('test:1')
-    ds = obj.datastreams["my_ds"].asOfDateTime(Time.now)
-    expect { ds.dsLabel = 'asdf' }.to raise_error
-    expect { ds.content = 'asdf' }.to raise_error
+
+  describe "datastream versions" do
+
+    it "should have versions" do
+      obj = @repository.find('test:1')
+      versions = obj.datastreams["my_ds"].versions
+      versions.should_not be_empty
+      versions.map { |x| x.versionID }.should include('my_ds.1', 'my_ds.0')
+    end
+
+    it "should have read-only versions" do
+      obj = @repository.find('test:1')
+      ds = obj.datastreams["my_ds"].asOfDateTime(Time.now)
+      expect { ds.dsLabel = 'asdf' }.to raise_error
+      expect { ds.content = 'asdf' }.to raise_error
+    end
   end
 
   context "mime types" do
