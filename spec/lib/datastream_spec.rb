@@ -7,6 +7,7 @@ describe Rubydora::Datastream do
     @mock_object.stub(:repository => @mock_repository, :pid => 'pid')
   end
 
+
   describe "create" do
     before(:each) do
       @mock_repository.stub(:datastream) { raise("") }
@@ -179,6 +180,119 @@ describe Rubydora::Datastream do
     end
     
   end
+
+  describe "datastream attributes" do
+
+  shared_examples "a datastream attribute" do
+    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
+    before do
+      @mock_repository.stub(:datastream => <<-XML
+        <datastreamProfile>
+        <anyProfileValue />
+        </datastreamProfile>
+      XML
+    )
+    end
+
+    describe "getter" do
+      it "should return the value" do
+        subject.instance_variable_set("@#{method}", 'asdf')
+        subject.send(method).should == 'asdf'
+      end
+
+      it "should look in the object profile" do
+        subject.should_receive(:profile) { { Rubydora::Datastream::DS_ATTRIBUTES[method.to_sym].to_s => 'qwerty' } }
+        subject.send(method).should == 'qwerty'
+      end
+
+      it "should fall-back to the set of default attributes" do
+        Rubydora::Datastream::DS_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+        subject.send(method).should == 'zxcv'
+      end
+    end
+
+    describe "setter" do
+      before do
+        subject.stub(:datastreams => [])
+      end
+      it "should mark the object as changed after setting" do
+        subject.send("#{method}=", 'new_value')
+        subject.should be_changed
+      end
+
+      it "should appear in the save request" do 
+        @mock_repository.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'new_value'))
+        subject.send("#{method}=", 'new_value')
+        subject.save
+      end
+    end
+  end
+
+  describe "#controlGroup" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'controlGroup' }
+  end
+
+  describe "#dsLocation" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'dsLocation' }
+  end
+
+  describe "#altIDs" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'altIDs' }
+  end
+
+  describe "#dsLabel" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'dsLabel' }
+  end
+
+  describe "#versionable" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'versionable' }
+  end
+
+  describe "#dsState" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'dsState' }
+  end
+
+  describe "#formatURI" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'formatURI' }
+  end
+
+  describe "#checksumType" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'checksumType' }
+  end
+
+  describe "#checksum" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'checksum' }
+  end
+
+  describe "#mimeType" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'mimeType' }
+  end
+
+  describe "#logMessage" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'logMessage' }
+  end
+
+  describe "#ignoreContent" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'ignoreContent' }
+  end
+
+  describe "#lastModifiedDate" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'lastModifiedDate' }
+  end
+end
 
   describe "to_api_params" do
 
