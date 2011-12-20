@@ -43,8 +43,8 @@ module Rubydora
     # TODO: raise an error if the object does not yet exist
     # @param [String] pid
     # @param [Rubydora::Repository] context
-    def self.find pid, repository = nil
-      self.new pid, repository
+    def self.find pid, repository = nil, options = {}
+      self.new pid, repository, options
     end
 
     # create a new fedora object (see also DigitalObject#save)
