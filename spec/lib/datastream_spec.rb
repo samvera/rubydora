@@ -182,9 +182,6 @@ describe Rubydora::Datastream do
   end
 
   describe "datastream attributes" do
-
-  shared_examples "a datastream attribute" do
-    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
     before do
       @mock_repository.stub(:datastream => <<-XML
         <datastreamProfile>
@@ -193,6 +190,9 @@ describe Rubydora::Datastream do
       XML
     )
     end
+
+  shared_examples "a datastream attribute" do
+    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
 
     describe "getter" do
       it "should return the value" do
@@ -226,6 +226,28 @@ describe Rubydora::Datastream do
         subject.save
       end
     end
+  end
+
+  shared_examples "a read-only datastream attribute" do
+    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
+
+    describe "getter" do
+      it "should return the value" do
+        subject.instance_variable_set("@#{method}", 'asdf')
+        subject.send(method).should == 'asdf'
+      end
+
+      it "should look in the object profile" do
+        subject.should_receive(:profile) { { method => 'qwerty' } }
+        subject.send(method).should == 'qwerty'
+      end
+
+      it "should fall-back to the set of default attributes" do
+        Rubydora::Datastream::DS_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+        subject.send(method).should == 'zxcv'
+      end
+    end
+
   end
 
   describe "#controlGroup" do
@@ -291,6 +313,21 @@ describe Rubydora::Datastream do
   describe "#lastModifiedDate" do
     it_behaves_like "a datastream attribute"
     let(:method) { 'lastModifiedDate' }
+  end
+
+  describe "#dsCreateDate" do
+    it_behaves_like "a read-only datastream attribute"
+    let(:method) { 'dsCreateDate' }
+  end
+
+  describe "#dsSize" do
+    it_behaves_like "a read-only datastream attribute"
+    let(:method) { 'dsSize' }
+  end
+
+  describe "#dsVersionID" do
+    it_behaves_like "a read-only datastream attribute"
+    let(:method) { 'dsVersionID' }
   end
 end
 
