@@ -138,6 +138,41 @@ describe "Integration testing against a live Fedora repository", :integration =>
   end
 
 
+  describe "object versions" do
+    it "should have versions" do
+      obj = @repository.find('test:1')
+      obj.versions.should_not be_empty
+    end
+
+    it "should have read-only versions" do
+      obj = @repository.find('test:1')
+      expect { obj.versions.first.label = "asdf" }.to raise_error
+    end
+
+    ## This isn't how Fedora object profiles actually work??
+    #it "should access profile data using asOfDateTime" do
+    #  obj = @repository.find('test:3')
+    #  obj.label = "asdf"
+    #  obj.save
+    #
+    #  obj = @repository.find('test:3')
+    #  obj.label = "qwerty"
+    #  obj.save
+    #
+    #  obj = @repository.find('test:3')
+    #  obj.versions.map { |x| x.label }.should include('adsf', 'qwerty')
+    #end
+
+    it "should access datastreams list using asOfDateTime (and pass the asOfDateTime through to the datastreams)" do
+      obj = @repository.find('test:1')
+      oldest = obj.versions.first.datastreams.keys
+      newest = obj.versions.last.datastreams.keys
+      (newest - oldest).should_not be_empty
+
+      obj.versions.first.datastreams.values.first.asOfDateTime.should == obj.versions.first.asOfDateTime
+    end
+  end
+
   describe "datastream versions" do
 
     it "should have versions" do

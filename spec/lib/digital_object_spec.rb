@@ -292,6 +292,41 @@ describe Rubydora::DigitalObject do
     end
   end
 
+  describe "versions" do
+    before(:each) do
+      @mock_repository.stub(:object) { <<-XML
+      <objectProfile>
+      </objectProfile>
+      XML
+      }
+
+      @mock_repository.stub(:object_versions) { <<-XML
+      <fedoraObjectHistory>
+        <objectChangeDate>2011-09-26T20:41:02.450Z</objectChangeDate>
+        <objectChangeDate>2011-10-11T21:17:48.124Z</objectChangeDate>
+      </fedoraObjectHistory>
+      XML
+      }
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+    end
+
+    it "should have a list of previous versions" do
+      @object.versions.should have(2).items
+      @object.versions.first.asOfDateTime.should == '2011-09-26T20:41:02.450Z'
+    end
+
+    it "should access versions as read-only copies" do
+      expect { @object.versions.first.label = "asdf" }.to raise_error
+    end
+
+    it "should lookup content of datastream using the asOfDateTime parameter" do
+      @mock_repository.should_receive(:datastreams).with(hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z')).and_return('')
+      Rubydora::Datastream.should_receive(:new).with(anything, 'my_ds', hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z'))
+      ds = @object.versions.first['my_ds']
+    end
+    
+  end
+
   describe "to_api_params" do
     before(:each) do
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
