@@ -15,7 +15,7 @@ module Rubydora
     attr_reader :digital_object, :dsid
 
     # mapping datastream attributes (and api parameters) to datastream profile names
-    DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :content => nil}
+    DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :content => nil, :asOfDateTime => nil}
     DS_DEFAULT_ATTRIBUTES = { :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true }
 
     define_attribute_methods DS_ATTRIBUTES.keys
@@ -57,6 +57,14 @@ module Rubydora
     end
 
 
+    def asOfDateTime asOfDateTime = nil
+      if asOfDateTime == nil
+        return @asOfDateTime
+      end
+
+      return self.class.new(@digital_object, @dsid, @options.merge(:asOfDateTime => asOfDateTime))
+    end
+
     ##
     # Initialize a Rubydora::Datastream object, which may or
     # may not already exist in the datastore.
@@ -70,6 +78,7 @@ module Rubydora
       _run_initialize_callbacks do
       @digital_object = digital_object
       @dsid = dsid
+      @options = options
       options.each do |key, value|
         self.send(:"#{key}=", value)
       end
@@ -117,6 +126,7 @@ module Rubydora
     # Content_will_change! would be dynamically created by ActiveModel::Dirty, but it would eagerly load the content.
     # We don't want to do that.
     def content_will_change!
+      raise "Can't change values on older versions" if @asOfDateTime
       changed_attributes[:content] = nil
     end
 
@@ -209,6 +219,16 @@ module Rubydora
     # @return [Rubydora::Repository]
     def repository
       digital_object.repository
+    end
+
+    def asOfDateTime= val
+      @asOfDateTime = val
+    end
+
+    private
+    def attribute_will_change! *args
+      raise "Can't change values on older versions" if @asOfDateTime
+      super
     end
   end
 end
