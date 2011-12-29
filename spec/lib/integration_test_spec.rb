@@ -93,6 +93,18 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.datastreams["Test"].content.should match( "Integration testing against a live Fedora repository")
   end
 
+  it "should have profile attributes" do
+    obj = @repository.find('test:1')
+    ds = obj.datastreams["Test"]
+
+    ds.versionID.should == "Test.0"
+
+    (Time.now - ds.createDate).should be < 60*60 # 1 hour
+    ds.state.should == "A"
+    ds.controlGroup.should == "M"
+    ds.size.should be > 100
+  end
+
   it "should delete datastreams" do
     obj = @repository.find('test:1')
     ds = obj.datastreams["Test"].delete
@@ -123,6 +135,70 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.datastreams["my_ds"].content.should == "XXX"
     obj.datastreams["my_ds"].dsLabel.should == "New Label"
     obj.datastreams["my_ds"].mimeType.should == "application/x-text"
+  end
+
+
+  describe "object versions" do
+    it "should have versions" do
+      obj = @repository.find('test:1')
+      obj.versions.should_not be_empty
+    end
+
+    it "should have read-only versions" do
+      obj = @repository.find('test:1')
+      expect { obj.versions.first.label = "asdf" }.to raise_error
+    end
+
+    ## This isn't how Fedora object profiles actually work??
+    #it "should access profile data using asOfDateTime" do
+    #  obj = @repository.find('test:3')
+    #  obj.label = "asdf"
+    #  obj.save
+    #
+    #  obj = @repository.find('test:3')
+    #  obj.label = "qwerty"
+    #  obj.save
+    #
+    #  obj = @repository.find('test:3')
+    #  obj.versions.map { |x| x.label }.should include('adsf', 'qwerty')
+    #end
+
+    it "should access datastreams list using asOfDateTime (and pass the asOfDateTime through to the datastreams)" do
+      obj = @repository.find('test:1')
+      oldest = obj.versions.first.datastreams.keys
+      newest = obj.versions.last.datastreams.keys
+      (newest - oldest).should_not be_empty
+
+      obj.versions.first.datastreams.values.first.asOfDateTime.should == obj.versions.first.asOfDateTime
+    end
+  end
+
+  describe "datastream versions" do
+
+    it "should have versions" do
+      obj = @repository.find('test:1')
+      versions = obj.datastreams["my_ds"].versions
+      versions.should_not be_empty
+      versions.map { |x| x.versionID }.should include('my_ds.1', 'my_ds.0')
+    end
+
+    it "should have read-only versions" do
+      obj = @repository.find('test:1')
+      ds = obj.datastreams["my_ds"].asOfDateTime(Time.now)
+      expect { ds.dsLabel = 'asdf' }.to raise_error
+      expect { ds.content = 'asdf' }.to raise_error
+    end
+
+    it "should access the content of older datastreams" do
+      obj = @repository.find('test:1')
+
+      ds = obj.datastreams["my_ds"]
+      ds.content = "YYY"
+      ds.save
+
+      versions = obj.datastreams["my_ds"].versions
+      versions.map { |x| x.content }.should include("XXX", "YYY") 
+    end
   end
 
   context "mime types" do

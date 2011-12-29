@@ -292,6 +292,41 @@ describe Rubydora::DigitalObject do
     end
   end
 
+  describe "versions" do
+    before(:each) do
+      @mock_repository.stub(:object) { <<-XML
+      <objectProfile>
+      </objectProfile>
+      XML
+      }
+
+      @mock_repository.stub(:object_versions) { <<-XML
+      <fedoraObjectHistory>
+        <objectChangeDate>2011-09-26T20:41:02.450Z</objectChangeDate>
+        <objectChangeDate>2011-10-11T21:17:48.124Z</objectChangeDate>
+      </fedoraObjectHistory>
+      XML
+      }
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+    end
+
+    it "should have a list of previous versions" do
+      @object.versions.should have(2).items
+      @object.versions.first.asOfDateTime.should == '2011-09-26T20:41:02.450Z'
+    end
+
+    it "should access versions as read-only copies" do
+      expect { @object.versions.first.label = "asdf" }.to raise_error
+    end
+
+    it "should lookup content of datastream using the asOfDateTime parameter" do
+      @mock_repository.should_receive(:datastreams).with(hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z')).and_return('')
+      Rubydora::Datastream.should_receive(:new).with(anything, 'my_ds', hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z'))
+      ds = @object.versions.first['my_ds']
+    end
+    
+  end
+
   describe "to_api_params" do
     before(:each) do
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
@@ -299,5 +334,67 @@ describe Rubydora::DigitalObject do
     it "should compile parameters to hash" do
       @object.send(:to_api_params).should == {}
     end
+  end
+
+  shared_examples "an object attribute" do
+    subject { Rubydora::DigitalObject.new 'pid', @mock_repository }
+
+    describe "getter" do
+      it "should return the value" do
+        subject.instance_variable_set("@#{method}", 'asdf')
+        subject.send(method).should == 'asdf'
+      end
+
+      it "should look in the object profile" do
+        subject.should_receive(:profile) { { Rubydora::DigitalObject::OBJ_ATTRIBUTES[method.to_sym].to_s => 'qwerty' } }
+        subject.send(method).should == 'qwerty'
+      end
+
+      it "should fall-back to the set of default attributes" do
+        Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+        subject.send(method).should == 'zxcv'
+      end
+    end
+
+    describe "setter" do
+      before do
+        subject.stub(:datastreams => [])
+      end
+      it "should mark the object as changed after setting" do
+        subject.send("#{method}=", 'new_value')
+        subject.should be_changed
+      end
+
+      it "should appear in the save request" do 
+        @mock_repository.should_receive(:ingest).with(hash_including(method.to_sym => 'new_value'))
+        subject.send("#{method}=", 'new_value')
+        subject.save
+      end
+    end
+  end
+
+  describe "#state" do
+    it_behaves_like "an object attribute"
+    let(:method) { 'state' }
+  end
+
+  describe "#ownerId" do
+    it_behaves_like "an object attribute"
+    let(:method) { 'ownerId' }
+  end
+
+  describe "#label" do
+    it_behaves_like "an object attribute"
+    let(:method) { 'label' }
+  end
+
+  describe "#logMessage" do
+    it_behaves_like "an object attribute"
+    let(:method) { 'logMessage' }
+  end
+
+  describe "#lastModifiedDate" do
+    it_behaves_like "an object attribute"
+    let(:method) { 'lastModifiedDate' }
   end
 end

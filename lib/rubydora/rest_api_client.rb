@@ -198,12 +198,14 @@ module Rubydora
       raise ArgumentError, "Must supply dsid" unless dsid
       options[:format] ||= 'xml'
       begin
-        return client[url_for(datastream_url(pid, dsid) + "/versions", options)].get
+        return client[url_for(datastream_url(pid, dsid) + "/history", options)].get
       rescue => e
         logger.error e.response
         raise "Error getting versions for datastream #{dsid} for object #{pid}. See logger for details"
       end
     end
+
+    alias_method :datastream_history, :datastream_versions
 
     # {include:RestApiClient::API_DOCUMENTATION}
     # @param [Hash] options

@@ -43,8 +43,8 @@ module Rubydora
     # TODO: raise an error if the object does not yet exist
     # @param [String] pid
     # @param [Rubydora::Repository] context
-    def self.find pid, repository = nil
-      self.new pid, repository
+    def self.find pid, repository = nil, options = {}
+      self.new pid, repository, options
     end
 
     # create a new fedora object (see also DigitalObject#save)
@@ -72,6 +72,7 @@ module Rubydora
         self.pid = pid
         @repository = repository
         @new = true
+        @options = options
 
         options.each do |key, value|
           self.send(:"#{key}=", value)
@@ -94,11 +95,25 @@ module Rubydora
       @new
     end
 
+    def asOfDateTime asOfDateTime = nil
+      if asOfDateTime == nil
+        return @asOfDateTime
+      end
+
+      return self.class.new(pid, @repository, @options.merge(:asOfDateTime => asOfDateTime))
+    end
+
+    def asOfDateTime= val
+      @asOfDateTime = val
+    end
+
     # Retrieve the object profile as a hash (and cache it)
     # @return [Hash] see Fedora #getObject documentation for keys
     def profile
       @profile ||= begin
-        profile_xml = repository.object(:pid => pid)
+        options = { :pid => pid }
+        options[:asOfDateTime] = asOfDateTime if asOfDateTime
+        profile_xml = repository.object(options)
         profile_xml.gsub! '<objectProfile', '<objectProfile xmlns="http://www.fedora.info/definitions/1/0/access/"' unless profile_xml =~ /xmlns=/
         doc = Nokogiri::XML(profile_xml)
         h = doc.xpath('/access:objectProfile/*', {'access' => "http://www.fedora.info/definitions/1/0/access/"} ).inject({}) do |sum, node|
@@ -123,6 +138,16 @@ module Rubydora
       end.freeze
     end
 
+    def versions
+      versions_xml = repository.object_versions(:pid => pid)
+      versions_xml.gsub! '<fedoraObjectHistory', '<fedoraObjectHistory xmlns="http://www.fedora.info/definitions/1/0/access/"' unless versions_xml =~ /xmlns=/
+      doc = Nokogiri::XML(versions_xml)
+      doc.xpath('//access:objectChangeDate', {'access' => 'http://www.fedora.info/definitions/1/0/access/' } ).map do |changeDate|
+        self.class.new pid, repository, :asOfDateTime => changeDate.text 
+      end
+    end
+
+
     # List of datastreams
     # @return [Array<Rubydora::Datastream>] 
     def datastreams
@@ -130,7 +155,9 @@ module Rubydora
         h = Hash.new { |h,k| h[k] = datastream_object_for(k) }                
 
         begin
-          datastreams_xml = repository.datastreams(:pid => pid)
+          options = { :pid => pid }
+          options[:asOfDateTime] = asOfDateTime if asOfDateTime
+          datastreams_xml = repository.datastreams(options)
           datastreams_xml.gsub! '<objectDatastreams', '<objectDatastreams xmlns="http://www.fedora.info/definitions/1/0/access/"' unless datastreams_xml =~ /xmlns=/
           doc = Nokogiri::XML(datastreams_xml)
           doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds| 
@@ -158,6 +185,7 @@ module Rubydora
     # 
     # @return [Rubydora::DigitalObject] a new copy of this object
     def save
+      check_if_read_only
       run_callbacks :save do
         if self.new?
           self.pid = repository.ingest to_api_params.merge(:pid => pid)
@@ -175,6 +203,7 @@ module Rubydora
     # Purge the object from Fedora
     # @return [Rubydora::DigitalObject] `self`
     def delete
+      check_if_read_only
       my_pid = pid
       run_callbacks :destroy do
         @datastreams = nil
@@ -219,8 +248,24 @@ module Rubydora
     # instantiate a datastream object for a dsid
     # @param [String] dsid
     # @return [Datastream]
-    def datastream_object_for dsid
-      Datastream.new self, dsid
+    def datastream_object_for dsid, options = {}
+      options[:asOfDateTime] ||= asOfDateTime if asOfDateTime
+      Datastream.new self, dsid, options
     end
+
+    def check_if_read_only
+      raise "Can't change values on older versions" if @asOfDateTime
+    end
+
+    def check_if_read_only
+      raise "Can't change values on older versions" if @asOfDateTime
+    end
+
+    private
+    def attribute_will_change! *args
+      check_if_read_only
+      super
+    end
+
   end
 end

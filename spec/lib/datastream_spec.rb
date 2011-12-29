@@ -7,6 +7,7 @@ describe Rubydora::Datastream do
     @mock_object.stub(:repository => @mock_repository, :pid => 'pid')
   end
 
+
   describe "create" do
     before(:each) do
       @mock_repository.stub(:datastream) { raise("") }
@@ -117,6 +118,218 @@ describe Rubydora::Datastream do
     end
 
   end
+
+  describe "should check if an object is read-only" do
+    before(:each) do
+      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+        <datastreamProfile>
+          <dsLocation>some:uri</dsLocation>
+          <dsLabel>label</dsLabel>
+        </datastreamProfile>
+      XML
+    end
+
+    it "before updating attributes" do
+      @datastream.should_receive(:check_if_read_only)
+      @datastream.dsLabel = 'New Label'
+    end
+
+    it "before saving an object" do
+      @mock_repository.should_receive(:modify_datastream)
+      @datastream.should_receive(:check_if_read_only)
+      @datastream.save
+    end
+
+    it "before deleting an object" do
+      @mock_repository.should_receive(:purge_datastream)
+      @mock_object.should_receive(:datastreams).and_return([])
+      @datastream.should_receive(:check_if_read_only)
+      @datastream.delete
+    end
+  end
+
+  describe "versions" do
+    before(:each) do
+      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      @mock_repository.should_receive(:datastream_versions).any_number_of_times.and_return <<-XML
+      <datastreamHistory>
+        <datastreamProfile>
+          <dsVersionID>dsid.1</dsVersionID>
+          <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
+        </datastreamProfile>
+        <datastreamProfile>
+          <dsVersionID>dsid.0</dsVersionID>
+          <dsCreateDate>2008-08-05T01:30:05.012Z</dsCreateDate>
+        </datastreamProfile>
+      </datastreamHistory>
+      XML
+    end
+
+    it "should have a list of previous versions" do
+      @datastream.versions.should have(2).items
+    end
+
+    it "should access versions as read-only copies" do
+      expect { @datastream.versions.first.label = "asdf" }.to raise_error
+    end
+
+    it "should lookup content of datastream using the asOfDateTime parameter" do
+      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:asOfDateTime => '2008-08-05T01:30:05.012Z'))
+      @datastream.versions.last.content
+    end
+    
+  end
+
+  describe "datastream attributes" do
+    before do
+      @mock_repository.stub(:datastream => <<-XML
+        <datastreamProfile>
+        <anyProfileValue />
+        </datastreamProfile>
+      XML
+    )
+    end
+
+  shared_examples "a datastream attribute" do
+    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
+
+    describe "getter" do
+      it "should return the value" do
+        subject.instance_variable_set("@#{method}", 'asdf')
+        subject.send(method).should == 'asdf'
+      end
+
+      it "should look in the object profile" do
+        subject.should_receive(:profile) { { Rubydora::Datastream::DS_ATTRIBUTES[method.to_sym].to_s => 'qwerty' } }
+        subject.send(method).should == 'qwerty'
+      end
+
+      it "should fall-back to the set of default attributes" do
+        Rubydora::Datastream::DS_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+        subject.send(method).should == 'zxcv'
+      end
+    end
+
+    describe "setter" do
+      before do
+        subject.stub(:datastreams => [])
+      end
+      it "should mark the object as changed after setting" do
+        subject.send("#{method}=", 'new_value')
+        subject.should be_changed
+      end
+
+      it "should appear in the save request" do 
+        @mock_repository.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'new_value'))
+        subject.send("#{method}=", 'new_value')
+        subject.save
+      end
+    end
+  end
+
+  shared_examples "a read-only datastream attribute" do
+    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
+
+    describe "getter" do
+      it "should return the value" do
+        subject.instance_variable_set("@#{method}", 'asdf')
+        subject.send(method).should == 'asdf'
+      end
+
+      it "should look in the object profile" do
+        subject.should_receive(:profile) { { method => 'qwerty' } }
+        subject.send(method).should == 'qwerty'
+      end
+
+      it "should fall-back to the set of default attributes" do
+        Rubydora::Datastream::DS_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+        subject.send(method).should == 'zxcv'
+      end
+    end
+
+  end
+
+  describe "#controlGroup" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'controlGroup' }
+  end
+
+  describe "#dsLocation" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'dsLocation' }
+  end
+
+  describe "#altIDs" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'altIDs' }
+  end
+
+  describe "#dsLabel" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'dsLabel' }
+  end
+
+  describe "#versionable" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'versionable' }
+  end
+
+  describe "#dsState" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'dsState' }
+  end
+
+  describe "#formatURI" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'formatURI' }
+  end
+
+  describe "#checksumType" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'checksumType' }
+  end
+
+  describe "#checksum" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'checksum' }
+  end
+
+  describe "#mimeType" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'mimeType' }
+  end
+
+  describe "#logMessage" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'logMessage' }
+  end
+
+  describe "#ignoreContent" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'ignoreContent' }
+  end
+
+  describe "#lastModifiedDate" do
+    it_behaves_like "a datastream attribute"
+    let(:method) { 'lastModifiedDate' }
+  end
+
+  describe "#dsCreateDate" do
+    it_behaves_like "a read-only datastream attribute"
+    let(:method) { 'dsCreateDate' }
+  end
+
+  describe "#dsSize" do
+    it_behaves_like "a read-only datastream attribute"
+    let(:method) { 'dsSize' }
+  end
+
+  describe "#dsVersionID" do
+    it_behaves_like "a read-only datastream attribute"
+    let(:method) { 'dsVersionID' }
+  end
+end
 
   describe "to_api_params" do
 

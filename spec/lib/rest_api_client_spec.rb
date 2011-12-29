@@ -163,9 +163,13 @@ describe Rubydora::RestApiClient do
   end
 
   it "datastream_versions" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/versions?format=xml"))
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/history?format=xml"))
     @mock_repository.datastream_versions :pid => 'mypid', :dsid => 'aaa'
+  end
 
+  it "datastream_history" do
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/history?format=xml"))
+    @mock_repository.datastream_history :pid => 'mypid', :dsid => 'aaa'
   end
 
   it "relationships" do
