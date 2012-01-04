@@ -97,6 +97,20 @@ module Rubydora
     # @param [Hash] options
     # @option options [String] :pid
     # @return [String]
+    def export options = {}
+      pid = options.delete(:pid)
+      begin
+        return client[export_object_url(pid, options)].get
+      rescue => e
+        logger.error e.response
+        raise "Error exporting object #{pid}. See logger for details"
+      end
+    end
+
+    # {include:RestApiClient::API_DOCUMENTATION}
+    # @param [Hash] options
+    # @option options [String] :pid
+    # @return [String]
     def modify_object options = {}
       pid = options.delete(:pid)
       begin
@@ -377,6 +391,5 @@ module Rubydora
         raise "Error getting dissemination for #{pid}. See logger for details"
       end
     end
-
   end
 end
