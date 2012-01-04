@@ -33,6 +33,7 @@ module Rubydora
         return client[url_for(object_url() + "/nextPID", options)].post nil
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting nextPID. See logger for details"
       end
     end
@@ -52,6 +53,7 @@ module Rubydora
         return resource.get
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error finding objects. See logger for details"
       end
     end
@@ -69,6 +71,7 @@ module Rubydora
         raise e
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting object #{pid}. See logger for details"
       end
     end
@@ -84,6 +87,7 @@ module Rubydora
         return client[object_url(pid, options)].post file, :content_type => 'text/xml'
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error ingesting object #{pid}. See logger for details"
       end
     end
@@ -98,6 +102,7 @@ module Rubydora
         return client[object_url(pid, options)].put nil
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error modifying object #{pid}. See logger for details"
       end
     end
@@ -114,6 +119,7 @@ module Rubydora
         raise e
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error purging object #{pid}. See logger for details"
       end
     end
@@ -130,6 +136,7 @@ module Rubydora
         return client[url_for(object_url(pid) + "/versions", options)].get
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting versions for object #{pid}. See logger for details"
       end
     end
@@ -146,6 +153,7 @@ module Rubydora
         return client[url_for(object_url(pid) + "/objectXML", options)].get
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting objectXML for object #{pid}. See logger for details"
       end
     end
@@ -165,6 +173,7 @@ module Rubydora
         raise e
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting datastream '#{dsid}' for object #{pid}. See logger for details"
       end
     end
@@ -183,6 +192,7 @@ module Rubydora
         return client[datastream_url(pid, dsid, options)].put nil
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error setting datastream options on #{dsid} for object #{pid}. See logger for details"
       end
     end
@@ -201,6 +211,7 @@ module Rubydora
         return client[url_for(datastream_url(pid, dsid) + "/history", options)].get
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting versions for datastream #{dsid} for object #{pid}. See logger for details"
       end
     end
@@ -228,6 +239,7 @@ module Rubydora
         raise e
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting dissemination for datastream #{dsid} for object #{pid}. See logger for details"
       end
     end
@@ -246,6 +258,7 @@ module Rubydora
         return client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error adding datastream #{dsid} for object #{pid}. See logger for details"
       end
     end
@@ -271,6 +284,7 @@ module Rubydora
         return client[datastream_url(pid, dsid, options)].put(file, rest_client_options)
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error modifying datastream #{dsid} for #{pid}. See logger for details"
       end
     end
@@ -287,6 +301,7 @@ module Rubydora
         client[datastream_url(pid, dsid, options)].delete
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error purging datastream #{dsid} for #{pid}. See logger for details"
       end
     end
@@ -303,6 +318,7 @@ module Rubydora
         return client[url_for(object_url(pid) + "/relationships", options)].get
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting relationships for #{pid}. See logger for details"
       end
     end
@@ -317,6 +333,7 @@ module Rubydora
         return client[url_for(object_url(pid) + "/relationships/new", options)].post nil
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error adding relationship for #{pid}. See logger for details"
       end
     end
@@ -331,6 +348,7 @@ module Rubydora
         return client[url_for(object_url(pid) + "/relationships", options)].delete
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error purging relationships for #{pid}. See logger for details"
       end
     end
@@ -354,6 +372,7 @@ module Rubydora
         return resource.get
       rescue => e
         logger.error e.response
+        logger.flush if logger.respond_to? :flush
         raise "Error getting dissemination for #{pid}. See logger for details"
       end
     end
