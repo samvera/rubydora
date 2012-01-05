@@ -5,6 +5,7 @@ module Rubydora
   autoload :Datastream, "rubydora/datastream"
   autoload :Repository, "rubydora/repository"
   autoload :ResourceIndex, "rubydora/resource_index"
+  autoload :FedoraUrlHelpers, "rubydora/fedora_url_helpers"
   autoload :RestApiClient, "rubydora/rest_api_client"
   autoload :Soap, "rubydora/soap"
   autoload :ModelsMixin, "rubydora/models_mixin"
