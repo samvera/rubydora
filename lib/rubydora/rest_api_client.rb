@@ -47,7 +47,7 @@ module Rubydora
       options[:resultFormat] ||= 'xml'
 
       begin
-        resource = client[object_url(nil, options)]
+        resource = client[find_objects_url(options)]
         if block_given?
           resource.options[:block_response] = block_response
         end 
