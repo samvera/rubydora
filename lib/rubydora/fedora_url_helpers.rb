@@ -16,7 +16,7 @@ module Rubydora
     # @param [String] pid
     # @param [Hash] options to convert to URL parameters
     # @return [String] URI
-    def object_url pid = nil, options = nil
+    def object_url pid, options = nil
       url_for("objects" + (("/#{CGI::escape(pid.to_s.gsub('info:fedora/', ''))}" if pid) || ''), options)
     end
 
@@ -24,6 +24,12 @@ module Rubydora
     # @return [String] URI
     def next_pid_url options = nil
       url_for("objects/nextPID", options)
+    end
+
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
+    def find_objects_url options = nil
+      url_for("objects", options)
     end
 
     # Generate a base object dissemination REST API endpoint URI
@@ -61,6 +67,20 @@ module Rubydora
     # @return [String] URI
     def datastream_history_url pid, dsid = nil, options = nil
       url_for(datastream_url(pid, dsid) +  "/history", options)
+    end
+
+    # @param [String] pid
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
+    def validate_object_url pid, options = nil
+      url_for(object_url(pid) + "/validate", options)
+    end
+
+    # @param [String] pid
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
+    def export_object_url pid, options = nil
+      url_for(object_url(pid) + "/export", options)
     end
 
     # @param [String] pid
