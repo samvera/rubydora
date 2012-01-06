@@ -72,6 +72,11 @@ describe Rubydora::RestApiClient do
     @mock_repository.ingest :pid => 'mypid'
   end
 
+  it "export" do
+     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/export"))
+    @mock_repository.export :pid => 'mypid'
+  end
+
   it "modify_object" do
      RestClient::Request.should_receive(:execute) do |params|
        params.should have_key(:url)
