@@ -126,6 +126,25 @@ describe Rubydora::DigitalObject do
 
   end
 
+  describe "update" do
+
+    before(:each) do
+      @mock_repository.stub(:object) { <<-XML
+      <objectProfile>
+        <objLabel>label</objLabel>
+      </objectProfile>
+      XML
+      }
+
+      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+    end
+
+    it "should not say changed if the value is set the same" do
+      @object.label = "label"
+      @object.should_not be_changed
+    end
+  end
+
   describe "retrieve" do
 
   end

@@ -33,7 +33,7 @@ module Rubydora
       end
 
       def #{attribute.to_s}= val
-        #{attribute.to_s}_will_change! unless val == @#{attribute.to_s}
+        #{attribute.to_s}_will_change! unless val == #{attribute.to_s}
         @#{attribute.to_s} = val
       end
       RUBY
