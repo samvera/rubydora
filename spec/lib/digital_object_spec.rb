@@ -384,6 +384,11 @@ describe Rubydora::DigitalObject do
         subject.should be_changed
       end
 
+      it "should not mark the object as changed if the value does not change" do
+        subject.should_receive(method) { 'zxcv' }
+        subject.send("#{method}=", 'zxcv')
+      end
+
       it "should appear in the save request" do 
         @mock_repository.should_receive(:ingest).with(hash_including(method.to_sym => 'new_value'))
         subject.send("#{method}=", 'new_value')
