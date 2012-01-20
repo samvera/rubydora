@@ -273,6 +273,20 @@ describe "Integration testing against a live Fedora repository", :integration =>
 
   end
 
+  it "should not destroy content when datastream properties are changed" do
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].content = "XXX"
+      obj.datastreams["my_ds"].mimeType = "text/plain"
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].mimeType = 'application/json'
+      obj.save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].content.should == "XXX"
+  end
+
 
   after(:all) do
     @repository.find('test:1').delete rescue nil
