@@ -94,6 +94,11 @@ describe Rubydora::Datastream do
       XML
     end
 
+    it "should not say changed if the value is set the same" do
+      @datastream.dsLabel = "label"
+      @datastream.should_not be_changed
+    end
+
     it "should allow profile attributes to be replaced" do
       @datastream.dsLabel = "New Label"
       @datastream.dsLabel.should == "New Label"
