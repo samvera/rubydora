@@ -1,0 +1,2 @@
+h3. 0.5.0
+* added checksum validation

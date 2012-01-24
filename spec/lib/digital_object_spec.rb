@@ -2,8 +2,7 @@ require 'spec_helper'
 
 describe Rubydora::DigitalObject do
   before do
-    @mock_repository = mock(Rubydora::Repository)
-
+    @mock_repository = mock(Rubydora::Repository, :config=>{})
   end
   describe "new" do
     it "should load a DigitalObject instance" do

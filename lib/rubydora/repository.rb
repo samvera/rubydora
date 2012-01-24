@@ -11,6 +11,7 @@ module Rubydora
     # @option options [String] :url
     # @option options [String] :user
     # @option options [String] :password
+    # @option options [Boolean] :validateChecksum
     def initialize options = {}
       @config = options
       load_api_abstraction

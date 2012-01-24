@@ -41,6 +41,10 @@ module Rubydora
         @#{attribute} || profile['#{attribute.to_s}'] || DS_DEFAULT_ATTRIBUTES[:#{attribute}]
       end
       }
+
+      def dsChecksumValid
+        profile['dsChecksumValid']
+      end
     end
 
 
@@ -76,12 +80,12 @@ module Rubydora
     # @param [Hash] default attribute values (used esp. for creating new datastreams)
     def initialize digital_object, dsid, options = {}
       _run_initialize_callbacks do
-      @digital_object = digital_object
-      @dsid = dsid
-      @options = options
-      options.each do |key, value|
-        self.send(:"#{key}=", value)
-      end
+        @digital_object = digital_object
+        @dsid = dsid
+        @options = options
+        options.each do |key, value|
+          self.send(:"#{key}=", value)
+        end
       end
     end
 
@@ -141,6 +145,7 @@ module Rubydora
       @profile ||= begin
         options = { :pid => pid, :dsid => dsid }
         options[:asOfDateTime] = asOfDateTime if asOfDateTime
+        options[:validateChecksum] = true if repository.config[:validateChecksum]
         profile_xml ||= repository.datastream(options)
         self.profile_xml_to_hash(profile_xml)
 
@@ -164,6 +169,8 @@ module Rubydora
 
       h['dsSize'] &&= h['dsSize'].to_i rescue h['dsSize']
       h['dsCreateDate'] &&= Time.parse(h['dsCreateDate']) rescue h['dsCreateDate']
+      h['dsChecksumValid'] &&= h['dsChecksumValid'] == 'true' 
+
 
       h
     end

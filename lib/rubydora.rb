@@ -51,7 +51,7 @@ module Rubydora
   # TODO: read ENV variables?
   # @return Hash
   def self.default_config
-    {}
+    {:validateChecksum=>false}
   end
 
 end
