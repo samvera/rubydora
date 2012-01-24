@@ -25,7 +25,6 @@ describe Rubydora::Datastream do
     it "should have default values" do
       @datastream.controlGroup == "M"
       @datastream.dsState.should == "A"
-      @datastream.checksumType.should == "DISABLED"
       @datastream.versionable.should == true
       @datastream.changed.should be_empty
     end
@@ -366,13 +365,11 @@ end
         @datastream.stub(:profile) { {} }
       end
       it "should compile parameters to hash" do
-        @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
-         :controlGroup=>"M", :dsState=>"A"}
+        @datastream.send(:to_api_params).should == {:versionable=>true, :controlGroup=>"M", :dsState=>"A"}
       end
       it "should not send parameters that are set to nil" do
         @datastream.dsLabel = nil
-        @datastream.send(:to_api_params).should == {:checksumType=>"DISABLED", :versionable=>true,
-         :controlGroup=>"M", :dsState=>"A"}
+        @datastream.send(:to_api_params).should == {:versionable=>true, :controlGroup=>"M", :dsState=>"A"}
       end
     end
   end

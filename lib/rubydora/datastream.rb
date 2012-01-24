@@ -16,7 +16,7 @@ module Rubydora
 
     # mapping datastream attributes (and api parameters) to datastream profile names
     DS_ATTRIBUTES = {:controlGroup => :dsControlGroup, :dsLocation => :dsLocation, :altIDs => nil, :dsLabel => :dsLabel, :versionable => :dsVersionable, :dsState => :dsState, :formatURI => :dsFormatURI, :checksumType => :dsChecksumType, :checksum => :dsChecksum, :mimeType => :dsMIME, :logMessage => nil, :ignoreContent => nil, :lastModifiedDate => nil, :content => nil, :asOfDateTime => nil}
-    DS_DEFAULT_ATTRIBUTES = { :controlGroup => 'M', :dsState => 'A', :checksumType => 'DISABLED', :versionable => true }
+    DS_DEFAULT_ATTRIBUTES = { :controlGroup => 'M', :dsState => 'A', :versionable => true }
 
     define_attribute_methods DS_ATTRIBUTES.keys
  
