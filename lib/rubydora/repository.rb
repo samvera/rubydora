@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash/indifferent_access'
+
 module Rubydora
   # Fedora Repository object that provides API access
   class Repository
@@ -13,7 +15,7 @@ module Rubydora
     # @option options [String] :password
     # @option options [Boolean] :validateChecksum
     def initialize options = {}
-      @config = options
+      @config = options.symbolize_keys
       load_api_abstraction
     end
 

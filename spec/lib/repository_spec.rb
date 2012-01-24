@@ -5,6 +5,13 @@ describe Rubydora::Repository do
     @repository = Rubydora::Repository.new
   end
 
+  describe "initialize" do
+    it "should symbolize config keys" do
+      repository = Rubydora::Repository.new "validateChecksum"=> true
+      repository.config[:validateChecksum].should be_true
+    end
+  end
+
   describe "client" do
     it "should return a RestClient resource" do
       client = @repository.client

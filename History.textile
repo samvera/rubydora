@@ -1,2 +1,6 @@
+h3. 0.5.1
+* symbolize keys that are passed as config options
+
 h3. 0.5.0
 * added checksum validation
+

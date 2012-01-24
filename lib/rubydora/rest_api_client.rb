@@ -12,8 +12,12 @@ module Rubydora
     # @option config [String] :user
     # @option config [String] :password
     # @return [RestClient::Resource]
+
+
+    #TODO trap for these errors specifically: RestClient::Request::Unauthorized, Errno::ECONNREFUSED
     def client config = {}
       client_config = self.config.merge(config)
+      client_config.symbolize_keys!
       if config.empty? or @config_hash.nil? or (client_config.hash == @config_hash)
         @config_hash = client_config.hash
         url = client_config[:url]
