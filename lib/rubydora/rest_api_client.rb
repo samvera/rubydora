@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash/indifferent_access'
+
 module Rubydora
 
   # Provide low-level access to the Fedora Commons REST API
@@ -230,7 +232,11 @@ module Rubydora
       options[:format] ||= 'xml'
       begin
         return client[datastream_history_url(pid, dsid, options)].get
+      rescue RestClient::ResourceNotFound => e
+        #404 Resource Not Found: No datastream history could be found. There is no datastream history for the digital object "changeme:1" with datastream ID of "descMetadata
+        return ''
       rescue => e
+raise e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
         raise "Error getting versions for datastream #{dsid} for object #{pid}. See logger for details"

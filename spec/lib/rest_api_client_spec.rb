@@ -167,9 +167,15 @@ describe Rubydora::RestApiClient do
     @mock_repository.set_datastream_options :pid => 'mypid', :dsid => 'aaa', :aparam => true 
   end
 
-  it "datastream_versions" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/history?format=xml"))
-    @mock_repository.datastream_versions :pid => 'mypid', :dsid => 'aaa'
+  describe "datastream_versions" do
+    it "should be successful" do
+       RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/history?format=xml")).and_return("expected result")
+      @mock_repository.datastream_versions(:pid => 'mypid', :dsid => 'aaa').should == 'expected result'
+    end
+    it "should not break when fedora doesn't have datastream history" do
+       RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa/history?format=xml")).and_raise(RestClient::ResourceNotFound)
+      @mock_repository.datastream_versions(:pid => 'mypid', :dsid => 'aaa').should == ''
+    end
   end
 
   it "datastream_history" do
