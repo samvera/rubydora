@@ -187,33 +187,46 @@ describe Rubydora::Datastream do
   end
 
   describe "versions" do
-    before(:each) do
-      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @mock_repository.should_receive(:datastream_versions).any_number_of_times.and_return <<-XML
-      <datastreamHistory>
-        <datastreamProfile>
-          <dsVersionID>dsid.1</dsVersionID>
-          <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
-        </datastreamProfile>
-        <datastreamProfile>
-          <dsVersionID>dsid.0</dsVersionID>
-          <dsCreateDate>2008-08-05T01:30:05.012Z</dsCreateDate>
-        </datastreamProfile>
-      </datastreamHistory>
-      XML
-    end
+    describe "when versions are in the repo" do
+      before(:each) do
+        @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @mock_repository.should_receive(:datastream_versions).any_number_of_times.and_return <<-XML
+        <datastreamHistory>
+          <datastreamProfile>
+            <dsVersionID>dsid.1</dsVersionID>
+            <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
+          </datastreamProfile>
+          <datastreamProfile>
+            <dsVersionID>dsid.0</dsVersionID>
+            <dsCreateDate>2008-08-05T01:30:05.012Z</dsCreateDate>
+          </datastreamProfile>
+        </datastreamHistory>
+        XML
+      end
 
-    it "should have a list of previous versions" do
-      @datastream.versions.should have(2).items
-    end
+      it "should have a list of previous versions" do
+        @datastream.versions.should have(2).items
+      end
 
-    it "should access versions as read-only copies" do
-      expect { @datastream.versions.first.label = "asdf" }.to raise_error
-    end
+      it "should access versions as read-only copies" do
+        expect { @datastream.versions.first.label = "asdf" }.to raise_error
+      end
 
-    it "should lookup content of datastream using the asOfDateTime parameter" do
-      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:asOfDateTime => '2008-08-05T01:30:05.012Z'))
-      @datastream.versions.last.content
+      it "should lookup content of datastream using the asOfDateTime parameter" do
+        @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:asOfDateTime => '2008-08-05T01:30:05.012Z'))
+        @datastream.versions.last.content
+      end
+    end
+    describe "when no versions are found" do
+      before(:each) do
+        @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @mock_repository.should_receive(:datastream_versions).any_number_of_times.and_return nil
+      end
+
+      it "should have an emptylist of previous versions" do
+        @datastream.versions.should be_empty
+      end
+
     end
     
   end

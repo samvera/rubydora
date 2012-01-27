@@ -234,7 +234,7 @@ module Rubydora
         return client[datastream_history_url(pid, dsid, options)].get
       rescue RestClient::ResourceNotFound => e
         #404 Resource Not Found: No datastream history could be found. There is no datastream history for the digital object "changeme:1" with datastream ID of "descMetadata
-        return ''
+        return nil
       rescue => e
 raise e
         logger.error e.response
