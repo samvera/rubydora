@@ -181,6 +181,8 @@ module Rubydora
     # @param [Hash] options
     # @option options [String] :pid
     # @option options [String] :dsid
+    # @option options [String] :asOfDateTime
+    # @option options [String] :validateChecksum
     # @return [String]
     def datastream options = {}
       pid = options.delete(:pid)

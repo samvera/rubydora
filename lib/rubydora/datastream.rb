@@ -43,7 +43,7 @@ module Rubydora
       }
 
       def dsChecksumValid
-        profile['dsChecksumValid']
+        profile(:validateChecksum=>true)['dsChecksumValid']
       end
     end
 
@@ -140,20 +140,27 @@ module Rubydora
     end
 
     # Retrieve the datastream profile as a hash (and cache it)
+    # @param opts [Hash] :validateChecksum if you want fedora to validate the checksum
     # @return [Hash] see Fedora #getDatastream documentation for keys
-    def profile profile_xml = nil
-      @profile ||= begin
+    def profile opts= {}
+      if @profile && !(opts[:validateChecksum] && !@profile.has_key?('dsChecksumValid'))
+        ## Force a recheck of the profile if they've passed :validateChecksum and we don't have dsChecksumValid
+        return @profile
+      end
+      @profile = begin
         options = { :pid => pid, :dsid => dsid }
+        options.merge!(opts)
         options[:asOfDateTime] = asOfDateTime if asOfDateTime
         options[:validateChecksum] = true if repository.config[:validateChecksum]
-        profile_xml ||= repository.datastream(options)
-        self.profile_xml_to_hash(profile_xml)
-
+        self.profile_xml_to_hash(repository.datastream(options))
       rescue
         {}
       end
     end
-    alias_method :profile=, :profile
+
+    def profile= profile_xml
+      @profile = self.profile_xml_to_hash(profile_xml)
+    end
 
     def profile_xml_to_hash profile_xml
       profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
