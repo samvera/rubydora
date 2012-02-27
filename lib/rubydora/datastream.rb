@@ -22,11 +22,18 @@ module Rubydora
  
     # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
-      class_eval %Q{
-      def #{attribute.to_s}
-        @#{attribute} || profile['#{profile_name.to_s}'] || DS_DEFAULT_ATTRIBUTES[:#{attribute}]
+      define_method attribute.to_s do
+        var = "@#{attribute.to_s}".to_sym
+        if instance_variable_defined?(var)
+          instance_variable_get var
+        elsif profile.has_key? profile_name.to_s
+            profile[profile_name.to_s]
+        else
+            DS_DEFAULT_ATTRIBUTES[attribute.to_sym]
+        end
       end
 
+      class_eval %Q{
       def #{attribute.to_s}= val
         #{attribute.to_s}_will_change! unless val == #{attribute.to_s}
         @#{attribute.to_s} = val
@@ -177,8 +184,7 @@ module Rubydora
       h['dsSize'] &&= h['dsSize'].to_i rescue h['dsSize']
       h['dsCreateDate'] &&= Time.parse(h['dsCreateDate']) rescue h['dsCreateDate']
       h['dsChecksumValid'] &&= h['dsChecksumValid'] == 'true' 
-
-
+      h['dsVersionable'] &&= h['dsVersionable'] == 'true' 
       h
     end
 

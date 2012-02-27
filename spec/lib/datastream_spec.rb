@@ -25,9 +25,19 @@ describe Rubydora::Datastream do
     it "should have default values" do
       @datastream.controlGroup == "M"
       @datastream.dsState.should == "A"
-      @datastream.versionable.should == true
+      @datastream.versionable.should be_true
       @datastream.changed.should be_empty
     end
+
+    it "should allow versionable to be set to false" do
+      @datastream.versionable = false
+      @datastream.versionable.should be_false
+    end
+
+    # it "should cast versionable to boolean" do
+    #   @datastream.profile['versionable'] = 'true'
+    #   @datastream.versionable.should be_true
+    # end
 
 
     it "should call the appropriate api on save" do
@@ -39,6 +49,37 @@ describe Rubydora::Datastream do
       @mock_repository.should_receive(:add_datastream).with(hash_including(:controlGroup => 'E'))
       @datastream.controlGroup = 'E'
       @datastream.save
+    end
+  end
+
+  describe 'versionable' do
+    before(:each) do
+      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+    end
+    it "should be nil when it hasn't been set" do
+      @mock_repository.should_receive(:datastream).and_return <<-XML
+        <datastreamProfile>
+        </datastreamProfile>
+      XML
+      @datastream.versionable.should be_true
+    end
+
+    it "should be true when it's returned as true" do
+      @mock_repository.should_receive(:datastream).and_return <<-XML
+        <datastreamProfile>
+          <dsVersionable>true</dsVersionable>
+        </datastreamProfile>
+      XML
+      @datastream.versionable.should be_true
+    end
+
+    it "should be false when it's returned as false" do
+      @mock_repository.should_receive(:datastream).and_return <<-XML
+        <datastreamProfile>
+          <dsVersionable>false</dsVersionable>
+        </datastreamProfile>
+      XML
+      @datastream.versionable.should be_false
     end
   end
 
@@ -251,7 +292,7 @@ describe Rubydora::Datastream do
         end
 
         it "should look in the object profile" do
-          subject.should_receive(:profile) { { Rubydora::Datastream::DS_ATTRIBUTES[method.to_sym].to_s => 'qwerty' } }
+          subject.should_receive(:profile) { { Rubydora::Datastream::DS_ATTRIBUTES[method.to_sym].to_s => 'qwerty' } }.twice
           subject.send(method).should == 'qwerty'
         end
 
