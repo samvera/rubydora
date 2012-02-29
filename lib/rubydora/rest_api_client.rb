@@ -6,6 +6,7 @@ module Rubydora
   module RestApiClient
     
     include Rubydora::FedoraUrlHelpers
+    include ActiveSupport::Benchmarkable
 
     VALID_CLIENT_OPTIONS = [:user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
     # Create an authorized HTTP client for the Fedora REST API
@@ -92,6 +93,9 @@ module Rubydora
       file = options.delete(:file)
       begin
         return client[object_url(pid, options)].post file, :content_type => 'text/xml'
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH => e
+        logger.error "Unable to connect to Fedora at #{@client.url}"
+        raise e
       rescue => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
@@ -191,13 +195,25 @@ module Rubydora
       dsid = options.delete(:dsid)
       options[:format] ||= 'xml'
       begin
-        return client[datastream_url(pid, dsid, options)].get
+        val = nil
+        message = dsid.nil? ? "Loaded datastream list for #{pid}" : "Loaded datastream #{pid}/#{dsid}"
+        benchmark message, :level=>:debug do
+          val = client[datastream_url(pid, dsid, options)].get
+        end
+        return val
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH => e
+        logger.error "Unable to connect to Fedora at #{@client.url}"
+        raise e
       rescue RestClient::ResourceNotFound => e
         raise e
       rescue => e
-        logger.error e.response
-        logger.flush if logger.respond_to? :flush
-        raise "Error getting datastream '#{dsid}' for object #{pid}. See logger for details"
+        if e.respond_to? :response
+          logger.error e.response
+          logger.flush if logger.respond_to? :flush
+          raise "Error getting datastream '#{dsid}' for object #{pid}. See logger for details"
+        else 
+          raise e 
+        end
       end
     end
 
