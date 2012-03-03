@@ -54,4 +54,10 @@ module Rubydora
     {:validateChecksum=>false}
   end
 
+  class RubydoraError < StandardError
+  end
+
+  class FedoraInvalidRequest < RubydoraError
+  end
+
 end

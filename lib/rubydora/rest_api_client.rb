@@ -39,10 +39,10 @@ module Rubydora
       options[:format] ||= 'xml'
       begin
         return client[next_pid_url(options)].post nil
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting nextPID. See logger for details"
+        raise FedoraInvalidRequest, "Error getting nextPID. See logger for details"
       end
     end
 
@@ -50,7 +50,7 @@ module Rubydora
     # @param [Hash] options
     # @return [String]
     def find_objects options = {}, &block_response
-      raise "" if options[:terms] and options[:query]
+      raise ArgumentError,"Cannot have both :terms and :query parameters" if options[:terms] and options[:query]
       options[:resultFormat] ||= 'xml'
 
       begin
@@ -59,10 +59,10 @@ module Rubydora
           resource.options[:block_response] = block_response
         end 
         return resource.get
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error finding objects. See logger for details"
+        raise FedoraInvalidRequest, "Error finding objects. See logger for details"
       end
     end
 
@@ -77,10 +77,10 @@ module Rubydora
         return client[object_url(pid, options)].get
       rescue RestClient::ResourceNotFound => e
         raise e
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error getting object #{pid}. See logger for details"
       end
     end
 
@@ -96,10 +96,10 @@ module Rubydora
       rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH => e
         logger.error "Unable to connect to Fedora at #{@client.url}"
         raise e
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error ingesting object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error ingesting object #{pid}. See logger for details"
       end
     end
 
@@ -111,9 +111,9 @@ module Rubydora
       pid = options.delete(:pid)
       begin
         return client[export_object_url(pid, options)].get
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
-        raise "Error exporting object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error exporting object #{pid}. See logger for details"
       end
     end
 
@@ -125,10 +125,10 @@ module Rubydora
       pid = options.delete(:pid)
       begin
         return client[object_url(pid, options)].put nil
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error modifying object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error modifying object #{pid}. See logger for details"
       end
     end
 
@@ -142,10 +142,10 @@ module Rubydora
         return client[object_url(pid, options)].delete
       rescue RestClient::ResourceNotFound => e
         raise e
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error purging object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error purging object #{pid}. See logger for details"
       end
     end
 
@@ -156,13 +156,13 @@ module Rubydora
     def object_versions options = {}
       pid = options.delete(:pid)
       options[:format] ||= 'xml'
-      raise "" unless pid
+      raise ArgumentError, "Must have a pid" unless pid
       begin
         return client[object_versions_url(pid, options)].get
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting versions for object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error getting versions for object #{pid}. See logger for details"
       end
     end
 
@@ -172,14 +172,14 @@ module Rubydora
     # @return [String]
     def object_xml options = {}
       pid = options.delete(:pid)
-      raise "" unless pid
+      raise ArgumentError, "Missing required parameter :pid" unless pid
       options[:format] ||= 'xml'
       begin
         return client[object_xml_url(pid, options)].get
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting objectXML for object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error getting objectXML for object #{pid}. See logger for details"
       end
     end
 
@@ -206,14 +206,10 @@ module Rubydora
         raise e
       rescue RestClient::ResourceNotFound => e
         raise e
-      rescue => e
-        if e.respond_to? :response
-          logger.error e.response
-          logger.flush if logger.respond_to? :flush
-          raise "Error getting datastream '#{dsid}' for object #{pid}. See logger for details"
-        else 
-          raise e 
-        end
+      rescue RestClient::InternalServerError => e
+        logger.error e.response
+        logger.flush if logger.respond_to? :flush
+        raise FedoraInvalidRequest, "Error getting datastream '#{dsid}' for object #{pid}. See logger for details"
       end
     end
 
@@ -229,10 +225,10 @@ module Rubydora
       dsid = options.delete(:dsid)
       begin
         return client[datastream_url(pid, dsid, options)].put nil
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error setting datastream options on #{dsid} for object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error setting datastream options on #{dsid} for object #{pid}. See logger for details"
       end
     end
 
@@ -251,11 +247,10 @@ module Rubydora
       rescue RestClient::ResourceNotFound => e
         #404 Resource Not Found: No datastream history could be found. There is no datastream history for the digital object "changeme:1" with datastream ID of "descMetadata
         return nil
-      rescue => e
-raise e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting versions for datastream #{dsid} for object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error getting versions for datastream #{dsid} for object #{pid}. See logger for details"
       end
     end
 
@@ -280,10 +275,10 @@ raise e
         return resource.send(method)
       rescue RestClient::ResourceNotFound => e
         raise e
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting dissemination for datastream #{dsid} for object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error getting dissemination for datastream #{dsid} for object #{pid}. See logger for details"
       end
     end
 
@@ -299,10 +294,10 @@ raise e
       content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
       begin
         return client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error adding datastream #{dsid} for object #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error adding datastream #{dsid} for object #{pid}. See logger for details"
       end
     end
 
@@ -325,10 +320,10 @@ raise e
 
       begin
         return client[datastream_url(pid, dsid, options)].put(file, rest_client_options)
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error modifying datastream #{dsid} for #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error modifying datastream #{dsid} for #{pid}. See logger for details"
       end
     end
 
@@ -342,10 +337,10 @@ raise e
       dsid = options.delete(:dsid)
       begin
         client[datastream_url(pid, dsid, options)].delete
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error purging datastream #{dsid} for #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error purging datastream #{dsid} for #{pid}. See logger for details"
       end
     end
 
@@ -355,14 +350,14 @@ raise e
     # @return [String]
     def relationships options = {}
       pid = options.delete(:pid) || options[:subject]
-      raise "" unless pid
+      raise ArgumentError, "Missing required parameter :pid" unless pid
       options[:format] ||= 'xml'
       begin
         return client[object_relationship_url(pid, options)].get
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting relationships for #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error getting relationships for #{pid}. See logger for details"
       end
     end
 
@@ -374,10 +369,10 @@ raise e
       pid = options.delete(:pid) || options[:subject]
       begin
         return client[new_object_relationship_url(pid, options)].post nil
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error adding relationship for #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error adding relationship for #{pid}. See logger for details"
       end
     end
 
@@ -389,10 +384,10 @@ raise e
       pid = options.delete(:pid) || options[:subject]
       begin
         return client[object_relationship_url(pid, options)].delete
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error purging relationships for #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error purging relationships for #{pid}. See logger for details"
       end
     end
 
@@ -413,10 +408,10 @@ raise e
           resource.options[:block_response] = block_response
         end
         return resource.get
-      rescue => e
+      rescue RestClient::InternalServerError => e
         logger.error e.response
         logger.flush if logger.respond_to? :flush
-        raise "Error getting dissemination for #{pid}. See logger for details"
+        raise FedoraInvalidRequest, "Error getting dissemination for #{pid}. See logger for details"
       end
     end
   end
