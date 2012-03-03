@@ -1,3 +1,11 @@
+h3. 0.5.4
+* Query Benchmarking 
+* Custom exception classes
+
+h3. 0.5.3
+* Issue 11, cast versionable strings to boolean 
+* Allow versionable to be set to false 
+
 h3. 0.5.2
 * Force checksum query when you call dsChecksumValid, unless it's already in the profile.
 
