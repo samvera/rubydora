@@ -454,6 +454,10 @@ describe Rubydora::Datastream do
       XML
       @datastream.profile(:validateChecksum=>true).should == {'dsChecksumValid' =>true}
     end
+    it "should reraise Unauthorized errors" do
+      @mock_repository.should_receive(:datastream).and_raise(RestClient::Unauthorized)
+      lambda{@datastream.profile}.should raise_error(RestClient::Unauthorized)
+    end
     describe "once it has a profile" do
       it "should use the profile from cache" do
         @mock_repository.should_receive(:datastream).once.and_return <<-XML

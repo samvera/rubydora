@@ -205,6 +205,10 @@ module Rubydora
         logger.error "Unable to connect to Fedora at #{@client.url}"
         raise e
       rescue RestClient::ResourceNotFound => e
+        logger.error "ResourceNotFound at #{datastream_url(pid, dsid, options)}"
+        raise e
+      rescue RestClient::Unauthorized => e
+        logger.error "Unauthorized at #{datastream_url(pid, dsid, options)}"
         raise e
       rescue RestClient::InternalServerError => e
         logger.error e.response

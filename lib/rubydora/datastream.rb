@@ -160,7 +160,9 @@ module Rubydora
         options[:asOfDateTime] = asOfDateTime if asOfDateTime
         options[:validateChecksum] = true if repository.config[:validateChecksum]
         self.profile_xml_to_hash(repository.datastream(options))
-      rescue
+      rescue RestClient::Unauthorized => e
+        raise e
+      rescue StandardError
         {}
       end
     end
