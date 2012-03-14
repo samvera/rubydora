@@ -119,7 +119,6 @@ describe Rubydora::RestApiClient do
 
   it "should raise not found exception when getting a datastream" do
      RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa?format=xml")).and_raise( RestClient::ResourceNotFound)
-    logger.should_receive(:error).with("ResourceNotFound at http://example.org/objects/mypid/datastreams/aaa?format=xml")
     lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
   end
 

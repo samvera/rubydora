@@ -10,7 +10,7 @@ describe Rubydora::Datastream do
 
   describe "create" do
     before(:each) do
-      @mock_repository.stub(:datastream) { raise("") }
+      @mock_repository.stub(:datastream) { raise(RestClient::ResourceNotFound) }
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
     end
 

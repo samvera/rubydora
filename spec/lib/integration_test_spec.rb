@@ -15,6 +15,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     @repository.ping.should == true
   end
 
+
   it "should create an object" do
     obj = @repository.find('test:1')
     obj.new?.should == true

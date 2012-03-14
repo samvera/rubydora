@@ -162,7 +162,8 @@ module Rubydora
         self.profile_xml_to_hash(repository.datastream(options))
       rescue RestClient::Unauthorized => e
         raise e
-      rescue StandardError
+      rescue RestClient::ResourceNotFound
+        # the datastream is new
         {}
       end
     end
