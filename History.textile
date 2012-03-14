@@ -1,5 +1,8 @@
+h3. 0.5.7
+* Don't expect that a digital object necessarily has a repository. 
+
 h3. 0.5.6
-* Don't log 404 errors. It's just checking to see if datastreams exist"
+* Don't log 404 errors. It's just checking to see if datastreams exist
 
 
 h3. 0.5.5

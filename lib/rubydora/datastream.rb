@@ -154,6 +154,7 @@ module Rubydora
         ## Force a recheck of the profile if they've passed :validateChecksum and we don't have dsChecksumValid
         return @profile
       end
+      return @profile = {} unless digital_object.respond_to? :repository
       @profile = begin
         options = { :pid => pid, :dsid => dsid }
         options.merge!(opts)

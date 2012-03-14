@@ -443,51 +443,62 @@ describe Rubydora::Datastream do
   end
 
   describe "profile" do
-    before(:each) do
-      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+    describe "with a digital_object that doesn't have a repository" do
+      ### see UnsavedDigitalObject in ActiveFedora
+      before(:each) do
+        @datastream = Rubydora::Datastream.new stub(:foo), 'dsid'
+      end
+      it "should be empty if the digital_object doesn't have a repository" do
+        @datastream.profile.should == {}
+      end
     end
-    it "should accept a validateChecksum argument" do
-      @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
-        <datastreamProfile>
-          <dsChecksumValid>true</dsChecksumValid>
-        </datastreamProfile>
-      XML
-      @datastream.profile(:validateChecksum=>true).should == {'dsChecksumValid' =>true}
-    end
-    it "should reraise Unauthorized errors" do
-      @mock_repository.should_receive(:datastream).and_raise(RestClient::Unauthorized)
-      lambda{@datastream.profile}.should raise_error(RestClient::Unauthorized)
-    end
-    describe "once it has a profile" do
-      it "should use the profile from cache" do
-        @mock_repository.should_receive(:datastream).once.and_return <<-XML
+    describe "with a digital_object that has a repository" do
+      before(:each) do
+        @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      end
+      it "should accept a validateChecksum argument" do
+        @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
           <datastreamProfile>
             <dsChecksumValid>true</dsChecksumValid>
           </datastreamProfile>
         XML
-        @datastream.profile().should == {'dsChecksumValid' =>true}
-        #second time should not trigger the mock, which demonstrates that the profile is coming from cache.
-        @datastream.profile().should == {'dsChecksumValid' =>true}
+        @datastream.profile(:validateChecksum=>true).should == {'dsChecksumValid' =>true}
       end
-      it "should re-fetch and replace the profile when validateChecksum is passed in, and there is no dsChecksumValid in the existing profile" do
-        @mock_repository.should_receive(:datastream).once.and_return <<-XML
-          <datastreamProfile>
-            <dsLabel>The description of the content</dsLabel>
-          </datastreamProfile>
-        XML
-        @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).once.and_return <<-XML
-          <datastreamProfile>
-            <dsLabel>The description of the content</dsLabel>
-            <dsChecksumValid>true</dsChecksumValid>
-          </datastreamProfile>
-        XML
-        @datastream.profile().should == {"dsLabel"=>"The description of the content"}
-        @datastream.profile(:validateChecksum=>true).should == {"dsLabel"=>"The description of the content", 'dsChecksumValid' =>true}
-        ## Third time should not trigger a mock, which demonstrates that the profile is coming from cache.
-        @datastream.profile(:validateChecksum=>true)
+      it "should reraise Unauthorized errors" do
+        @mock_repository.should_receive(:datastream).and_raise(RestClient::Unauthorized)
+        lambda{@datastream.profile}.should raise_error(RestClient::Unauthorized)
       end
-    end
 
+      describe "once it has a profile" do
+        it "should use the profile from cache" do
+          @mock_repository.should_receive(:datastream).once.and_return <<-XML
+            <datastreamProfile>
+              <dsChecksumValid>true</dsChecksumValid>
+            </datastreamProfile>
+          XML
+          @datastream.profile().should == {'dsChecksumValid' =>true}
+          #second time should not trigger the mock, which demonstrates that the profile is coming from cache.
+          @datastream.profile().should == {'dsChecksumValid' =>true}
+        end
+        it "should re-fetch and replace the profile when validateChecksum is passed in, and there is no dsChecksumValid in the existing profile" do
+          @mock_repository.should_receive(:datastream).once.and_return <<-XML
+            <datastreamProfile>
+              <dsLabel>The description of the content</dsLabel>
+            </datastreamProfile>
+          XML
+          @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).once.and_return <<-XML
+            <datastreamProfile>
+              <dsLabel>The description of the content</dsLabel>
+              <dsChecksumValid>true</dsChecksumValid>
+            </datastreamProfile>
+          XML
+          @datastream.profile().should == {"dsLabel"=>"The description of the content"}
+          @datastream.profile(:validateChecksum=>true).should == {"dsLabel"=>"The description of the content", 'dsChecksumValid' =>true}
+          ## Third time should not trigger a mock, which demonstrates that the profile is coming from cache.
+          @datastream.profile(:validateChecksum=>true)
+        end
+      end
+    end
   end
 
   describe "to_api_params" do
