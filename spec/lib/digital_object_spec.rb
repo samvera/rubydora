@@ -33,7 +33,11 @@ describe Rubydora::DigitalObject do
       h = @object.profile
 
       expect { h['asdf'] = 'asdf' }.to raise_error
+    end
 
+    it "should return nil for empty profile fields" do
+      @mock_repository.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a></a></objectProfile>")
+      @object.profile['a'].should be_nil
     end
   end
 

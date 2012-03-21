@@ -125,10 +125,11 @@ module Rubydora
                      end
 
                      sum
-                   end
-        h.select { |key, value| value.length == 1 }.each do |key, value|
+                   end.reject { |key, values| values.empty? }
+
+        h.select { |key, values| values.length == 1 }.each do |key, values|
           next if key == "objModels"
-          h[key] = value.first
+          h[key] = values.reject { |x| x.empty? }.first
         end
         @new = false
 

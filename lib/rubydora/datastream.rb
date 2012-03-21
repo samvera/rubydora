@@ -180,9 +180,9 @@ module Rubydora
                    sum[node.name] ||= []
                    sum[node.name] << node.text
                    sum
-                 end
-      h.select { |key, value| value.length == 1 }.each do |key, value|
-        h[key] = value.first
+                 end.reject { |key, values| values.empty? }
+      h.select { |key, values| values.length == 1 }.each do |key, values|
+        h[key] = values.reject { |x| x.empty? }.first 
       end
 
       h['dsSize'] &&= h['dsSize'].to_i rescue h['dsSize']
