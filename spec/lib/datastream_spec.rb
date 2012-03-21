@@ -152,16 +152,6 @@ describe Rubydora::Datastream do
 
     end
 
-    it "should pass-through IO-type content if reading the content fails" do
-      @mock_io = File.open('rubydora.gemspec')
-      @mock_io.should_receive(:read).and_raise('Rubydora #13-style read-error.')
-
-      @datastream.content = @mock_io
-
-      @datastream.content.should == @mock_io
-
-    end
-
 
   end
 
