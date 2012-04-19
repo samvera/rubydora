@@ -245,7 +245,7 @@ module Rubydora
       valid_changed_attributes = changes.keys.map { |x| x.to_sym }.select { |x| DS_ATTRIBUTES.key? x }
       ## if we don't provide a mimeType, application/octet-stream will be used instead
       (valid_changed_attributes | [:mimeType]).each do |attribute|
-        h[attribute] = send(attribute) if send(attribute)
+        h[attribute.to_sym] = send(attribute) unless send(attribute).nil?
       end
 
       h

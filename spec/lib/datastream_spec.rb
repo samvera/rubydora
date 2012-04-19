@@ -56,7 +56,7 @@ describe Rubydora::Datastream do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
     end
-    it "should be nil when it hasn't been set" do
+    it "should be true by default" do
       @mock_repository.should_receive(:datastream).and_return <<-XML
         <datastreamProfile>
         </datastreamProfile>

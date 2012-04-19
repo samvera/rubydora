@@ -200,6 +200,27 @@ describe "Integration testing against a live Fedora repository", :integration =>
       versions = obj.datastreams["my_ds"].versions
       versions.map { |x| x.content }.should include("XXX", "YYY") 
     end
+
+    it "should allow the user to go from a versioned datastream to an unversioned datastream" do
+      obj = @repository.find('test:1')
+      versions_count = obj.datastreams["my_ds"].versions.length
+
+      obj.datastreams["my_ds"].versionable.should be_true
+
+      obj.datastreams["my_ds"].versionable = false
+      obj.datastreams["my_ds"].content = "ZZZ"
+      obj.datastreams["my_ds"].save
+
+      obj.datastreams["my_ds"].content = "111"
+      obj.datastreams["my_ds"].save
+
+      obj.datastreams["my_ds"].content = "222"
+      obj.datastreams["my_ds"].save
+
+      obj = @repository.find('test:1')
+      obj.datastreams["my_ds"].versionable.should be_false
+      obj.datastreams["my_ds"].versions.length.should == (versions_count + 1)
+    end
   end
 
   context "mime types" do
