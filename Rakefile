@@ -19,7 +19,11 @@ task :default => :spec
 
 desc "Run specs"
 RSpec::Core::RakeTask.new do |t|
-  # Put spec opts in a file named .rspec in root
+
+  if ENV['COVERAGE'] and RUBY_VERSION =~ /^1.8/
+    spec.rcov = true
+    spec.rcov_opts = %w{--exclude spec\/*,gems\/*,ruby\/* --aggregate coverage.data}
+  end
 end
 
 require 'yard'
@@ -45,11 +49,35 @@ task :ci do
     :jetty_port => ENV['TEST_JETTY_PORT'] || 8983,
     :solr_home => File.expand_path(File.dirname(__FILE__) + '/jetty/solr'),
     :fedora_home => File.expand_path(File.dirname(__FILE__) + '/jetty/fedora/default'),
-    :startup_wait => 30
+    :startup_wait => 30,
+    :java_opts => ['-Xmx256m', '-XX:MaxPermSize=128m']
   }
 
   error = Jettywrapper.wrap(jetty_params) do
     Rake::Task['spec'].invoke
   end
   raise "test failures: #{error}" if error
+end
+
+
+desc "Execute specs with coverage"
+task :coverage do 
+  # Put spec opts in a file named .rspec in root
+  ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
+  ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
+
+
+  Rake::Task['spec'].invoke
+end
+
+namespace :coverage do
+desc "Execute ci build with coverage"
+task :ci do 
+  # Put spec opts in a file named .rspec in root
+  ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
+  ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
+
+
+  Rake::Task['ci'].invoke
+end
 end
