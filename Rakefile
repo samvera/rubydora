@@ -21,8 +21,8 @@ desc "Run specs"
 RSpec::Core::RakeTask.new do |t|
 
   if ENV['COVERAGE'] and RUBY_VERSION =~ /^1.8/
-    spec.rcov = true
-    spec.rcov_opts = %w{--exclude spec\/*,gems\/*,ruby\/* --aggregate coverage.data}
+    t.rcov = true
+    t.rcov_opts = %w{--exclude spec\/*,gems\/*,ruby\/* --aggregate coverage.data}
   end
 end
 
