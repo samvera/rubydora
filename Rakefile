@@ -54,7 +54,7 @@ task :ci do
   }
 
   error = Jettywrapper.wrap(jetty_params) do
-    Rake::Task['spec'].invoke
+    Rake::Task['coverage'].invoke
   end
   raise "test failures: #{error}" if error
 end
@@ -70,14 +70,3 @@ task :coverage do
   Rake::Task['spec'].invoke
 end
 
-namespace :coverage do
-desc "Execute ci build with coverage"
-task :ci do 
-  # Put spec opts in a file named .rspec in root
-  ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
-  ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
-
-
-  Rake::Task['ci'].invoke
-end
-end
