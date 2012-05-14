@@ -55,6 +55,7 @@ task :ci do
 
   error = Jettywrapper.wrap(jetty_params) do
     Rake::Task['coverage'].invoke
+    Rake::Task['yard'].invoke
   end
   raise "test failures: #{error}" if error
 end
