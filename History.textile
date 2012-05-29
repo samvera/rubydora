@@ -1,3 +1,6 @@
+h3. 0.5.9
+* Raise exception if it's not 404
+
 h3. 0.5.7
 * Don't expect that a digital object necessarily has a repository. 
 

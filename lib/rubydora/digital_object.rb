@@ -134,7 +134,7 @@ module Rubydora
         @new = false
 
         h
-      rescue Exception => e
+      rescue RestClient::ResourceNotFound => e
         {}
       end.freeze
     end

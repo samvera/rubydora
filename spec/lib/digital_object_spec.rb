@@ -39,11 +39,16 @@ describe Rubydora::DigitalObject do
       @mock_repository.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a></a></objectProfile>")
       @object.profile['a'].should be_nil
     end
+
+    it "should throw exceptions that arise" do
+      @mock_repository.should_receive(:object).with(:pid => 'pid').and_raise(Net::HTTPBadResponse)
+      expect { @object.profile }.to raise_error(Net::HTTPBadResponse)
+    end
   end
 
   describe "new" do
     before(:each) do
-      @mock_repository.stub(:object) { raise "" }
+      @mock_repository.stub(:object) { raise RestClient::ResourceNotFound }
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
     end
 
@@ -373,6 +378,7 @@ describe Rubydora::DigitalObject do
       end
 
       it "should fall-back to the set of default attributes" do
+        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
         subject.send(method).should == 'zxcv'
       end
@@ -383,6 +389,7 @@ describe Rubydora::DigitalObject do
         subject.stub(:datastreams => [])
       end
       it "should mark the object as changed after setting" do
+        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.send("#{method}=", 'new_value')
         subject.should be_changed
       end
@@ -394,6 +401,7 @@ describe Rubydora::DigitalObject do
 
       it "should appear in the save request" do 
         @mock_repository.should_receive(:ingest).with(hash_including(method.to_sym => 'new_value'))
+        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.send("#{method}=", 'new_value')
         subject.save
       end
