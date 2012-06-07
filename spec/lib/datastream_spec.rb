@@ -155,6 +155,44 @@ describe Rubydora::Datastream do
 
   end
 
+  describe "content changed behavior" do
+    before(:each) do
+      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+        <datastreamProfile>
+          <dsLocation>some:uri</dsLocation>
+          <dsLabel>label</dsLabel>
+        </datastreamProfile>
+      XML
+    end
+
+    it "should not be changed after a read-only access" do
+      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+      @datastream.content
+      @datastream.content_changed?.should == false
+    end
+    it "should be changed in the new content is different than the old content" do
+      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+      @datastream.content = "test"
+      @datastream.content_changed?.should == true 
+    end
+
+    it "should not be changed in the new content is the same as the existing content" do
+      pending "this would be nice, but for now it's easier to trust applications.."
+      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+      @datastream.content = "test"
+      @datastream.content_changed?.should  == false 
+    end
+
+    it "should not be changed in the new content is the same as the existing content (and we have accessed #content previously)" do
+      pending "this would be nice, but for now it's easier to trust applications.."
+      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+      @datastream.content
+      @datastream.content = "test"
+      @datastream.content_changed?.should  == false 
+    end
+  end
+
   describe "update" do
 
     before(:each) do

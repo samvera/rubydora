@@ -143,7 +143,7 @@ module Rubydora
     # We don't want to do that.
     def content_will_change!
       raise "Can't change values on older versions" if @asOfDateTime
-      changed_attributes[:content] = nil
+      changed_attributes['content'] = nil
     end
 
     # Retrieve the datastream profile as a hash (and cache it)
