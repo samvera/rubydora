@@ -7,8 +7,10 @@ module Rubydora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, :only => :after
 
-
     include ActiveModel::Dirty
+
+    class_attribute :eager_load_datastream_content
+    self.eager_load_datastream_content = false
 
     include Rubydora::ExtensionParameters
 
@@ -135,7 +137,7 @@ module Rubydora
     # @param [String or IO] 
     # @return [String or IO]
     def content= new_content
-       content_will_change!
+       content_will_change! if (self.eager_load_datastream_content and content != new_content) or (@content.nil? or @content != new_content)
        @content = new_content
     end
 
