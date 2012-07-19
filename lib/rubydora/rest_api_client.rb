@@ -11,6 +11,7 @@ module Rubydora
     extend ActiveSupport::Concern
     include ActiveSupport::Benchmarkable
 
+
     VALID_CLIENT_OPTIONS = [:user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
 
     included do
@@ -27,6 +28,11 @@ module Rubydora
         logger.error "Unable to connect to Fedora at #{@client.url}"
         raise exception
       end
+
+      include ActiveSupport::Callbacks
+      define_callbacks :ingest, :modify_object, :purge_object
+      define_callbacks :set_datastream_options, :add_datastream, :modify_datastream, :purge_datastream
+      define_callbacks :add_relationship, :purge_relationship
     end
 
     # Create an authorized HTTP client for the Fedora REST API
@@ -95,7 +101,9 @@ module Rubydora
     def ingest options = {}
       pid = options.delete(:pid) || 'new'
       file = options.delete(:file)
-      client[object_url(pid, options)].post file, :content_type => 'text/xml'
+      run_callbacks :ingest, :pid => pid, :file => file, :options => options do
+        client[object_url(pid, options)].post file, :content_type => 'text/xml'
+      end
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -117,7 +125,9 @@ module Rubydora
     # @return [String]
     def modify_object options = {}
       pid = options.delete(:pid)
-      client[object_url(pid, options)].put nil
+      run_callbacks :modify_object, :pid => pid, :options => options do
+        client[object_url(pid, options)].put nil
+      end
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -128,7 +138,9 @@ module Rubydora
     # @return [String]
     def purge_object options = {}
       pid = options.delete(:pid)
-      client[object_url(pid, options)].delete
+      run_callbacks :purge_object, :pid => pid, :options => options do
+        client[object_url(pid, options)].delete
+      end
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -251,7 +263,9 @@ module Rubydora
       dsid = options.delete(:dsid)
       file = options.delete(:content)
       content_type = options.delete(:content_type) || options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
-      client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
+      run_callbacks :add_datastream, :pid => pid, :dsid => dsid, :file => file, :options => options do
+        client[datastream_url(pid, dsid, options)].post file, :content_type => content_type.to_s, :multipart => true
+      end
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -273,7 +287,9 @@ module Rubydora
         rest_client_options[:content_type] = content_type
       end
 
-      client[datastream_url(pid, dsid, options)].put(file, rest_client_options)
+      run_callbacks :modify_datastream, :pid => pid, :dsid => dsid, :file => file, :content_type => content_type, :options => options do
+        client[datastream_url(pid, dsid, options)].put(file, rest_client_options)
+      end
 
     rescue Exception => exception
         rescue_with_handler(exception) || raise
@@ -287,7 +303,9 @@ module Rubydora
     def purge_datastream options = {}
       pid = options.delete(:pid)
       dsid = options.delete(:dsid)
-      client[datastream_url(pid, dsid, options)].delete
+      run_callbacks :purge_datastream, :pid => pid, :dsid => dsid do
+        client[datastream_url(pid, dsid, options)].delete
+      end
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -311,7 +329,9 @@ module Rubydora
     # @return [String]
     def add_relationship options = {}
       pid = options.delete(:pid) || options[:subject]
-      client[new_object_relationship_url(pid, options)].post nil
+      run_callbacks :add_relationship, :pid => pid, :options => options do
+        client[new_object_relationship_url(pid, options)].post nil
+      end
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -322,7 +342,9 @@ module Rubydora
     # @return [String]
     def purge_relationship options = {}
       pid = options.delete(:pid) || options[:subject]
-      client[object_relationship_url(pid, options)].delete
+      run_callbacks :purge_relationship, :pid => pid, :options => options do
+        client[object_relationship_url(pid, options)].delete
+      end
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
