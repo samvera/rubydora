@@ -1,5 +1,4 @@
 require 'spec_helper' 
-require 'loggable'
 
 describe Rubydora::RestApiClient do
   class FakeException < Exception

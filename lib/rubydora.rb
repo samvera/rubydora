@@ -15,6 +15,7 @@ module Rubydora
   autoload :ExtensionParameters, "rubydora/extension_parameters"
   autoload :Callbacks, "rubydora/callbacks"
   autoload :ArrayWithCallback, "rubydora/array_with_callback"
+  autoload :Transactions, "rubydora/transactions"
 
 
   require 'csv'

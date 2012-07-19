@@ -15,6 +15,23 @@ describe "Integration testing against a live Fedora repository", :integration =>
     @repository.ping.should == true
   end
 
+  it "should ingest from foxml" do
+    @repository.find('changeme:n').delete rescue nil
+    pid = @repository.ingest :pid => 'changeme:n'
+
+    pid.should == 'changeme:n'
+
+    obj = @repository.find(pid)
+    obj.should_not be_new
+  end
+
+  it "should ingest from foxml" do
+    pid = @repository.ingest :pid => 'new'
+
+    obj = @repository.find(pid)
+    obj.should_not be_new
+    @repository.find(pid).delete rescue nil
+  end
 
   it "should create an object" do
     obj = @repository.find('test:1')
@@ -138,6 +155,101 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.datastreams["my_ds"].mimeType.should == "application/x-text"
   end
 
+  describe "with transactions" do
+    it "should work on ingest" do
+       @repository.find('transactions:1').delete rescue nil
+
+       @repository.transaction do |t|
+         obj = @repository.find('transactions:1')
+         obj.save
+
+         t.rollback
+       end
+
+       obj = @repository.find('transactions:1')
+       obj.should be_new
+    end
+
+    it "should work on purge" do
+       @repository.find('transactions:1').delete rescue nil
+
+       obj = @repository.find('transactions:1')
+       obj.save
+
+       @repository.transaction do |t|
+         obj.delete
+
+         t.rollback
+       end
+
+       obj = @repository.find('transactions:1')
+       obj.should_not be_new
+    end
+
+    it "should work on datastreams" do
+       @repository.find('transactions:1').delete rescue nil
+
+       obj = @repository.find('transactions:1')
+       obj.save
+
+       ds = obj.datastreams['datastream_to_delete']
+       ds.content = 'asdf'
+       ds.save
+
+       ds2 = obj.datastreams['datastream_to_change']
+       ds2.content = 'asdf'
+       ds2.save
+
+       ds3 = obj.datastreams['datastream_to_change_properties']
+       ds3.content = 'asdf'
+       ds3.versionable = true
+       ds3.dsState = 'I'
+       ds3.save
+
+       @repository.transaction do |t|
+         ds.delete
+
+         ds2.content = '1234'
+         ds2.save
+
+         @repository.set_datastream_options :pid => obj.pid, :dsid => 'datastream_to_change_properties', :state => 'A'
+         @repository.set_datastream_options :pid => obj.pid, :dsid => 'datastream_to_change_properties', :versionable => false
+
+         ds4 = obj.datastreams['datastream_to_create']
+         ds4.content = 'asdf'
+         ds4.save
+
+         t.rollback
+       end
+
+       obj = @repository.find('transactions:1')
+       obj.datastreams.keys.should_not include('datsatream_to_create')
+       obj.datastreams.keys.should include('datastream_to_delete')
+       obj.datastreams['datastream_to_change'].content.should == 'asdf'
+       obj.datastreams['datastream_to_change_properties'].versionable.should == true
+       obj.datastreams['datastream_to_change_properties'].dsState.should == 'I'
+    end
+
+    it "should work on relationships" do
+       @repository.find('transactions:1').delete rescue nil
+
+       obj = @repository.find('transactions:1')
+       obj.save
+       @repository.add_relationship :subject => obj.pid, :predicate => 'uri:asdf', :object => 'fedora:object'
+
+       ds = obj.datastreams['RELS-EXT'].content
+
+       @repository.transaction do |t|
+         @repository.purge_relationship :subject => obj.pid, :predicate => 'uri:asdf', :object => 'fedora:object'
+         @repository.add_relationship :subject => obj.pid, :predicate => 'uri:qwerty', :object => 'fedora:object'
+
+         t.rollback
+
+       end
+       obj = @repository.find('transactions:1')
+       obj.datastreams['RELS-EXT'].content.should == ds
+    end
+  end
 
   describe "object versions" do
     it "should have versions" do
