@@ -18,7 +18,7 @@ module Rubydora
       include ActiveSupport::Rescuable
 
 
-      rescue_from RestClient::InternalServerError do
+      rescue_from RestClient::InternalServerError do |e|
         logger.error e.response
         logger.flush if logger.respond_to? :flush
         raise FedoraInvalidRequest, "See logger for details"

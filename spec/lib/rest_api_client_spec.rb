@@ -2,13 +2,51 @@ require 'spec_helper'
 require 'loggable'
 
 describe Rubydora::RestApiClient do
+  class FakeException < Exception
+
+  end
   class MockRepository
     include Rubydora::RestApiClient
     include Loggable
 
-
     attr_accessor :config
   end
+
+
+
+  describe "exception handling" do
+  
+    shared_examples "RestClient error handling" do
+      subject { 
+        mock_repository = MockRepository.new
+        mock_repository.config = { :url => 'http://example.org' }
+
+        mock_repository
+      }
+
+      it "should replace a RestClient exception with a Rubydora one" do
+        subject.stub_chain(:client, :[], :get).and_raise RestClient::InternalServerError.new
+        subject.stub_chain(:client, :[], :put).and_raise RestClient::InternalServerError.new
+        subject.stub_chain(:client, :[], :delete).and_raise RestClient::InternalServerError.new
+        subject.stub_chain(:client, :[], :post).and_raise RestClient::InternalServerError.new
+        expect { subject.send(method, :pid => 'fake:pid', :dsid => 'my_dsid') }.to raise_error Rubydora::FedoraInvalidRequest
+      end
+    end
+
+    [:next_pid, :find_objects, :object, :ingest, :export, :modify_object, :purge_object, :object_versions, :object_xml, :datastream, :datastreams, :set_datastream_options, :datastream_versions, :datastream_history, :datastream_dissemination, :add_datastream, :modify_datastream, :purge_datastream, :relationships, :add_relationship, :purge_relationship, :dissemination].each do |method|
+
+      class_eval %Q{
+    describe "##{method}" do
+      it_behaves_like "RestClient error handling"
+      let(:method) { '#{method}' }
+    end
+      }
+    end
+
+  end
+
+
+
 
   before(:each) do
     @fedora_user = 'fedoraAdmin'
