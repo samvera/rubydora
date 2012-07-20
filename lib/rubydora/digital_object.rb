@@ -258,10 +258,6 @@ module Rubydora
       raise "Can't change values on older versions" if @asOfDateTime
     end
 
-    def check_if_read_only
-      raise "Can't change values on older versions" if @asOfDateTime
-    end
-
     private
     def attribute_will_change! *args
       check_if_read_only
