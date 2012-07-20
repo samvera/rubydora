@@ -245,11 +245,11 @@ module Rubydora
       method = options.delete(:method)
       method ||= :get
       raise self.class.name + "#datastream_dissemination requires a DSID" unless dsid
-      resource = client[datastream_content_url(pid, dsid, options)]
       if block_given?
-        resource.options[:block_response] = block_response
+        resource = safe_subresource(datastream_content_url(pid, dsid, options), :block_response => block_response)
+      else
+        resource = client[datastream_content_url(pid, dsid, options)]
       end
-
       resource.send(method)
     rescue Exception => exception
         rescue_with_handler(exception) || raise
@@ -357,15 +357,27 @@ module Rubydora
       sdef = options.delete(:sdef)
       method = options.delete(:method)
       options[:format] ||= 'xml' unless pid and sdef and method
-      resource = client[dissemination_url(pid,sdef,method,options)]
       if block_given?
-        resource.options[:block_response] = block_response
+        resource = safe_subresource(dissemination_url(pid,sdef,method,options), :block_response => block_response)
+      else
+        resource = client[dissemination_url(pid,sdef,method,options)]
       end
       resource.get
 
     rescue Exception => exception
         rescue_with_handler(exception) || raise
 
+    end
+    
+    def safe_subresource(subresource, options=Hash.new)
+      url = client.concat_urls(client.url, subresource)
+      options = client.options.dup.merge! options
+      block = client.block
+      if block
+        client.class.new(url, options, &block)
+      else
+        client.class.new(url, options)
+      end
     end
   end
 end
