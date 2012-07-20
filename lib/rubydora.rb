@@ -1,5 +1,6 @@
 # Fedora Commons REST API module
 require 'active_model'
+require 'deprecation'
 
 module Rubydora
   autoload :Datastream, "rubydora/datastream"

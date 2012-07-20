@@ -16,6 +16,10 @@ module Rubydora
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
 
+    extend Deprecation
+
+    self.deprecation_horizon = 'rubydora 0.6'
+
 
     attr_reader :pid
     
@@ -44,7 +48,23 @@ module Rubydora
     # @param [String] pid
     # @param [Rubydora::Repository] context
     def self.find pid, repository = nil, options = {}
-      self.new pid, repository, options
+      obj = self.new pid, repository, options
+      if obj.new?
+        Deprecation.warn(Rubydora::DigitalObject, "DigitalObject.find called 
+          for an object that doesn't exist. In #{Rubydora::DigitalObject.deprecation_horizon},
+          this behavior will raise an exception. Use
+          DigitalObject.new or DigitalObject.find_or_initialize instead.")
+      end
+
+      obj
+    end
+
+    # find or initialize a Fedora object
+    # @param [String] pid
+    # @param [Rubydora::Repository] repository context
+    # @param [Hash] options default attribute values (used esp. for creating new datastreams
+    def self.find_or_initialize *args
+      self.new *args
     end
 
     # create a new fedora object (see also DigitalObject#save)
