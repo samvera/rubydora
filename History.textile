@@ -1,3 +1,23 @@
+h3. 0.5.11
+* Ensure that the base rest resource is insulated from blocks passed to dissemination and datastream_dissemination.
+* Deprecated a behavior for DigitalObject.find that allowed one to call DigitalObject.find for a non-existent object. This will raise an exception in a future rubydora release. Instead, you should use the new DigitalObject.find_or_initialize for that behavior.
+* Use ActiveSupport::Rescuable for the REST API calls.
+* Implement a basic form of "transactions" in Rubydora, intended to be used during testing. It uses the new REST API hooks and knows how to roll-back the different data-changing operations. In some cases, this involves deleting and re-ingesting the previous version of the object (purge, modify datastream, purge datastream), which make it unsuitable for production use, especially with large content datastreams.
+
+At Stanford, we've hooked it into our rspec tests as an around filter:
+bc. RSpec.configure do |config|
+  …
+  config.around(:each) do |example|
+    ActiveFedora::Base.connection_for_pid(0).transaction do |t|
+      example.call
+      t.rollback
+    end
+  end
+end
+
+h3. 0.5.10
+* Support for content_changed? and content_will_change!
+
 h3. 0.5.9
 * Raise exception if it's not 404
 
