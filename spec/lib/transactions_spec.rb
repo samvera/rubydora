@@ -8,8 +8,27 @@ describe Rubydora::Transactions do
     repository = Rubydora::Repository.new :url => 'http://example.org'
   }
 
-
   describe "#rollback" do
+
+    it "should fire a after_rollback hook" do
+      i = 0
+      Rubydora::Transaction.after_rollback do
+        i+=1
+      end
+
+      subject.transaction do |t|
+        subject.append_to_transactions_log :asdf, :pid => 'asdf'
+        subject.append_to_transactions_log :asdf, :pid => 'asdf'
+        subject.append_to_transactions_log :asdf, :pid => 'asdf'
+        subject.append_to_transactions_log :asdf, :pid => 'asdf'
+        subject.append_to_transactions_log :asdf, :pid => 'asdf'
+        subject.append_to_transactions_log :asdf, :pid => 'asdf'
+        t.rollback
+      end
+
+      i.should == 6
+    end
+
     it "ingest" do
       subject.client.stub_chain(:[], :post).and_return 'asdf'
       subject.should_receive(:purge_object).with(hash_including(:pid => 'asdf'))

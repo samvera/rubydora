@@ -85,6 +85,9 @@ module Rubydora
 
   class Transaction
     attr_reader :repository
+    include Hooks
+    define_hook "after_rollback"
+
     def initialize repository, &block
       @repository = repository
       with_transactions(&block)
@@ -149,6 +152,8 @@ module Rubydora
         rescue
           # no-op
         end
+
+        run_hook :after_rollback, :pid => options[:pid], :method => method, :options => options
 
       end
       end

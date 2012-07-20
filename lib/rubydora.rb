@@ -21,6 +21,7 @@ module Rubydora
 
   require 'csv'
   require 'time'
+  require 'hooks'
 
   if CSV.const_defined? :Reader
     require 'fastercsv'
