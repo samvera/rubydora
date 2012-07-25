@@ -31,7 +31,7 @@ module Rubydora
         elsif profile.has_key? profile_name.to_s
             profile[profile_name.to_s]
         else
-            DS_DEFAULT_ATTRIBUTES[attribute.to_sym]
+            default_attributes[attribute.to_sym]
         end
       end
 
@@ -47,7 +47,7 @@ module Rubydora
     DS_READONLY_ATTRIBUTES.each do |attribute|
       class_eval %Q{
       def #{attribute.to_s}
-        @#{attribute} || profile['#{attribute.to_s}'] || DS_DEFAULT_ATTRIBUTES[:#{attribute}]
+        @#{attribute} || profile['#{attribute.to_s}'] || default_attributes[:#{attribute}]
       end
       }
 
@@ -78,6 +78,18 @@ module Rubydora
       return self.class.new(@digital_object, @dsid, @options.merge(:asOfDateTime => asOfDateTime))
     end
 
+    def self.default_attributes
+      DS_DEFAULT_ATTRIBUTES
+    end
+
+    def default_attributes
+      @default_attributes ||= self.class.default_attributes
+    end
+
+    def default_attributes= attributes
+      @default_attributes = default_attributes.merge attributes
+    end
+
     ##
     # Initialize a Rubydora::Datastream object, which may or
     # may not already exist in the datastore.
@@ -87,11 +99,12 @@ module Rubydora
     # @param [Rubydora::DigitalObject]
     # @param [String] Datastream ID
     # @param [Hash] default attribute values (used esp. for creating new datastreams)
-    def initialize digital_object, dsid, options = {}
+    def initialize digital_object, dsid, options = {}, default_instance_attributes = {}
       _run_initialize_callbacks do
         @digital_object = digital_object
         @dsid = dsid
         @options = options
+        @default_attributes = default_attributes.merge(default_instance_attributes)
         options.each do |key, value|
           self.send(:"#{key}=", value)
         end
@@ -256,7 +269,7 @@ module Rubydora
     # default datastream parameters
     # @return [Hash]
     def default_api_params
-      return DS_DEFAULT_ATTRIBUTES.dup if new?
+      return default_attributes.dup if new?
       {}
     end
 

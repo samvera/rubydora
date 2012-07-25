@@ -340,7 +340,8 @@ describe Rubydora::Datastream do
         end
 
         it "should fall-back to the set of default attributes" do
-          Rubydora::Datastream::DS_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+          mock_attr = { method.to_sym => 'zxcv' }
+          subject.should_receive(:default_attributes).and_return(mock_attr)
           subject.send(method).should == 'zxcv'
         end
       end
@@ -382,7 +383,8 @@ describe Rubydora::Datastream do
         end
 
         it "should fall-back to the set of default attributes" do
-          Rubydora::Datastream::DS_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+          mock_attr = { method.to_sym => 'zxcv' }
+          subject.should_receive(:default_attributes).and_return(mock_attr)
           subject.send(method).should == 'zxcv'
         end
       end
