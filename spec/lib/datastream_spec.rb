@@ -18,8 +18,13 @@ describe Rubydora::Datastream do
       @datastream.new?.should == true
     end
 
-    it "should be dirty" do
+    it "should not be dirty" do
       @datastream.changed?.should == false
+    end
+
+    it "should be dirty if datastream_will_change! is called" do
+      @datastream.datastream_will_change!
+      @datastream.changed?.should == true
     end
 
     it "should have default values" do
@@ -27,6 +32,13 @@ describe Rubydora::Datastream do
       @datastream.dsState.should == "A"
       @datastream.versionable.should be_true
       @datastream.changed.should be_empty
+    end
+
+    it "should allow default values to by specified later" do
+      @datastream.dsState = 'A'
+      @datastream.default_attributes = { :controlGroup => 'E', :dsState => 'I' }
+      @datastream.controlGroup.should == 'E'
+      @datastream.dsState.should == 'A'
     end
 
     it "should allow versionable to be set to false" do

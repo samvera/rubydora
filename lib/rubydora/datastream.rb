@@ -21,7 +21,7 @@ module Rubydora
     DS_DEFAULT_ATTRIBUTES = { :controlGroup => 'M', :dsState => 'A', :versionable => true }
 
     define_attribute_methods DS_ATTRIBUTES.keys
- 
+
     # accessors for datastream attributes 
     DS_ATTRIBUTES.each do |attribute, profile_name|
       define_method attribute.to_s do
@@ -29,9 +29,9 @@ module Rubydora
         if instance_variable_defined?(var)
           instance_variable_get var
         elsif profile.has_key? profile_name.to_s
-            profile[profile_name.to_s]
+           profile[profile_name.to_s]
         else
-            default_attributes[attribute.to_sym]
+          default_attributes[attribute.to_sym]
         end
       end
 
@@ -250,6 +250,10 @@ module Rubydora
         reset_profile_attributes
         self
       end
+    end
+
+    def datastream_will_change!
+      attribute_will_change! :profile
     end
 
     protected
