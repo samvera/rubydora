@@ -37,6 +37,7 @@ module Rubydora
 
       class_eval %Q{
       def #{attribute.to_s}= val
+        validate_#{attribute.to_s}!(val) if respond_to? :validate_#{attribute.to_s}!
         #{attribute.to_s}_will_change! unless val == #{attribute.to_s}
         @#{attribute.to_s} = val
       end
@@ -296,6 +297,10 @@ module Rubydora
 
     def check_if_read_only
       raise "Can't change values on older versions" if @asOfDateTime
+    end
+
+    def validate_dsLocation! val
+      URI.parse(val)
     end
 
     private

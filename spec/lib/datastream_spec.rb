@@ -390,7 +390,7 @@ describe Rubydora::Datastream do
         end
 
         it "should look in the object profile" do
-          subject.should_receive(:profile) { { method => 'qwerty' } }
+          subject.stub(:profile) { { method => 'qwerty' } }
           subject.send(method).should == 'qwerty'
         end
 
@@ -409,8 +409,20 @@ describe Rubydora::Datastream do
     end
 
     describe "#dsLocation" do
-      it_behaves_like "a datastream attribute"
+      it_behaves_like "a read-only datastream attribute"
       let(:method) { 'dsLocation' }
+
+      subject { Rubydora::Datastream.new @mock_object, 'dsid' }
+
+      it "should reject invalid URIs" do
+        expect { subject.dsLocation = "this is a bad uri" }.to raise_error URI::InvalidURIError
+      end
+
+      it "should appear in the save request" do
+          @mock_repository.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'http://example.com'))
+          subject.dsLocation = 'http://example.com'
+          subject.save
+      end
     end
 
     describe "#altIDs" do
