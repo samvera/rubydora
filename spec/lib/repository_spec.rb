@@ -65,17 +65,9 @@ describe Rubydora::Repository do
   end
 
   describe "load_api_abstraction" do
-    class ApiAbstractionTestClass < Rubydora::Repository 
-      def version; 3.3; end
-    end
     it "should load an abstraction layer for relationships for older versions of the fedora rest api" do
-      @mock_repository = ApiAbstractionTestClass.new
-      @mock_repository.should be_a_kind_of(Rubydora::RestApiClient::V33)
-    end
-
-    it "should automatically load the SOAP endpoint when needed" do
-      @mock_repository = ApiAbstractionTestClass.new
-      @mock_repository.should be_a_kind_of(Rubydora::Soap)
+      Rubydora::Repository.any_instance.stub(:version).and_return(3.3)
+      expect { Rubydora::Repository.new }.to raise_error
     end
   end
 

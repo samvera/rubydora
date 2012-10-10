@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors = ["Chris Beer"]
   s.email = ["chris@cbeer.info"]
   s.summary = %q{Fedora Commons REST API ruby library }
-  s.description = %q{Fedora Commons REST API ruby library : REQUIRES FCREPO 3.4+}
+  s.description = %q{Fedora Commons REST API ruby library}
   s.homepage = "http://github.com/cbeer/rubydora"
 
   s.files         = `git ls-files`.split("\n")
@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.add_dependency "mime-types"
   s.add_dependency "activesupport"
   s.add_dependency "activemodel"
-  s.add_dependency "savon"
   s.add_dependency "hooks"
   s.add_dependency "deprecation"
 

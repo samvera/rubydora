@@ -12,7 +12,6 @@ module Rubydora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, :only => :after
     include ActiveModel::Dirty
-    include Rubydora::ExtensionParameters
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
 

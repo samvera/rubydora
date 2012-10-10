@@ -16,7 +16,7 @@ module Rubydora
     # @option options [Boolean] :validateChecksum
     def initialize options = {}
       @config = options.symbolize_keys
-      load_api_abstraction
+      check_repository_version!
     end
 
     # {include:DigitalObject.find}
@@ -97,15 +97,11 @@ module Rubydora
     protected
 
     # Load fallback API implementations for older versions of Fedora
-    def load_api_abstraction
+    def check_repository_version!
       return unless version
 
-      if version <= 3.0
-      end
-
       if version < 3.4
-        require 'rubydora/rest_api_client/v33'
-        self.extend Rubydora::RestApiClient::V33
+        raise "You're connecting to a Fedora #{version} repository. Rubydora requires Fedora >= 3.4"
       end
 
       true

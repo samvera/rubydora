@@ -12,8 +12,6 @@ module Rubydora
     class_attribute :eager_load_datastream_content
     self.eager_load_datastream_content = false
 
-    include Rubydora::ExtensionParameters
-
     attr_reader :digital_object, :dsid
 
     # mapping datastream attributes (and api parameters) to datastream profile names
