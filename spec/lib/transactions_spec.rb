@@ -84,6 +84,7 @@ describe Rubydora::Transactions do
       subject.client.stub_chain(:[], :put)
 
       subject.should_receive(:export).with(hash_including(:pid => 'asdf', :context => :archive)).and_return '<xml />'
+      subject.should_receive(:purge_object).with(hash_including(:pid => 'asdf'))
       subject.should_receive(:ingest).with(hash_including(:pid => 'asdf', :file => '<xml />'))
 
       subject.transaction do |t|
