@@ -15,15 +15,15 @@ module Rubydora
       end
 
       before_purge_object do |options|
-        append_to_transactions_log :purge_object, :pid => options[:pid], :foxml => export(:pid => options[:pid], :context => :archive) if Rubydora::Transactions.use_transactions
+        append_to_transactions_log :purge_object, :pid => options[:pid], :foxml => true if Rubydora::Transactions.use_transactions
       end
 
       before_modify_datastream do |options|
-        append_to_transactions_log :modify_datastream, :pid => options[:pid], :foxml => export(:pid => options[:pid], :context => :archive) if Rubydora::Transactions.use_transactions
+        append_to_transactions_log :modify_datastream, :pid => options[:pid], :foxml => true if Rubydora::Transactions.use_transactions
       end
 
       before_purge_datastream do |options|
-        append_to_transactions_log :purge_datastream, :pid => options[:pid], :foxml => export(:pid => options[:pid], :context => :archive) if Rubydora::Transactions.use_transactions
+        append_to_transactions_log :purge_datastream, :pid => options[:pid], :foxml => true if Rubydora::Transactions.use_transactions
       end
 
       before_add_datastream do |options|
@@ -72,14 +72,27 @@ module Rubydora
     # Unshift a transaction entry onto the transaction logs.
     # We want these entries in reverse-chronological order
     # for ease of undoing..
-    def append_to_transactions_log *args
+    def append_to_transactions_log method, options = {}
       return unless Rubydora::Transactions.use_transactions
-      transactions_log.unshift(args)
+
+      unless transaction_is_redundant?(method, options)
+        options[:foxml] = export(:pid => options[:pid], :context => :archive) if options[:foxml] == true
+        transactions_log.unshift([method, options])
+      end
     end
 
     # The repository transaction log.
     def transactions_log
       @log ||= []
+    end
+
+    def transaction_is_redundant? method, options
+      return true if transactions_log.any? { |(t_method, t_options)| 
+        # these methods will rollback ANY object change that happens after it, so there's no need to track future changes to this object
+        t_options[:pid] == options[:pid] and [:ingest, :purge_object, :modify_datastream, :purge_datastream].include? t_method
+      }
+
+      false
     end
   end
 

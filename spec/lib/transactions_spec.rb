@@ -8,6 +8,31 @@ describe Rubydora::Transactions do
     repository = Rubydora::Repository.new :url => 'http://example.org'
   }
 
+  describe "#transaction_is_redundant?" do
+    it "should throw away transactions messages if the object was ingested or purged previously" do
+      subject.client.stub_chain(:[], :post).and_return 'asdf'
+      subject.client.stub_chain(:[], :put).and_return 'asdf'
+      subject.client.stub_chain(:[], :delete)
+
+        # this should be squelched
+      subject.should_not_receive(:export).with(hash_including(:pid => 'asdf', :context => :archive)).and_return '<xml />'
+      
+      subject.transaction do |t|
+        subject.ingest :pid => 'asdf', :file => '<a />'
+        subject.purge_object :pid => 'asdf'
+        subject.modify_datastream :pid => 'asdf', :dsid => 'mydsid'
+
+
+        subject.should_receive(:purge_object).with(hash_including(:pid => 'asdf'))
+
+        # this should be squelched
+        subject.should_not_receive(:ingest).with(hash_including(:pid => 'asdf', :file => '<a />'))
+
+        t.rollback
+      end
+    end
+  end
+
   describe "#rollback" do
 
     it "should fire a after_rollback hook" do
