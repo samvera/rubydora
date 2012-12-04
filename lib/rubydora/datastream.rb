@@ -124,6 +124,8 @@ module Rubydora
     # Retrieve the content of the datastream (and cache it)
     # @return [String]
     def content
+      return @content if new?
+
       begin
         options = { :pid => pid, :dsid => dsid }
         options[:asOfDateTime] = asOfDateTime if asOfDateTime
@@ -162,9 +164,10 @@ module Rubydora
 
     def has_content?
       return true unless new?
+
       return !dsLocation.blank? if ['E','R'].include? controlGroup
 
-      !content.blank?
+      !@content.blank?
     end
 
     # Retrieve the datastream profile as a hash (and cache it)
