@@ -233,7 +233,7 @@ module Rubydora
       run_callbacks :create do
         repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
         reset_profile_attributes
-        Datastream.new(digital_object, dsid)
+        self.class.new(digital_object, dsid, @options)
       end
     end
 
@@ -245,7 +245,7 @@ module Rubydora
         return create if new?
         repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
         reset_profile_attributes
-        Datastream.new(digital_object, dsid)
+        self.class.new(digital_object, dsid, @options)
       end
     end
 
