@@ -210,6 +210,30 @@ describe Rubydora::Datastream do
     end
   end
 
+  describe "has_content?" do
+    subject { Rubydora::Datastream.new mock(:pid => 'asdf'), 'asdf' }
+    it "should have content if it is persisted" do
+      subject.stub(:new? => false)
+      subject.should have_content     
+    end
+
+    it "should have content if it has content" do
+      subject.content = "123"
+      subject.should have_content     
+    end
+
+    it "should have content if it has a dsLocation" do
+      subject.dsLocation = "urn:abc"
+      subject.controlGroup = 'E'
+      subject.should have_content     
+    end
+
+    it "should not have content otherwise" do
+      subject.stub(:content => nil)
+      subject.should_not have_content     
+    end
+  end
+
   describe "update" do
 
     before(:each) do

@@ -160,6 +160,13 @@ module Rubydora
       changed_attributes['content'] = nil
     end
 
+    def has_content?
+      return true unless new?
+      return !dsLocation.blank? if ['E','R'].include? controlGroup
+
+      !content.blank?
+    end
+
     # Retrieve the datastream profile as a hash (and cache it)
     # @param opts [Hash] :validateChecksum if you want fedora to validate the checksum
     # @return [Hash] see Fedora #getDatastream documentation for keys
