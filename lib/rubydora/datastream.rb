@@ -308,7 +308,7 @@ module Rubydora
     end
 
     def validate_dsLocation! val
-      URI.parse(val)
+      URI.parse(val) unless val.nil?
     end
 
     private
