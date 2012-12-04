@@ -35,7 +35,7 @@ module Rubydora
 
       class_eval %Q{
       def #{attribute.to_s}= val
-        validate_#{attribute.to_s}!(val) if respond_to? :validate_#{attribute.to_s}!
+        validate_#{attribute.to_s}!(val) if respond_to?(:validate_#{attribute.to_s}!, true)
         #{attribute.to_s}_will_change! unless val == #{attribute.to_s}
         @#{attribute.to_s} = val
       end
