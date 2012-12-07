@@ -92,6 +92,7 @@ describe Rubydora::DigitalObject do
         "<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>"
       end
       @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object.stub(:new? => false)
     end
 
     describe "datastreams" do

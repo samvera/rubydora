@@ -118,7 +118,7 @@ module Rubydora
     # Does this datastream already exist?
     # @return [Boolean]
     def new?
-      profile.empty?
+      digital_object.nil? || digital_object.new? || profile_xml.blank?
     end
 
     # Retrieve the content of the datastream (and cache it)
@@ -178,18 +178,31 @@ module Rubydora
         ## Force a recheck of the profile if they've passed :validateChecksum and we don't have dsChecksumValid
         return @profile
       end
+      
       return @profile = {} unless digital_object.respond_to? :repository
+      
       @profile = begin
+        xml = profile_xml(opts)
+
+        (self.profile_xml_to_hash(xml) unless xml.blank?) || {}
+      end
+    end
+
+    def profile_xml opts = {}
+      @profile_xml = nil unless opts.empty?
+      
+      @profile_xml ||= begin
+
         options = { :pid => pid, :dsid => dsid }
         options.merge!(opts)
         options[:asOfDateTime] = asOfDateTime if asOfDateTime
         options[:validateChecksum] = true if repository.config[:validateChecksum]
-        self.profile_xml_to_hash(repository.datastream(options))
+        repository.datastream(options)
       rescue RestClient::Unauthorized => e
         raise e
       rescue RestClient::ResourceNotFound
         # the datastream is new
-        {}
+        ''
       end
     end
 
@@ -231,7 +244,7 @@ module Rubydora
     def create
       check_if_read_only
       run_callbacks :create do
-        repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
+        repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid, :content => content })
         reset_profile_attributes
         self.class.new(digital_object, dsid, @options)
       end
@@ -290,6 +303,7 @@ module Rubydora
     # @return [Hash]
     def reset_profile_attributes
       @profile = nil
+      @profile_xml = nil
       @changed_attributes = {}
     end
 

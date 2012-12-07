@@ -4,7 +4,7 @@ describe Rubydora::Datastream do
   before do
     @mock_repository = mock(Rubydora::Repository, :config=>{})
     @mock_object = mock(Rubydora::DigitalObject)
-    @mock_object.stub(:repository => @mock_repository, :pid => 'pid')
+    @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new? => false)
   end
 
 
@@ -53,7 +53,8 @@ describe Rubydora::Datastream do
 
 
     it "should call the appropriate api on save" do
-      @mock_repository.should_receive(:add_datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A'))
+      @datastream.stub(:content => 'content')
+      @mock_repository.should_receive(:add_datastream).with(hash_including(:content => 'content', :pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A'))
       @datastream.save
     end
 
@@ -211,7 +212,11 @@ describe Rubydora::Datastream do
   end
 
   describe "has_content?" do
-    subject { Rubydora::Datastream.new mock(:pid => 'asdf'), 'asdf' }
+    before(:each) do
+      subject.stub(:new? => true)
+    end
+
+    subject { Rubydora::Datastream.new mock(:pid => 'asdf', :new? => false), 'asdf' }
     it "should have content if it is persisted" do
       subject.stub(:new? => false)
       subject.should have_content     
@@ -223,6 +228,7 @@ describe Rubydora::Datastream do
     end
 
     it "should have content if it has a dsLocation" do
+
       subject.dsLocation = "urn:abc"
       subject.controlGroup = 'E'
       subject.should have_content     
@@ -310,6 +316,7 @@ describe Rubydora::Datastream do
     describe "when versions are in the repo" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @datastream.stub(:new? => false)
         @mock_repository.should_receive(:datastream_versions).any_number_of_times.and_return <<-XML
         <datastreamHistory>
           <datastreamProfile>
@@ -334,6 +341,7 @@ describe Rubydora::Datastream do
 
       it "should lookup content of datastream using the asOfDateTime parameter" do
         @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:asOfDateTime => '2008-08-05T01:30:05.012Z'))
+        Rubydora::Datastream.any_instance.stub(:new? => false)
         @datastream.versions.last.content
       end
     end
@@ -599,6 +607,7 @@ describe Rubydora::Datastream do
     describe "with existing properties" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @datastream.stub(:new? => false)
         @datastream.stub(:profile) { {'dsMIME' => 'application/rdf+xml', 'dsChecksumType' =>'DISABLED', 'dsVersionable'=>true, 'dsControlGroup'=>'M', 'dsState'=>'A'} }
       end
       it "should not set unchanged values except for mimeType" do
@@ -616,6 +625,7 @@ describe Rubydora::Datastream do
     describe "without existing properties" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @datastream.stub(:new? => true )
         @datastream.stub(:profile) { {} }
       end
       it "should compile parameters to hash" do

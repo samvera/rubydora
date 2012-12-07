@@ -90,7 +90,6 @@ module Rubydora
       _run_initialize_callbacks do
         self.pid = pid
         @repository = repository
-        @new = true
         @options = options
 
         options.each do |key, value|
@@ -110,8 +109,7 @@ module Rubydora
     # Does this object already exist?
     # @return [Boolean]
     def new?
-      self.profile  ### Make sure we've checked the repository at least once
-      @new
+      self.profile_xml.blank?
     end
 
     def asOfDateTime asOfDateTime = nil
@@ -129,10 +127,9 @@ module Rubydora
     # Retrieve the object profile as a hash (and cache it)
     # @return [Hash] see Fedora #getObject documentation for keys
     def profile
+      return {} if profile_xml.nil?
+
       @profile ||= begin
-        options = { :pid => pid }
-        options[:asOfDateTime] = asOfDateTime if asOfDateTime
-        profile_xml = repository.object(options)
         profile_xml.gsub! '<objectProfile', '<objectProfile xmlns="http://www.fedora.info/definitions/1/0/access/"' unless profile_xml =~ /xmlns=/
         doc = Nokogiri::XML(profile_xml)
         h = doc.xpath('/access:objectProfile/*', {'access' => "http://www.fedora.info/definitions/1/0/access/"} ).inject({}) do |sum, node|
@@ -153,9 +150,18 @@ module Rubydora
         @new = false
 
         h
-      rescue RestClient::ResourceNotFound => e
-        {}
+      
       end.freeze
+    end
+
+    def profile_xml
+      @profile_xml ||= begin
+        options = { :pid => pid }
+        options[:asOfDateTime] = asOfDateTime if asOfDateTime
+        repository.object(options)
+      rescue RestClient::ResourceNotFound => e
+        ''
+      end
     end
 
     def versions
@@ -210,6 +216,7 @@ module Rubydora
         if self.new?
           self.pid = repository.ingest to_api_params.merge(:pid => pid)
           @profile = nil #will cause a reload with updated data
+          @profile_xml = nil
         else                       
           p = to_api_params
           repository.modify_object p.merge(:pid => pid) unless p.empty?
@@ -228,6 +235,7 @@ module Rubydora
       run_callbacks :destroy do
         @datastreams = nil
         @profile = nil
+        @profile_xml = nil
         @pid = nil
         nil
       end
