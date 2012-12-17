@@ -134,6 +134,8 @@ module Rubydora
     alias_method :read, :content
 
     def datastream_content
+      return nil if new?
+
       @datastream_content ||=begin
         options = { :pid => pid, :dsid => dsid }
         options[:asOfDateTime] = asOfDateTime if asOfDateTime
@@ -167,16 +169,16 @@ module Rubydora
     end
 
     def content_changed?
-      # we have content
-      return true if new? # new datastreams must have content
+      return true if new? and !content.blank? # new datastreams must have content
 
-      # compare content against the original datastream content, if it is conventient
-      return true if datastream_content_loaded? and has_content? and content != datastream_content 
+      return true unless content == datastream_content
+
+
       super
     end
 
-    def datastream_content_loaded?
-      instance_variable_defined?(:@datastream_content)
+    def changed?
+      super || content_changed?
     end
 
     def has_content?
