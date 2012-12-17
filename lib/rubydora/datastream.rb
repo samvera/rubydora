@@ -163,11 +163,17 @@ module Rubydora
     end
 
     def has_content?
+      # persisted objects are required to have content
       return true unless new?
 
+      # type E and R objects should have content.
       return !dsLocation.blank? if ['E','R'].include? controlGroup
 
-      !@content.blank?
+      # if we've set content, then we have content.
+
+      # return true if instance_variable_defined? :@content
+
+      @content.is_a?(IO) || !content.blank?
     end
 
     # Retrieve the datastream profile as a hash (and cache it)

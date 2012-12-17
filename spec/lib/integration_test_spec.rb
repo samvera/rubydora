@@ -155,6 +155,16 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.datastreams["my_ds"].mimeType.should == "application/x-text"
   end
 
+  it "should save IO-based datastreams" do
+    obj = @repository.find('test:1')
+    ds = obj.datastreams['gemspec']
+    ds.controlGroup = 'M'
+    ds.content = File.open('rubydora.gemspec', 'r')
+    obj.save
+
+    ds.content
+  end
+
   describe "with transactions" do
     it "should work on ingest" do
        @repository.find('transactions:1').delete rescue nil
