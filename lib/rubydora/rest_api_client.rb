@@ -108,7 +108,7 @@ module Rubydora
       query_options = options.dup
       pid = query_options.delete(:pid) || 'new'
       file = query_options.delete(:file)
-      assigned_pid = client[object_url(pid, query_options)].post file, :content_type => 'text/xml'
+      assigned_pid = client[object_url(pid, query_options)].post((file.dup if file), :content_type => 'text/xml')
       run_hook :after_ingest, :pid => assigned_pid, :file => file, :options => options
       assigned_pid
     rescue Exception => exception
@@ -279,7 +279,7 @@ module Rubydora
       file = query_options.delete(:content)
       content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
       run_hook :before_add_datastream, :pid => pid, :dsid => dsid, :file => file, :options => options
-      client[datastream_url(pid, dsid, query_options)].post file, :content_type => content_type.to_s, :multipart => true
+      client[datastream_url(pid, dsid, query_options)].post((file.dup if file), :content_type => content_type.to_s, :multipart => true)
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -303,7 +303,7 @@ module Rubydora
       end
 
       run_hook :before_modify_datastream, :pid => pid, :dsid => dsid, :file => file, :content_type => content_type, :options => options
-      client[datastream_url(pid, dsid, query_options)].put(file, rest_client_options)
+      client[datastream_url(pid, dsid, query_options)].put((file.dup if file), rest_client_options)
 
     rescue Exception => exception
         rescue_with_handler(exception) || raise
