@@ -126,18 +126,22 @@ module Rubydora
     def content
       return @content if new?
 
-      begin
-        options = { :pid => pid, :dsid => dsid }
-        options[:asOfDateTime] = asOfDateTime if asOfDateTime
-
-        @content ||= repository.datastream_dissemination options
-      rescue RestClient::ResourceNotFound
-      end
+      @content ||= datastream_content
 
       content = @content.read and @content.rewind if @content.kind_of? IO
       content ||= @content
     end
     alias_method :read, :content
+
+    def datastream_content
+      @datastream_content ||=begin
+        options = { :pid => pid, :dsid => dsid }
+        options[:asOfDateTime] = asOfDateTime if asOfDateTime
+
+        repository.datastream_dissemination options
+      rescue RestClient::ResourceNotFound
+      end
+    end
 
     # Get the URL for the datastream content
     # @return [String]
@@ -160,6 +164,19 @@ module Rubydora
     def content_will_change!
       raise "Can't change values on older versions" if @asOfDateTime
       changed_attributes['content'] = nil
+    end
+
+    def content_changed?
+      # we have content
+      return true if new? # new datastreams must have content
+
+      # compare content against the original datastream content, if it is conventient
+      return true if datastream_content_loaded? and has_content? and content != datastream_content 
+      super
+    end
+
+    def datastream_content_loaded?
+      instance_variable_defined?(:@datastream_content)
     end
 
     def has_content?
@@ -290,6 +307,7 @@ module Rubydora
     def to_api_params
       h = default_api_params
       valid_changed_attributes = changes.keys.map { |x| x.to_sym }.select { |x| DS_ATTRIBUTES.key? x }
+      valid_changed_attributes += [:content] if content_changed? and !valid_changed_attributes.include? :content
       ## if we don't provide a mimeType, application/octet-stream will be used instead
       (valid_changed_attributes | [:mimeType]).each do |attribute|
         h[attribute.to_sym] = send(attribute) unless send(attribute).nil?
@@ -310,6 +328,7 @@ module Rubydora
     def reset_profile_attributes
       @profile = nil
       @profile_xml = nil
+      @datastream_content = nil
       @changed_attributes = {}
     end
 
