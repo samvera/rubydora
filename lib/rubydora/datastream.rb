@@ -169,6 +169,7 @@ module Rubydora
     end
 
     def content_changed?
+      return false if ['E','R'].include? controlGroup
       return true if new? and !content.blank? # new datastreams must have content
 
       return true unless content == datastream_content

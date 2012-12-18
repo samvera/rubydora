@@ -140,6 +140,7 @@ describe Rubydora::Datastream do
     end
 
     it "should not be new" do
+      @datastream.stub :content_changed? => false
       @datastream.new?.should == false
       @datastream.changed?.should == false
     end
@@ -244,6 +245,7 @@ describe Rubydora::Datastream do
 
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      @datastream.stub :content_changed? => false
       @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
@@ -253,6 +255,7 @@ describe Rubydora::Datastream do
     end
 
     it "should not say changed if the value is set the same" do
+      @datastream.stub :content_changed? => false
       @datastream.dsLabel = "label"
       @datastream.should_not be_changed
     end
@@ -285,6 +288,7 @@ describe Rubydora::Datastream do
   describe "should check if an object is read-only" do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+      @datastream.stub :content_changed? => false
       @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
@@ -392,7 +396,7 @@ describe Rubydora::Datastream do
 
       describe "setter" do
         before do
-          subject.stub(:datastreams => [])
+          subject.stub(:datastreams => [], :content_changed? => false)
         end
         it "should mark the object as changed after setting" do
           subject.send("#{method}=", 'new_value')
@@ -452,6 +456,7 @@ describe Rubydora::Datastream do
 
       it "should appear in the save request" do
           @mock_repository.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'http://example.com'))
+          subject.stub(:content_changed? => false)
           subject.dsLocation = 'http://example.com'
           subject.save
       end
@@ -608,6 +613,7 @@ describe Rubydora::Datastream do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
         @datastream.stub(:new? => false)
+        @datastream.stub(:content_changed? => false)
         @datastream.stub(:profile) { {'dsMIME' => 'application/rdf+xml', 'dsChecksumType' =>'DISABLED', 'dsVersionable'=>true, 'dsControlGroup'=>'M', 'dsState'=>'A'} }
       end
       it "should not set unchanged values except for mimeType" do
@@ -626,14 +632,15 @@ describe Rubydora::Datastream do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
         @datastream.stub(:new? => true )
+        @datastream.stub(:content => '123')
         @datastream.stub(:profile) { {} }
       end
       it "should compile parameters to hash" do
-        @datastream.send(:to_api_params).should == {:versionable=>true, :controlGroup=>"M", :dsState=>"A"}
+        @datastream.send(:to_api_params).should == {:versionable=>true, :controlGroup=>"M", :dsState=>"A", :content => '123' }
       end
       it "should not send parameters that are set to nil" do
         @datastream.dsLabel = nil
-        @datastream.send(:to_api_params).should == {:versionable=>true, :controlGroup=>"M", :dsState=>"A"}
+        @datastream.send(:to_api_params).should == {:versionable=>true, :controlGroup=>"M", :dsState=>"A", :content => '123' }
       end
     end
   end
