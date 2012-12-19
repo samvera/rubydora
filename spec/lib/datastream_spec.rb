@@ -61,6 +61,7 @@ describe Rubydora::Datastream do
     it "should be able to override defaults" do
       @mock_repository.should_receive(:add_datastream).with(hash_including(:controlGroup => 'E'))
       @datastream.controlGroup = 'E'
+      @datastream.dsLocation = "uri:asdf"
       @datastream.save
     end
   end
