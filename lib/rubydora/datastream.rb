@@ -128,8 +128,16 @@ module Rubydora
 
       @content ||= datastream_content
 
-      content = @content.read and @content.rewind if @content.kind_of? IO
-      content ||= @content
+      if @content.kind_of? IO
+        begin
+          @content.rewind
+          @content.read
+        ensure
+          @content.rewind
+        end
+      else
+        @content
+      end
     end
     alias_method :read, :content
 

@@ -158,11 +158,12 @@ describe Rubydora::Datastream do
 
     it "should rewind IO-type contents" do
       @mock_io = File.open('rubydora.gemspec')
-      @mock_io.should_receive(:rewind)
+      @mock_io.readline # start with a dirty file
 
       @datastream.content = @mock_io
 
       @datastream.content.should be_a(String)
+      @datastream.content.should == File.read('rubydora.gemspec')
 
     end
 
