@@ -183,9 +183,20 @@ describe Rubydora::RestApiClient do
     lambda {@mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
   end
 
-  it "add_datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa"))
-    @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa' 
+  describe "add_datastream" do
+    it "should post to the correct url" do
+       RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/datastreams/aaa"))
+      @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa' 
+    end
+
+    describe "when a file is passed" do
+      it "should rewind the file" do
+        RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
+        file = StringIO.new('test', 'r') # StringIO is a good stand it for a real File (it has read, rewind and close)
+        @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+        lambda {file.read}.should_not raise_error IOError
+      end
+    end
   end
 
   describe "modify datastream" do
@@ -196,6 +207,14 @@ describe Rubydora::RestApiClient do
     it "should pass the provided mimeType header" do
        RestClient::Request.should_receive(:execute).with(:url => "http://example.org/objects/mypid/datastreams/aaa?mimeType=application%2Fjson",:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :mimeType=>'application/json'
+    end
+    describe "when a file is passed" do
+      it "should rewind the file" do
+        RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
+        file = StringIO.new('test', 'r') # StringIO is a good stand it for a real File (it has read, rewind and close)
+        @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+        lambda {file.read}.should_not raise_error IOError
+      end
     end
   end
 
