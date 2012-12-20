@@ -129,7 +129,7 @@ module Rubydora
 
       @content ||= datastream_content
 
-      if @content.kind_of? IO
+      if behaves_like_io?(@content)
         begin
           @content.rewind
           @content.read
@@ -205,7 +205,7 @@ module Rubydora
 
       # return true if instance_variable_defined? :@content
 
-      @content.is_a?(IO) || !content.blank?
+      behaves_like_io?(@content) || !content.blank?
     end
 
     # Retrieve the datastream profile as a hash (and cache it)
@@ -367,6 +367,12 @@ module Rubydora
     end
 
     private
+
+    # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
+    def behaves_like_io?(obj)
+      obj.is_a?(IO) || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
+    end
+
     def attribute_will_change! *args
       check_if_read_only
       super
