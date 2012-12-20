@@ -279,7 +279,9 @@ module Rubydora
       file = query_options.delete(:content)
       content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
       run_hook :before_add_datastream, :pid => pid, :dsid => dsid, :file => file, :options => options
-      client[datastream_url(pid, dsid, query_options)].post((file.dup if file), :content_type => content_type.to_s, :multipart => true)
+      str = file.respond_to?(:read) ? file.read : file
+      file.rewind if file.respond_to?(:rewind)
+      client[datastream_url(pid, dsid, query_options)].post(str, :content_type => content_type.to_s, :multipart => true)
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -303,7 +305,9 @@ module Rubydora
       end
 
       run_hook :before_modify_datastream, :pid => pid, :dsid => dsid, :file => file, :content_type => content_type, :options => options
-      client[datastream_url(pid, dsid, query_options)].put((file.dup if file), rest_client_options)
+      str = file.respond_to?(:read) ? file.read : file
+      file.rewind if file.respond_to?(:rewind)
+      client[datastream_url(pid, dsid, query_options)].put(str, rest_client_options)
 
     rescue Exception => exception
         rescue_with_handler(exception) || raise
