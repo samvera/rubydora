@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'stringio'
 
 describe Rubydora::Datastream do
   before do
@@ -187,26 +188,26 @@ describe Rubydora::Datastream do
       @datastream.content
       @datastream.content_changed?.should == false
     end
-    it "should be changed in the new content is different than the old content" do
+    it "should be changed when the new content is different than the old content" do
       @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
       @datastream.content = "test"
       @datastream.content_changed?.should == true 
     end
 
-    it "should not be changed in the new content is the same as the existing content (when eager-loading is enabled)" do
+    it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
       @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
       @datastream.eager_load_datastream_content = true
       @datastream.content = "test"
       @datastream.content_changed?.should  == false 
     end
 
-    it "should  be changed in the new content is the same as the existing content (without eager loading, the default)" do
+    it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
       @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
       @datastream.content = "test"
       @datastream.content_changed?.should  == true
     end
 
-    it "should not be changed in the new content is the same as the existing content (and we have accessed #content previously)" do
+    it "should not be changed when the new content is the same as the existing content (and we have accessed #content previously)" do
       @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
       @datastream.content
       @datastream.content = "test"
