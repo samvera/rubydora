@@ -1,3 +1,4 @@
+require 'equivalent-xml'
 module Rubydora
   # This class represents a Fedora datastream object
   # and provides helper methods for creating and manipulating
@@ -180,8 +181,11 @@ module Rubydora
       return false if ['E','R'].include? controlGroup
       return true if new? and !content.blank? # new datastreams must have content
 
-      return true unless content == datastream_content
-
+      if controlGroup == "X"
+        return true unless EquivalentXml.equivalent?(Nokogiri::XML(content), Nokogiri::XML(datastream_content))
+      else
+        return true unless content == datastream_content
+      end
 
       super
     end
