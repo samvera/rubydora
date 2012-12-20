@@ -1,3 +1,7 @@
+h3. 1.2.1
+* Support for Rack::Test::UploadedFile
+* Allow reading content that is a kind of IO after save
+
 h3. 0.5.11
 * Ensure that the base rest resource is insulated from blocks passed to dissemination and datastream_dissemination.
 * Deprecated a behavior for DigitalObject.find that allowed one to call DigitalObject.find for a non-existent object. This will raise an exception in a future rubydora release. Instead, you should use the new DigitalObject.find_or_initialize for that behavior.
