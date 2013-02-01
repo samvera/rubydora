@@ -123,11 +123,12 @@ module Rubydora
     end
 
     # Retrieve the content of the datastream (and cache it)
+    # @param [Boolean] ensure_fetch <true> if true, it will grab the content from the database if is not already loaded
     # @return [String]
-    def content
-      return @content if new?
+    def content(ensure_fetch = true)
+      return @content if new? 
 
-      @content ||= datastream_content
+      @content ||= datastream_content(ensure_fetch)
 
       if behaves_like_io?(@content)
         begin
@@ -142,8 +143,9 @@ module Rubydora
     end
     alias_method :read, :content
 
-    def datastream_content
+    def datastream_content(ensure_fetch = true)
       return nil if new?
+      return @datastream_content unless ensure_fetch
 
       @datastream_content ||=begin
         options = { :pid => pid, :dsid => dsid }
@@ -179,12 +181,12 @@ module Rubydora
 
     def content_changed?
       return false if ['E','R'].include? controlGroup
-      return true if new? and !content.blank? # new datastreams must have content
+      return true if new? and !content(false).blank? # new datastreams must have content
 
       if controlGroup == "X"
         return true unless EquivalentXml.equivalent?(Nokogiri::XML(content), Nokogiri::XML(datastream_content))
       else
-        return true unless content == datastream_content
+        return true unless content(false) == datastream_content(false)
       end
 
       super

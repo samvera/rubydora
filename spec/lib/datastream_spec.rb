@@ -158,6 +158,11 @@ describe Rubydora::Datastream do
       @datastream.content.should == "asdf"
     end
 
+    it "should not load contents if they say not to" do
+      @mock_repository.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
+      @datastream.content(false).should be_nil
+    end
+
     it "should rewind IO-type contents" do
       @mock_io = File.open('rubydora.gemspec')
       @mock_io.readline # start with a dirty file
@@ -186,6 +191,10 @@ describe Rubydora::Datastream do
     it "should not be changed after a read-only access" do
       @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
       @datastream.content
+      @datastream.content_changed?.should == false
+    end
+    it "should not load content just to check and see if it was changed." do
+      @mock_repository.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
       @datastream.content_changed?.should == false
     end
     it "should be changed when the new content is different than the old content" do
