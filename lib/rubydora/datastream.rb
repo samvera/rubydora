@@ -122,10 +122,15 @@ module Rubydora
       digital_object.nil? || digital_object.new? || profile_xml.blank?
     end
 
+    # This method is overridden in ActiveFedora, so we didn't
+    def content
+      local_or_remote_content(true)
+    end
+
     # Retrieve the content of the datastream (and cache it)
-    # @param [Boolean] ensure_fetch <true> if true, it will grab the content from the database if is not already loaded
+    # @param [Boolean] ensure_fetch <true> if true, it will grab the content from the repository if is not already loaded
     # @return [String]
-    def content(ensure_fetch = true)
+    def local_or_remote_content(ensure_fetch = true)
       return @content if new? 
 
       @content ||= datastream_content(ensure_fetch)
@@ -181,12 +186,14 @@ module Rubydora
 
     def content_changed?
       return false if ['E','R'].include? controlGroup
-      return true if new? and !content(false).blank? # new datastreams must have content
+      return true if new? and !local_or_remote_content(false).blank? # new datastreams must have content
 
       if controlGroup == "X"
         return true unless EquivalentXml.equivalent?(Nokogiri::XML(content), Nokogiri::XML(datastream_content))
       else
-        return true unless content(false) == datastream_content(false)
+        unless local_or_remote_content(false) == datastream_content(false)
+           return true
+        end
       end
 
       super

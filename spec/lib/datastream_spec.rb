@@ -160,7 +160,7 @@ describe Rubydora::Datastream do
 
     it "should not load contents if they say not to" do
       @mock_repository.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
-      @datastream.content(false).should be_nil
+      @datastream.local_or_remote_content(false).should be_nil
     end
 
     it "should rewind IO-type contents" do
@@ -644,7 +644,7 @@ describe Rubydora::Datastream do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
         @datastream.stub(:new? => true )
-        @datastream.stub(:content => '123')
+        @datastream.stub(:local_or_remote_content => '123')
         @datastream.stub(:profile) { {} }
       end
       it "should compile parameters to hash" do
