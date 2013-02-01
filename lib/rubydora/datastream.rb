@@ -133,7 +133,7 @@ module Rubydora
     def local_or_remote_content(ensure_fetch = true)
       return @content if new? 
 
-      @content ||= datastream_content(ensure_fetch)
+      @content ||= ensure_fetch ? datastream_content : @datastream_content
 
       if behaves_like_io?(@content)
         begin
@@ -148,9 +148,8 @@ module Rubydora
     end
     alias_method :read, :content
 
-    def datastream_content(ensure_fetch = true)
+    def datastream_content
       return nil if new?
-      return @datastream_content unless ensure_fetch
 
       @datastream_content ||=begin
         options = { :pid => pid, :dsid => dsid }
@@ -191,7 +190,7 @@ module Rubydora
       if controlGroup == "X"
         return true unless EquivalentXml.equivalent?(Nokogiri::XML(content), Nokogiri::XML(datastream_content))
       else
-        unless local_or_remote_content(false) == datastream_content(false)
+        unless local_or_remote_content(false) == @datastream_content
            return true
         end
       end
