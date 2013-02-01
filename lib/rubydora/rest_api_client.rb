@@ -194,7 +194,7 @@ module Rubydora
       dsid = query_options.delete(:dsid)
       query_options[:format] ||= 'xml'
       val = nil
-      message = dsid.nil? ? "Loaded datastream list for #{pid}" : "Loaded datastream #{pid}/#{dsid}"
+      message = dsid.nil? ? "Loaded datastream list for #{pid}" : "Loaded datastream profile #{pid}/#{dsid}"
       benchmark message, :level=>:debug do
         val = client[datastream_url(pid, dsid, query_options)].get
       end
@@ -262,7 +262,11 @@ module Rubydora
       else
         resource = client[datastream_content_url(pid, dsid, query_options)]
       end
-      resource.send(method)
+      val = nil
+      benchmark "Loaded datastream content #{pid}/#{dsid}", :level=>:debug do
+        val = resource.send(method)
+      end
+      val
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
