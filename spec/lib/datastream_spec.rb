@@ -254,10 +254,8 @@ describe Rubydora::Datastream do
   end
 
   describe "update" do
-
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @datastream.stub :content_changed? => false
       @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
@@ -266,35 +264,41 @@ describe Rubydora::Datastream do
       XML
     end
 
-    it "should not say changed if the value is set the same" do
-      @datastream.stub :content_changed? => false
-      @datastream.dsLabel = "label"
-      @datastream.should_not be_changed
+    describe "when content is unchanged" do
+      before do
+        @datastream.stub :content_changed? => false
+      end
+      it "should not say changed if the value is set the same" do
+        @datastream.dsLabel = "label"
+        @datastream.should_not be_changed
+      end
+
+      it "should allow profile attributes to be replaced" do
+        @datastream.dsLabel = "New Label"
+        @datastream.dsLabel.should == "New Label"
+      end
+
+      it "should call the appropriate api with any dirty attributes" do
+        @mock_repository.should_receive(:modify_datastream).with(hash_including(:dsLabel => "New Label"))
+        @datastream.dsLabel = "New Label"
+        @datastream.save
+      end
     end
 
-    it "should allow profile attributes to be replaced" do
-      @datastream.dsLabel = "New Label"
-      @datastream.dsLabel.should == "New Label"
-    end
+    describe "update when content is changed" do
+      it "should update the datastream when the content is changed" do
+        @mock_repository.should_receive(:modify_datastream).with(hash_including(:content => 'test'))
+        @datastream.content = "test"
+        @datastream.save
+      end
 
-    it "should call the appropriate api with any dirty attributes" do
-      @mock_repository.should_receive(:modify_datastream).with(hash_including(:dsLabel => "New Label"))
-      @datastream.dsLabel = "New Label"
-      @datastream.save
-    end
+      it "should be marked as changed when the content is updated" do
+        @datastream.changed?.should be_false
+        @datastream.content = "test"
+        @datastream.changed?.should be_true
+      end
 
-    it "should update the datastream when the content is changed" do
-      @mock_repository.should_receive(:modify_datastream).with(hash_including(:content => 'test'))
-      @datastream.content = "test"
-      @datastream.save
     end
-
-    it "should be marked as changed when the content is updated" do
-      @datastream.changed?.should be_false
-      @datastream.content = "test"
-      @datastream.changed?.should be_true
-    end
-
   end
 
   describe "should check if an object is read-only" do

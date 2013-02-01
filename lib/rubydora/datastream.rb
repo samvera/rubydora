@@ -172,15 +172,8 @@ module Rubydora
     # @param [String or IO] 
     # @return [String or IO]
     def content= new_content
-       content_will_change! if (self.eager_load_datastream_content and content != new_content) or (@content.nil? or @content != new_content)
-       @content = new_content
-    end
-
-    # Content_will_change! would be dynamically created by ActiveModel::Dirty, but it would eagerly load the content.
-    # We don't want to do that.
-    def content_will_change!
       raise "Can't change values on older versions" if @asOfDateTime
-      changed_attributes['content'] = nil
+       @content = new_content
     end
 
     def content_changed?
@@ -188,13 +181,14 @@ module Rubydora
       return true if new? and !local_or_remote_content(false).blank? # new datastreams must have content
 
       if controlGroup == "X"
-        return true unless EquivalentXml.equivalent?(Nokogiri::XML(content), Nokogiri::XML(datastream_content))
+        return !EquivalentXml.equivalent?(Nokogiri::XML(content), Nokogiri::XML(datastream_content))
       else
-        unless local_or_remote_content(false) == @datastream_content
-           return true
+        if self.eager_load_datastream_content
+          return local_or_remote_content(false) != datastream_content
+        else
+          return local_or_remote_content(false) != @datastream_content
         end
       end
-
       super
     end
 
@@ -353,6 +347,7 @@ module Rubydora
       @profile = nil
       @profile_xml = nil
       @datastream_content = nil
+      @content = nil
       @changed_attributes = {}
     end
 
