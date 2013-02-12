@@ -49,6 +49,28 @@ describe Rubydora::Datastream do
         @datastream.should be_external
       end
     end
+    describe "redirect?" do
+      it "should test against controlGroup" do
+        @datastream.should_not be_redirect
+        @datastream.controlGroup = "R"
+        @datastream.should be_redirect
+      end
+    end
+    describe "managed?" do
+      it "should test against controlGroup" do
+        # Managed is default
+        @datastream.should be_managed
+        @datastream.controlGroup = "X"
+        @datastream.should_not be_managed
+      end
+    end
+    describe "inline?" do
+      it "should test against controlGroup" do
+        @datastream.should_not be_inline
+        @datastream.controlGroup = "X"
+        @datastream.should be_inline
+      end
+    end
 
     it "should allow versionable to be set to false" do
       @datastream.versionable = false

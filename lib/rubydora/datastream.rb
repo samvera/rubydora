@@ -374,6 +374,21 @@ module Rubydora
       controlGroup == 'E'
     end
 
+    # @return [boolean] is this a redirect datastream?
+    def redirect?
+      controlGroup == 'R'
+    end
+
+    # @return [boolean] is this a managed datastream?
+    def managed?
+      controlGroup == 'M'
+    end
+
+    # @return [boolean] is this an inline datastream?
+    def inline?
+      controlGroup == 'X'
+    end
+
     
     private
 
