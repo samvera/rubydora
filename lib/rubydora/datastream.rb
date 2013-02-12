@@ -369,6 +369,12 @@ module Rubydora
       URI.parse(val) unless val.nil?
     end
 
+    # @return [boolean] is this an external datastream?
+    def external?
+      controlGroup == 'E'
+    end
+
+    
     private
 
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.

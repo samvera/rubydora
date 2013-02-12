@@ -42,6 +42,14 @@ describe Rubydora::Datastream do
       @datastream.dsState.should == 'A'
     end
 
+    describe "external?" do
+      it "should test against controlGroup" do
+        @datastream.should_not be_external
+        @datastream.controlGroup = "E"
+        @datastream.should be_external
+      end
+    end
+
     it "should allow versionable to be set to false" do
       @datastream.versionable = false
       @datastream.versionable.should be_false
