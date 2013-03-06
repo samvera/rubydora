@@ -181,7 +181,11 @@ module Rubydora
       return true if new? and !local_or_remote_content(false).blank? # new datastreams must have content
 
       if controlGroup == "X"
-        return !EquivalentXml.equivalent?(Nokogiri::XML(content), Nokogiri::XML(datastream_content))
+        if self.eager_load_datastream_content
+          return !EquivalentXml.equivalent?(Nokogiri::XML(local_or_remote_content(false)), Nokogiri::XML(datastream_content))
+        else
+          return !EquivalentXml.equivalent?(Nokogiri::XML(local_or_remote_content(false)), Nokogiri::XML(@datastream_content))
+        end
       else
         if self.eager_load_datastream_content
           return local_or_remote_content(false) != datastream_content

@@ -208,49 +208,75 @@ describe Rubydora::Datastream do
   end
 
   describe "content changed behavior" do
-    before(:each) do
-      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
-        <datastreamProfile>
-          <dsLocation>some:uri</dsLocation>
-          <dsLabel>label</dsLabel>
-        </datastreamProfile>
-      XML
+    describe "for a managed datastream" do
+      before(:each) do
+        @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+        @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+          <datastreamProfile>
+            <dsLocation>some:uri</dsLocation>
+            <dsLabel>label</dsLabel>
+          </datastreamProfile>
+        XML
+      end
+
+      it "should not be changed after a read-only access" do
+        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+        @datastream.content
+        @datastream.content_changed?.should == false
+      end
+      it "should not load content just to check and see if it was changed." do
+        @mock_repository.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
+        @datastream.content_changed?.should == false
+      end
+      it "should be changed when the new content is different than the old content" do
+        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+        @datastream.content = "test"
+        @datastream.content_changed?.should == true 
+      end
+
+      it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
+        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @datastream.eager_load_datastream_content = true
+        @datastream.content = "test"
+        @datastream.content_changed?.should  == false 
+      end
+
+      it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
+        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @datastream.content = "test"
+        @datastream.content_changed?.should  == true
+      end
+
+      it "should not be changed when the new content is the same as the existing content (and we have accessed #content previously)" do
+        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @datastream.content
+        @datastream.content = "test"
+        @datastream.content_changed?.should  == false 
+      end
     end
 
-    it "should not be changed after a read-only access" do
-      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
-      @datastream.content
-      @datastream.content_changed?.should == false
-    end
-    it "should not load content just to check and see if it was changed." do
-      @mock_repository.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
-      @datastream.content_changed?.should == false
-    end
-    it "should be changed when the new content is different than the old content" do
-      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
-      @datastream.content = "test"
-      @datastream.content_changed?.should == true 
-    end
+    describe "for an inline datastream" do
+      before(:each) do
+        @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+          <datastreamProfile>
+            <dsLocation>some:uri</dsLocation>
+            <dsLabel>label</dsLabel>
+          </datastreamProfile>
+        XML
+        @datastream = Rubydora::Datastream.new @mock_object, 'dsid', :controlGroup => 'X'
+      end
+      it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
+        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
+        @datastream.eager_load_datastream_content = true
+        @datastream.content = "<xml>test</xml>"
+        @datastream.content_changed?.should  == false 
+      end
 
-    it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
-      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
-      @datastream.eager_load_datastream_content = true
-      @datastream.content = "test"
-      @datastream.content_changed?.should  == false 
-    end
-
-    it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
-      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
-      @datastream.content = "test"
-      @datastream.content_changed?.should  == true
-    end
-
-    it "should not be changed when the new content is the same as the existing content (and we have accessed #content previously)" do
-      @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
-      @datastream.content
-      @datastream.content = "test"
-      @datastream.content_changed?.should  == false 
+      it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
+        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
+        @datastream.content = "<xml>test</xml>"
+        @datastream.content_changed?.should  == true
+      end
     end
   end
 
