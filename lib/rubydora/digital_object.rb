@@ -14,6 +14,7 @@ module Rubydora
     include ActiveModel::Dirty
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
+    include Rubydora::AuditTrail
 
     attr_reader :pid
     
