@@ -214,6 +214,46 @@ module Rubydora
       behaves_like_io?(@content) || !content.blank?
     end
 
+    # Returns a streaming response of the datastream.  This is ideal for large datasteams because
+    # it doesn't require holding the entire content in memory. If you specify the from and length
+    # parameters it simulates a range request. Unfortunatly Fedora 3 doesn't have range requests,
+    # so this method needs to download the whole thing and just seek to the part you care about.
+    # 
+    # @param [Integer] from (bytes) the starting point you want to return. 
+    # 
+    def stream (from = 0, length = nil)
+      raise "Can't determine dsSize" unless dsSize
+      length = dsSize - from unless length
+      counter = 0
+      Enumerator.new do |blk|
+        repository.datastream_dissemination(pid: pid, dsid: dsid) do |response|
+          response.read_body do |chunk|
+            last_counter = counter
+            counter += chunk.size
+            if (counter > from) # greater than the range minimum
+              if counter > from + length
+                # At the end of what we need. Write the beginning of what was read.
+                offset = (length + from) - counter
+                blk << chunk[0..offset]
+                break
+              elsif from >= last_counter
+                # At the end of what we beginning of what we need. Write the end of what was read.
+                offset = from - last_counter
+                blk << chunk[offset..-1]
+              else 
+                # In the middle. We need all of this
+                blk << chunk
+              end
+              if (counter == from + length)
+                # Iteration was exactly the right length, no more reads needed.
+                break
+              end
+            end
+          end
+        end
+      end
+    end
+
     # Retrieve the datastream profile as a hash (and cache it)
     # @param opts [Hash] :validateChecksum if you want fedora to validate the checksum
     # @return [Hash] see Fedora #getDatastream documentation for keys

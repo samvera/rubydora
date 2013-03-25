@@ -8,6 +8,52 @@ describe Rubydora::Datastream do
     @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new? => false)
   end
 
+  describe "stream" do
+    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
+    before do
+      stub_response = stub()
+      stub_response.stub(:read_body).and_yield("one1").and_yield('two2').and_yield('thre').and_yield('four')
+      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_yield(stub_response) 
+      prof = <<-XML
+        <datastreamProfile>
+          <dsSize>16</dsSize>
+        </datastreamProfile>
+      XML
+      subject.profile = prof
+    end
+    it "should send the whold thing" do
+      e = subject.stream()
+      result = ''
+      e.each do |blk|
+        result << blk
+      end
+      result.should == 'one1two2threfour'
+    end
+    it "should send the whole thing when the range is open ended" do
+      e = subject.stream(0)
+      result = ''
+      e.each do |blk|
+        result << blk
+      end
+      result.should == 'one1two2threfour'
+    end
+    it "should get a range not starting at the beginning" do
+      e = subject.stream(3, 13)
+      result = ''
+      e.each do |blk|
+        result << blk
+      end
+      result.should == '1two2threfour'
+    end
+    it "should get a range not ending at the end" do
+      e = subject.stream(4, 8)
+      result = ''
+      e.each do |blk|
+        result << blk
+      end
+      result.should == 'two2thre'
+    end
+  end
 
   describe "create" do
     before(:each) do
