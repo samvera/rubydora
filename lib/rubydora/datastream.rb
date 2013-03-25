@@ -226,7 +226,7 @@ module Rubydora
       length = dsSize - from unless length
       counter = 0
       Enumerator.new do |blk|
-        repository.datastream_dissemination(pid: pid, dsid: dsid) do |response|
+        repository.datastream_dissemination(:pid => pid, :dsid => dsid) do |response|
           response.read_body do |chunk|
             last_counter = counter
             counter += chunk.size
