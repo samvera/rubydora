@@ -1,3 +1,10 @@
+h3. 1.5.0
+* Support for streaming range requests
+* Removed deprecated functionality for calling find on a non-existant datastream.
+
+h3. 1.4.0
+* Don't load datastreams more than necessary
+
 h3. 1.2.1
 * Support for Rack::Test::UploadedFile
 * Allow reading content that is a kind of IO after save
