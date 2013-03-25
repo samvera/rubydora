@@ -34,14 +34,14 @@ describe "Integration testing against a live Fedora repository", :integration =>
   end
 
   it "should create an object" do
-    obj = @repository.find('test:1')
+    obj = Rubydora::DigitalObject.new('test:1', @repository)
     obj.new?.should == true
     obj.save
     obj.new?.should == false
   end
 
   it "new should not return true until the profile is read" do
-    obj = @repository.find('test:1')
+    obj = Rubydora::DigitalObject.new('test:1', @repository)
     obj.save
     new_obj = Rubydora::DigitalObject.new('test:1', @repository)
     new_obj.new?.should == false 
@@ -58,13 +58,13 @@ describe "Integration testing against a live Fedora repository", :integration =>
   end
 
   it "should create another object" do
-    obj = @repository.find('test:2')
+    obj = Rubydora::DigitalObject.new('test:2', @repository)
     obj.save
     obj.new?.should == false
   end
 
   it "should create and update object labels" do
-    obj = @repository.find('test:3')
+    obj = Rubydora::DigitalObject.new('test:3', @repository)
     obj.label = 'asdf'
     obj.save
 
@@ -130,7 +130,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
   end
 
   it "should save changed datastreams when the object is saved" do
-    obj = @repository.find('test:1')
+    obj = Rubydora::DigitalObject.new('test:1', @repository)
     obj.datastreams["new_ds"].content = "XXX"
     obj.datastreams["empty_ds"].new?
     obj.save
@@ -140,7 +140,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
   end
 
   it "should update datastream attributes without changing the content (or mime type)" do
-    obj = @repository.find('test:1')
+    obj = Rubydora::DigitalObject.new('test:1', @repository)
     obj.datastreams["my_ds"].content = "XXX"
     obj.datastreams["my_ds"].mimeType = "application/x-text"
     obj.save
@@ -170,20 +170,19 @@ describe "Integration testing against a live Fedora repository", :integration =>
        @repository.find('transactions:1').delete rescue nil
 
        @repository.transaction do |t|
-         obj = @repository.find('transactions:1')
+         obj = Rubydora::DigitalObject.new('transactions:1', @repository)
          obj.save
 
          t.rollback
        end
 
-       obj = @repository.find('transactions:1')
-       obj.should be_new
+       lambda { @repository.find('transactions:1') }.should raise_error Rubydora::RecordNotFound
     end
 
     it "should work on purge" do
        @repository.find('transactions:1').delete rescue nil
 
-       obj = @repository.find('transactions:1')
+       obj = Rubydora::DigitalObject.new('transactions:1', @repository)
        obj.save
 
        @repository.transaction do |t|
@@ -198,8 +197,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
 
     it "should work on datastreams" do
        @repository.find('transactions:1').delete rescue nil
-
-       obj = @repository.find('transactions:1')
+       obj = Rubydora::DigitalObject.new('transactions:1', @repository)
        obj.save
 
        ds = obj.datastreams['datastream_to_delete']
@@ -243,7 +241,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     it "should work on relationships" do
        @repository.find('transactions:1').delete rescue nil
 
-       obj = @repository.find('transactions:1')
+       obj = Rubydora::DigitalObject.new('transactions:1', @repository)
        obj.save
        @repository.add_relationship :subject => obj.pid, :predicate => 'uri:asdf', :object => 'fedora:object'
 
@@ -268,7 +266,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     end
 
     it "should have read-only versions" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       expect { obj.versions.first.label = "asdf" }.to raise_error
     end
 
@@ -287,7 +285,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     #end
 
     it "should access datastreams list using asOfDateTime (and pass the asOfDateTime through to the datastreams)" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       oldest = obj.versions.first.datastreams.keys
       newest = obj.versions.last.datastreams.keys
       (newest - oldest).should_not be_empty
@@ -299,21 +297,21 @@ describe "Integration testing against a live Fedora repository", :integration =>
   describe "datastream versions" do
 
     it "should have versions" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       versions = obj.datastreams["my_ds"].versions
       versions.should_not be_empty
       versions.map { |x| x.versionID }.should include('my_ds.1', 'my_ds.0')
     end
 
     it "should have read-only versions" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       ds = obj.datastreams["my_ds"].asOfDateTime(Time.now)
       expect { ds.dsLabel = 'asdf' }.to raise_error
       expect { ds.content = 'asdf' }.to raise_error
     end
 
     it "should access the content of older datastreams" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
 
       ds = obj.datastreams["my_ds"]
       ds.content = "YYY"
@@ -324,7 +322,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     end
 
     it "should allow the user to go from a versioned datastream to an unversioned datastream" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       versions_count = obj.datastreams["my_ds"].versions.length
 
       obj.datastreams["my_ds"].versionable.should be_true
@@ -352,7 +350,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     end
 
     it "should default to application/octet-stream" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       obj.datastreams["my_ds"].content = "XXX"
       obj.save
 
@@ -361,7 +359,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     end
 
     it "should allow the user to specify a mimetype" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       obj.datastreams["my_ds"].content = "XXX"
       obj.datastreams["my_ds"].mimeType = "text/plain"
       obj.save
@@ -371,7 +369,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     end
 
     it "should preserve the mimetype on update" do
-      obj = @repository.find('test:1')
+      obj = Rubydora::DigitalObject.new('test:1', @repository)
       obj.datastreams["my_ds"].content = "XXX"
       obj.datastreams["my_ds"].mimeType = "text/plain"
       obj.save

@@ -54,10 +54,10 @@ module Rubydora
     {:validateChecksum=>false}
   end
 
-  class RubydoraError < StandardError
-  end
+  class RubydoraError < StandardError; end
 
-  class FedoraInvalidRequest < RubydoraError
-  end
+  class FedoraInvalidRequest < RubydoraError; end
+
+  class RecordNotFound < RubydoraError; end 
 
 end

@@ -15,11 +15,6 @@ module Rubydora
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
 
-    extend Deprecation
-
-    self.deprecation_horizon = 'rubydora 0.6'
-
-
     attr_reader :pid
     
     # mapping object parameters to profile elements
@@ -42,17 +37,15 @@ module Rubydora
       RUBY
     end
 
-    # find an existing fedora object
-    # TODO: raise an error if the object does not yet exist
+    # Find an existing Fedora object
+    #
     # @param [String] pid
     # @param [Rubydora::Repository] context
+    # @raise [RecordNotFound] if the record is not found in Fedora 
     def self.find pid, repository = nil, options = {}
       obj = self.new pid, repository, options
       if obj.new?
-        Deprecation.warn(Rubydora::DigitalObject, "DigitalObject.find called 
-          for an object that doesn't exist. In #{Rubydora::DigitalObject.deprecation_horizon},
-          this behavior will raise an exception. Use
-          DigitalObject.new or DigitalObject.find_or_initialize instead.")
+        raise Rubydora::RecordNotFound, "DigitalObject.find called for an object that doesn't exist"
       end
 
       obj
