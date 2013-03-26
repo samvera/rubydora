@@ -1,3 +1,6 @@
+h3. 1.5.1
+* Fixed backwards incompatibility. Readded Deprecation to Rubydora::DigitalObject so 5.x versions of AF can do 'Deprecation.silence(Rubydora::DigitalObject)'
+
 h3. 1.5.0
 * Support for streaming range requests
 * Removed deprecated functionality for calling find on a non-existant datastream.
