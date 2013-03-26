@@ -281,7 +281,9 @@ module Rubydora
       pid = query_options.delete(:pid)
       dsid = query_options.delete(:dsid)
       file = query_options.delete(:content)
-      content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
+      # In ruby 1.8.7 StringIO (file) responds_to? :path, but it always returns nil,  In ruby 1.9.3 StringIO doesn't have path.
+      # When we discontinue ruby 1.8.7 support we can remove the `|| ''` part.
+      content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path || '').first if file.respond_to? :path) || 'application/octet-stream'
       run_hook :before_add_datastream, :pid => pid, :dsid => dsid, :file => file, :options => options
       str = file.respond_to?(:read) ? file.read : file
       file.rewind if file.respond_to?(:rewind)
@@ -300,7 +302,9 @@ module Rubydora
       pid = query_options.delete(:pid)
       dsid = query_options.delete(:dsid)
       file = query_options.delete(:content)
-      content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || 'application/octet-stream'
+      # In ruby 1.8.7 StringIO (file) responds_to? :path, but it always returns nil,  In ruby 1.9.3 StringIO doesn't have path.
+      # When we discontinue ruby 1.8.7 support we can remove the `|| ''` part.
+      content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path || '').first if file.respond_to? :path) || 'application/octet-stream'
 
       rest_client_options = {}
       if file

@@ -1,4 +1,5 @@
 require 'equivalent-xml'
+require 'backports' # for Enumerator.new in ruby 1.8.7
 module Rubydora
   # This class represents a Fedora datastream object
   # and provides helper methods for creating and manipulating
