@@ -15,7 +15,7 @@ describe Rubydora::Transactions do
       subject.client.stub_chain(:[], :delete)
 
         # this should be squelched
-      subject.should_not_receive(:export).with(hash_including(:pid => 'asdf', :context => :archive)).and_return '<xml />'
+      subject.should_not_receive(:export).with(hash_including(:pid => 'asdf', :context => :archive))
       
       subject.transaction do |t|
         subject.ingest :pid => 'asdf', :file => '<a />'
