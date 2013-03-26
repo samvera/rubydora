@@ -15,6 +15,8 @@ module Rubydora
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
 
+    extend Deprecation
+
     attr_reader :pid
     
     # mapping object parameters to profile elements
