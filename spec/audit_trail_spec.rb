@@ -2,12 +2,14 @@ require 'spec_helper'
 
 describe "#audit_trail" do
 
-  before(:all) do
+  before do
     path = File.join(File.dirname(__FILE__), 'fixtures', 'audit_trail.foxml.xml')
-    # Create Rubydora::DigitalObject
-  end
-  after(:all) do
-    @test_object.delete
+    File.open(path, 'rb') do |f|
+      @xml = f.read
+    end
+    @repo = Rubydora::Repository.new
+    @repo.stub(:object_xml).with(hash_including(:pid => 'foo:bar')).and_return(@xml)
+    @test_object = Rubydora::DigitalObject.new('foo:bar', @repo)
   end
   it "should have the correct number of audit records" do
     @test_object.audit_trail.records.length.should == 3
