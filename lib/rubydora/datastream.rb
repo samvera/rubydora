@@ -234,9 +234,8 @@ module Rubydora
             if (counter > from) # greater than the range minimum
               if counter > from + length
                 # At the end of what we need. Write the beginning of what was read.
-                offset = (length + from) - counter
+                offset = (length + from) - counter - 1
                 blk << chunk[0..offset]
-                break
               elsif from >= last_counter
                 # At the end of what we beginning of what we need. Write the end of what was read.
                 offset = from - last_counter
@@ -244,10 +243,6 @@ module Rubydora
               else 
                 # In the middle. We need all of this
                 blk << chunk
-              end
-              if (counter == from + length)
-                # Iteration was exactly the right length, no more reads needed.
-                break
               end
             end
           end
