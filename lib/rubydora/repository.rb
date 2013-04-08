@@ -28,7 +28,7 @@ module Rubydora
     #
     # @params [String] query
     # @params [Hash] options
-    # @yield [DigitalObject] Yield a DigitalObject for each search result
+    # @yield [DigitalObject] Yield a DigitalObject for each search result, skipping forbidden objects
     def search query, options = {}, &block
       return to_enum(:search, query, options).to_a unless block_given?
       
@@ -42,7 +42,14 @@ module Rubydora
         response = self.find_objects(options.merge(:query => query, :resultFormat => 'xml', :pid => true).merge(sessionOptions))
 
         doc = Nokogiri::XML(response)
-        doc.xpath('//xmlns:objectFields/xmlns:pid', doc.namespaces).each { |pid| obj = self.find(pid.text); block.call(obj) }
+        doc.xpath('//xmlns:objectFields/xmlns:pid', doc.namespaces).each do |pid|
+          begin
+            obj = self.find(pid.text);
+          rescue RestClient::Unauthorized
+            next
+          end
+          block.call(obj)
+        end
 
         sessionToken = doc.xpath('//xmlns:listSession/xmlns:token', doc.namespaces).text
       end until sessionToken.nil? or sessionToken.empty? or doc.xpath('//xmlns:resultList/xmlns:objectFields', doc.namespaces).empty?

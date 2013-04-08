@@ -13,6 +13,9 @@ end
 require 'rspec/autorun'
 require 'loggable'
 require 'rubydora'
+require 'webmock/rspec'
+
+WebMock.allow_net_connect!
 
 RSpec.configure do |config|
 
