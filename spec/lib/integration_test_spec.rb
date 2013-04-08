@@ -413,6 +413,18 @@ describe "Integration testing against a live Fedora repository", :integration =>
       pids.should include('test:1', 'test:2')
     end
 
+    it "should skip forbidden objects" do
+      # lets say the object test:2 is forbidden
+      stub = stub_http_request(:get, /.*test:2.*/).to_return(:status => 401)
+      objects = []
+      lambda { objects = @repository.search('pid~test:*') }.should_not raise_error
+      pids = objects.map {|obj| obj.pid }
+      pids.should include('test:1')
+      pids.should_not include('test:2')
+      stub.should have_been_requested
+      WebMock.reset!
+    end
+
   end
 
   it "should not destroy content when datastream properties are changed" do
