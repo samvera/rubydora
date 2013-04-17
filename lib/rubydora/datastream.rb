@@ -359,6 +359,28 @@ module Rubydora
       attribute_will_change! :profile
     end
 
+    # @return [boolean] is this an external datastream?
+    def external?
+      controlGroup == 'E'
+    end
+
+    # @return [boolean] is this a redirect datastream?
+    def redirect?
+      controlGroup == 'R'
+    end
+
+    # @return [boolean] is this a managed datastream?
+    def managed?
+      controlGroup == 'M'
+    end
+
+    # @return [boolean] is this an inline datastream?
+    def inline?
+      controlGroup == 'X'
+    end
+
+    
+
     protected
     # datastream parameters 
     # @return [Hash]
@@ -409,27 +431,6 @@ module Rubydora
       URI.parse(val) unless val.nil?
     end
 
-    # @return [boolean] is this an external datastream?
-    def external?
-      controlGroup == 'E'
-    end
-
-    # @return [boolean] is this a redirect datastream?
-    def redirect?
-      controlGroup == 'R'
-    end
-
-    # @return [boolean] is this a managed datastream?
-    def managed?
-      controlGroup == 'M'
-    end
-
-    # @return [boolean] is this an inline datastream?
-    def inline?
-      controlGroup == 'X'
-    end
-
-    
     private
 
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
