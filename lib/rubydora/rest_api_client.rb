@@ -122,6 +122,7 @@ module Rubydora
     def export options = {}
       query_options = options.dup
       pid = query_options.delete(:pid)
+      raise ArgumentError, "Must have a pid" unless pid
       client[export_object_url(pid, query_options)].get
     rescue Exception => exception
         rescue_with_handler(exception) || raise
