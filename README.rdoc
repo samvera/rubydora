@@ -1,4 +1,5 @@
 = rubydora
+{<img src="https://travis-ci.org/projecthydra/rubydora.png?branch=master" alt="Build Status" />}[https://travis-ci.org/projecthydra/rubydora]
 
 Rubydora is a low-level Fedora Commons REST API consumer, providing direct access to REST API methods, as well as a primitive ruby abstraction.
 
