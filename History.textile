@@ -1,3 +1,8 @@
+h3. 1.6.2 (29 April 2013)
+* Handle 401 (no access) from Fedora in a graceful manner
+* Expose methods relating to control group (e.g. external?, redirect?, managed?, inline?)
+* validate that a pid is passed as one of the arguments to RestApiClient#export
+
 h3. 1.6.1
 * Removed break which caused Enumerator to never terminate
 
