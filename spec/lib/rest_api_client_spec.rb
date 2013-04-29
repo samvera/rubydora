@@ -109,9 +109,14 @@ describe Rubydora::RestApiClient do
     @mock_repository.ingest :pid => 'mypid'
   end
 
-  it "export" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/export"))
-    @mock_repository.export :pid => 'mypid'
+  describe "export" do
+    it "should work on the happy path" do
+       RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/mypid/export"))
+      @mock_repository.export :pid => 'mypid'
+    end
+    it "should require a pid" do
+      lambda { @mock_repository.export }.should raise_error ArgumentError, "Must have a pid"
+    end
   end
 
   it "modify_object" do
