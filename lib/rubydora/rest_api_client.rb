@@ -9,7 +9,9 @@ module Rubydora
     
     include Rubydora::FedoraUrlHelpers
     extend ActiveSupport::Concern
-    include ActiveSupport::Benchmarkable
+    include ActiveSupport::Benchmarkable    
+    extend Deprecation
+
 
 
     VALID_CLIENT_OPTIONS = [:user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
@@ -217,10 +219,16 @@ module Rubydora
       query_options = options.dup
       pid = query_options.delete(:pid)
       dsid = query_options.delete(:dsid)
+      raise ArgumentError, "Missing required parameter :pid" unless pid
+
+      if dsid.nil?
+        #raise ArgumentError, "Missing required parameter :dsid" unless dsid
+        Deprecation.warn(RestApiClient, "Calling Rubydora::RestApiClient#datastream without a :dsid is deprecated, use #datastreams instead")
+        return datastreams(options)
+      end
       query_options[:format] ||= 'xml'
       val = nil
-      message = dsid.nil? ? "Loaded datastream list for #{pid}" : "Loaded datastream profile #{pid}/#{dsid}"
-      benchmark message, :level=>:debug do
+      benchmark "Loaded datastream profile #{pid}/#{dsid}", :level=>:debug do
         val = client[datastream_url(pid, dsid, query_options)].get
       end
 
@@ -232,7 +240,29 @@ module Rubydora
         rescue_with_handler(exception) || raise
     end
 
-    alias_method :datastreams, :datastream
+    def datastreams options = {}
+      unless options[:dsid].nil?
+        #raise ArgumentError, "Missing required parameter :dsid" unless dsid
+        Deprecation.warn(RestApiClient, "Calling Rubydora::RestApiClient#datastreams with a :dsid is deprecated, use #datastream instead")
+        return datastream(options)
+      end
+      query_options = options.dup
+      pid = query_options.delete(:pid)
+      raise ArgumentError, "Missing required parameter :pid" unless pid
+      query_options[:format] ||= 'xml'
+      val = nil
+      benchmark "Loaded datastream list for #{pid}", :level=>:debug do
+        val = client[datastreams_url(pid, query_options)].get
+      end
+
+      val
+    rescue RestClient::Unauthorized => e
+      logger.error "Unauthorized at #{client.url}/#{datastreams_url(pid, query_options)}"
+      raise e
+    rescue Exception => exception
+        rescue_with_handler(exception) || raise
+
+    end
 
     # {include:RestApiClient::API_DOCUMENTATION}
     # @param [Hash] options

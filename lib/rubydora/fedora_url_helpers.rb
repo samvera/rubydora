@@ -56,9 +56,20 @@ module Rubydora
     # @param [String] dsid
     # @param [Hash] options to convert to URL parameters
     # @return [String] URI
-    def datastream_url pid, dsid = nil, options = nil
+    def datastream_url pid, dsid, options = nil
+      raise "" unless pid and dsid
+      url_for(object_url(pid) + "/datastreams/#{CGI::escape(dsid)}", options)
+    end
+
+
+    # Generate a base datastream REST API endpoint URI
+    # @param [String] pid
+    # @param [String] dsid
+    # @param [Hash] options to convert to URL parameters
+    # @return [String] URI
+    def datastreams_url pid, options = nil
       raise "" unless pid
-      url_for(object_url(pid) + "/datastreams" + (("/#{CGI::escape(dsid)}" if dsid) || ''), options)
+      url_for(object_url(pid) + "/datastreams", options)
     end
 
     # @param [String] pid

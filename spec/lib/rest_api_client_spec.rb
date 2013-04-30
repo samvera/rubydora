@@ -27,6 +27,7 @@ describe Rubydora::RestApiClient do
       }
 
       it "should replace a RestClient exception with a Rubydora one" do
+        Deprecation.stub(:warn)
         subject.stub_chain(:client, :[], :get).and_raise RestClient::InternalServerError.new
         subject.stub_chain(:client, :[], :put).and_raise RestClient::InternalServerError.new
         subject.stub_chain(:client, :[], :delete).and_raise RestClient::InternalServerError.new
@@ -157,8 +158,20 @@ describe Rubydora::RestApiClient do
   end
 
   it "datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => datastreams_url('mypid')"http://example.org/objects/mypid/datastreams?format=xml"))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => datastreams_url('mypid', :format => xml)))
     logger.should_receive(:debug) # squelch message "Loaded datastream list for mypid (time)"
+    @mock_repository.datastreams :pid => 'mypid'
+  end
+
+  it "datastreams" do
+    @mock_repository.should_receive(:datastream).with(:pid => 'mypid', :dsid => 'asdf')
+    Deprecation.should_receive(:warn)
+    @mock_repository.datastreams :pid => 'mypid', :dsid => 'asdf'
+  end
+
+  it "datastream" do
+    @mock_repository.should_receive(:datastreams).with(:pid => 'mypid')
+    Deprecation.should_receive(:warn)
     @mock_repository.datastream :pid => 'mypid'
   end
 
