@@ -32,7 +32,7 @@ describe Rubydora::RestApiClient do
       end
     end
 
-    [:next_pid, :find_objects, :object, :ingest, :export, :modify_object, :purge_object, :object_versions, :object_xml, :datastream, :datastreams, :set_datastream_options, :datastream_versions, :datastream_history, :datastream_dissemination, :add_datastream, :modify_datastream, :purge_datastream, :relationships, :add_relationship, :purge_relationship, :dissemination].each do |method|
+    [:next_pid, :find_objects, :object, :ingest, :mint_pid_and_ingest, :export, :modify_object, :purge_object, :object_versions, :object_xml, :datastream, :datastreams, :set_datastream_options, :datastream_versions, :datastream_history, :datastream_dissemination, :add_datastream, :modify_datastream, :purge_datastream, :relationships, :add_relationship, :purge_relationship, :dissemination].each do |method|
 
       class_eval %Q{
     describe "##{method}" do
@@ -100,7 +100,13 @@ describe Rubydora::RestApiClient do
   end
   
   it "ingest" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/new"))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/new"))
+    @mock_repository.ingest
+  end
+
+
+  it "mint_pid_and_ingest" do
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => "http://example.org/objects/new"))
     @mock_repository.ingest
   end
 

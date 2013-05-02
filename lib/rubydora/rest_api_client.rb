@@ -106,9 +106,25 @@ module Rubydora
     # @return [String]
     def ingest options = {}
       query_options = options.dup
-      pid = query_options.delete(:pid) || 'new'
+      pid = query_options.delete(:pid)
+
+      if pid.nil?
+        return mint_pid_and_ingest options
+      end
+
       file = query_options.delete(:file)
       assigned_pid = client[object_url(pid, query_options)].post((file.dup if file), :content_type => 'text/xml')
+      run_hook :after_ingest, :pid => assigned_pid, :file => file, :options => options
+      assigned_pid
+    rescue Exception => exception
+        rescue_with_handler(exception) || raise
+    end
+
+    def mint_pid_and_ingest options = {}
+      query_options = options.dup
+      file = query_options.delete(:file)
+
+      assigned_pid = client[new_object_url(query_options)].post((file.dup if file), :content_type => 'text/xml')
       run_hook :after_ingest, :pid => assigned_pid, :file => file, :options => options
       assigned_pid
     rescue Exception => exception
