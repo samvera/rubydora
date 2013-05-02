@@ -12,6 +12,10 @@ module Rubydora
       "#{base}" + (("?#{options.map { |key, value|  "#{CGI::escape(key.to_s)}=#{CGI::escape(value.to_s)}"}.join("&")  }" if options and not options.empty?) || '')
     end
 
+    def describe_repository_url options = nil
+      url_for("describe", options)
+    end
+
     # Generate a base object REST API endpoint URI
     # @param [String] pid
     # @param [Hash] options to convert to URL parameters

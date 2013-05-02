@@ -65,7 +65,7 @@ module Rubydora
     # @return [Hash]
     def profile
       @profile ||= begin
-        profile_xml = client['describe?xml=true'].get
+        profile_xml = self.describe.strip
         profile_xml.gsub! '<fedoraRepository', '<fedoraRepository xmlns="http://www.fedora.info/definitions/1/0/access/"' unless profile_xml =~ /xmlns=/
         doc = Nokogiri::XML(profile_xml)
         xmlns = { 'access' => "http://www.fedora.info/definitions/1/0/access/"  }

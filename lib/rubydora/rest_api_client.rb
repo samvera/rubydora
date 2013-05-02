@@ -59,6 +59,14 @@ module Rubydora
       end
     end
 
+    def describe options = {}
+      query_options = options.dup
+      query_options[:xml] ||= 'true'
+      client[describe_repository_url(query_options)].get
+    rescue Exception => exception
+      rescue_with_handler(exception) || raise
+    end
+
     # {include:RestApiClient::API_DOCUMENTATION}
     # @param [Hash] options
     # @return [String]
