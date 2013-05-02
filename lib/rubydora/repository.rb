@@ -24,6 +24,10 @@ module Rubydora
       DigitalObject.find(pid, self)
     end
 
+    def find_or_initialize pid
+      DigitalObject.find_or_initialize(pid, self)
+    end
+
     # High-level access to the Fedora find_objects API
     #
     # @params [String] query
