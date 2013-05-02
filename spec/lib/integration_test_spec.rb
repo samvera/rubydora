@@ -239,6 +239,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     end
 
     it "should work on relationships" do
+      pending("fcrepo 3.6's relationship api is busted; skipping") if @repository.version == 3.6
        @repository.find('transactions:1').delete rescue nil
 
        obj = Rubydora::DigitalObject.new('transactions:1', @repository)
