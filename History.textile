@@ -1,3 +1,6 @@
+h3. 1.6.3 (2 May 2013)
+* Don't require backports gem
+
 h3. 1.6.2 (29 April 2013)
 * Handle 401 (no access) from Fedora in a graceful manner
 * Expose methods relating to control group (e.g. external?, redirect?, managed?, inline?)
