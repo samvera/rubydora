@@ -123,6 +123,10 @@ describe Rubydora::Datastream do
       @datastream.versionable.should be_false
     end
 
+    it "should be the current version" do
+      @datastream.current_version?.should be_true
+    end
+
     # it "should cast versionable to boolean" do
     #   @datastream.profile['versionable'] = 'true'
     #   @datastream.versionable.should be_true
@@ -465,6 +469,36 @@ describe Rubydora::Datastream do
         @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:asOfDateTime => '2008-08-05T01:30:05.012Z'))
         Rubydora::Datastream.any_instance.stub(:new? => false)
         @datastream.versions.last.content
+      end
+
+      it "should be the current version" do
+        @mock_repository.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return <<-XML
+          <datastreamProfile>
+            <dsVersionID>dsid.1</dsVersionID>
+            <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
+          </datastreamProfile>
+          XML
+        @datastream.current_version?.should be_true
+      end
+
+      it "should be the current version if it's the first version" do
+        @mock_repository.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :asOfDateTime =>'2010-01-02T00:00:00.012Z')).and_return <<-XML
+          <datastreamProfile>
+            <dsVersionID>dsid.1</dsVersionID>
+            <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
+          </datastreamProfile>
+          XML
+        @datastream.versions.first.current_version?.should be_true
+      end
+
+      it "should not be the current version if it's the second version" do
+        @mock_repository.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :asOfDateTime => '2008-08-05T01:30:05.012Z')).and_return <<-XML
+          <datastreamProfile>
+            <dsVersionID>dsid.0</dsVersionID>
+            <dsCreateDate>2008-08-05T01:30:05.012Z</dsCreateDate>
+          </datastreamProfile>
+          XML
+        @datastream.versions[1].current_version?.should be_false
       end
     end
     describe "when no versions are found" do
