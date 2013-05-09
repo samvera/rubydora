@@ -320,7 +320,9 @@ module Rubydora
     end
 
     def current_version?
-      new? || dsVersionID == versions.first.dsVersionID
+      return true if new?
+      vers = versions
+      return vers.empty? || dsVersionID == vers.first.dsVersionID
     end
 
     # Add datastream to Fedora

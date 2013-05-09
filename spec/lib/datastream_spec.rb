@@ -511,6 +511,11 @@ describe Rubydora::Datastream do
         @datastream.versions.should be_empty
       end
 
+      it "should be the current version" do
+        @datastream.stub(:new? => false)
+        @datastream.current_version?.should be_true
+      end
+
     end
     
   end
