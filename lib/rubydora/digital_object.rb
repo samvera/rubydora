@@ -160,6 +160,10 @@ module Rubydora
       end
     end
 
+    def object_xml
+      repository.object_xml(pid: pid)
+    end
+
     def versions
       versions_xml = repository.object_versions(:pid => pid)
       versions_xml.gsub! '<fedoraObjectHistory', '<fedoraObjectHistory xmlns="http://www.fedora.info/definitions/1/0/access/"' unless versions_xml =~ /xmlns=/

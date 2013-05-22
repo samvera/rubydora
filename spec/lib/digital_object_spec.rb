@@ -433,4 +433,13 @@ describe Rubydora::DigitalObject do
     it_behaves_like "an object attribute"
     let(:method) { 'lastModifiedDate' }
   end
+
+  describe "#object_xml" do
+    it "should return the FOXML record" do
+      xml = File.read(File.join(File.dirname(__FILE__), '..', 'fixtures', 'audit_trail.foxml.xml'))
+      @mock_repository.stub(:object_xml).with(hash_including(:pid => 'foo:bar')).and_return(xml)
+      @object = Rubydora::DigitalObject.new 'foo:bar', @mock_repository
+      @object.object_xml.should == @object.repository.object_xml(pid: 'foo:bar')
+    end
+  end
 end
