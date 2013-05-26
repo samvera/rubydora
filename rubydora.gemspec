@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency "mime-types"
   s.add_dependency "activesupport"
   s.add_dependency "activemodel"
-  s.add_dependency "hooks"
+  s.add_dependency "hooks", "~> 0.2.2"
   s.add_dependency "deprecation"
 
   s.add_development_dependency("rake")
