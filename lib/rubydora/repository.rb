@@ -28,6 +28,14 @@ module Rubydora
       DigitalObject.find_or_initialize(pid, self)
     end
 
+    # Reserve a new pid for the object
+    # @params [Hash] options
+    # @option options [String] :namespace the namespece for the pid
+    def mint(options={})
+      d = Nokogiri::XML(next_pid(options))
+      d.xpath('//fedora:pid', 'fedora' => 'http://www.fedora.info/definitions/1/0/management/').text
+    end
+
     # High-level access to the Fedora find_objects API
     #
     # @params [String] query
