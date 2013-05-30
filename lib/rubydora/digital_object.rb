@@ -40,6 +40,12 @@ module Rubydora
       RUBY
     end
 
+    def state= val
+      raise ArgumentError, "Allowed values for state are 'I', 'A' and 'D'. You provided '#{val}'" unless ['I', 'A', 'D'].include?(val)
+      state_will_change! unless val == state
+      @state = val
+    end
+
     # Find an existing Fedora object
     #
     # @param [String] pid

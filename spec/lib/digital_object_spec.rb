@@ -410,8 +410,53 @@ describe Rubydora::DigitalObject do
   end
 
   describe "#state" do
-    it_behaves_like "an object attribute"
-    let(:method) { 'state' }
+    subject { Rubydora::DigitalObject.new 'pid', @mock_repository }
+
+    describe "getter" do
+      it "should return the value" do
+        subject.instance_variable_set("@state", 'asdf')
+        subject.state.should == 'asdf'
+      end
+
+      it "should look in the object profile" do
+        subject.should_receive(:profile) { { Rubydora::DigitalObject::OBJ_ATTRIBUTES[:state].to_s => 'qwerty' } }
+        subject.state.should == 'qwerty'
+      end
+
+      it "should fall-back to the set of default attributes" do
+        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(:state) { 'zxcv'} 
+        subject.state.should == 'zxcv'
+      end
+    end
+
+    describe "setter" do
+      before do
+        subject.stub(:datastreams => [])
+      end
+      it "should mark the object as changed after setting" do
+        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        subject.state= 'D'
+        subject.should be_changed
+      end
+
+      it "should raise an error when setting an invalid value" do
+        expect {subject.state= 'Q'}.to raise_error ArgumentError, "Allowed values for state are 'I', 'A' and 'D'. You provided 'Q'"
+      end
+
+      it "should not mark the object as changed if the value does not change" do
+        subject.should_receive(:state) { 'A' }
+        subject.state= 'A'
+        subject.should_not be_changed
+      end
+
+      it "should appear in the save request" do 
+        @mock_repository.should_receive(:ingest).with(hash_including(:state => 'A'))
+        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        subject.state='A'
+        subject.save
+      end
+    end
   end
 
   describe "#ownerId" do
