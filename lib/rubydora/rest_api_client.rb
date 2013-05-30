@@ -33,10 +33,10 @@ module Rubydora
 
       include Hooks
       [:ingest, :modify_object, :purge_object, :set_datastream_options, :add_datastream, :modify_datastream, :purge_datastream, :add_relationship, :purge_relationship].each do |h|
-        define_hook "before_#{h}"
+        define_hook "before_#{h}".to_sym
       end
 
-      define_hook "after_ingest"
+      define_hook :after_ingest
       include Transactions
     end
 

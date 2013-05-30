@@ -99,7 +99,7 @@ module Rubydora
   class Transaction
     attr_reader :repository
     include Hooks
-    define_hook "after_rollback"
+    define_hook :after_rollback
 
     def initialize repository, &block
       @repository = repository
