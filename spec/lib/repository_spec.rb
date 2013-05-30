@@ -31,6 +31,17 @@ describe Rubydora::Repository do
     end
   end
 
+  describe "mint" do
+    before do
+      xml = "<resp xmlns:fedora=\"http://www.fedora.info/definitions/1/0/management/\"><fedora:pid>test:123</fedora:pid></resp>"
+      @repository.should_receive(:next_pid).and_return xml 
+    end
+    it "should call nextPID" do
+      @repository.mint.should == 'test:123'
+    end
+  end
+
+
   describe "sparql" do
     it "should return csv results for sparql queries" do
       resource_index_query = ""
