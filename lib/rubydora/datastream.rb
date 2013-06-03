@@ -100,7 +100,7 @@ module Rubydora
     # @param [String] Datastream ID
     # @param [Hash] default attribute values (used esp. for creating new datastreams)
     def initialize digital_object, dsid, options = {}, default_instance_attributes = {}
-      _run_initialize_callbacks do
+      run_callbacks :initialize do
         @digital_object = digital_object
         @dsid = dsid
         @options = options

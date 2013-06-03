@@ -89,7 +89,7 @@ module Rubydora
     # @param [Rubydora::Repository] repository context
     # @param [Hash] options default attribute values (used esp. for creating new datastreams
     def initialize pid, repository = nil, options = {}
-      _run_initialize_callbacks do
+      run_callbacks :initialize do
         self.pid = pid
         @repository = repository
         @options = options
