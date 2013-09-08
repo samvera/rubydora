@@ -286,7 +286,16 @@ module Rubydora
     end
 
     def profile= profile_xml
-      @profile = self.profile_xml_to_hash(profile_xml)
+      unless profile_xml.eql? @profile_xml
+        @profile_xml = profile_xml
+        @profile = self.profile_xml_to_hash(profile_xml)
+        attribute_will_change! :profile
+      end
+    end
+
+    def initialize_profile profile_xml
+      profile= profile_xml
+      changed_attributes.delete :profile
     end
 
     def profile_xml_to_hash profile_xml
