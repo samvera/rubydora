@@ -198,8 +198,8 @@ module Rubydora
           end
           # post-3.6, full ds profiles will be returned
           doc.xpath('//access:datastreamProfile', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds|
-            p_xml = ds.to_xml.gsub! 'apim:', ''
-            h[ds['dsID']].initialize_profile p_xml
+            # n.b. that the dsID attribute has a different name in the profile response
+            h[ds['dsID']].initialize_profile ds
           end
         rescue RestClient::ResourceNotFound
         end
