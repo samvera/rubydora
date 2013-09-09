@@ -187,13 +187,19 @@ module Rubydora
         h = Hash.new { |h,k| h[k] = datastream_object_for(k) }                
 
         begin
-          options = { :pid => pid }
+          options = { :pid => pid, :profiles => 'true' }
           options[:asOfDateTime] = asOfDateTime if asOfDateTime
           datastreams_xml = repository.datastreams(options)
+          # pre-3.6, the profiles parm will be ignored
           datastreams_xml.gsub! '<objectDatastreams', '<objectDatastreams xmlns="http://www.fedora.info/definitions/1/0/access/"' unless datastreams_xml =~ /xmlns=/
           doc = Nokogiri::XML(datastreams_xml)
           doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds| 
             h[ds['dsid']] = datastream_object_for ds['dsid'] 
+          end
+          # post-3.6, full ds profiles will be returned
+          doc.xpath('//access:datastreamProfile', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds|
+            # n.b. that the dsID attribute has a different name in the profile response
+            h[ds['dsID']].initialize_profile ds
           end
         rescue RestClient::ResourceNotFound
         end

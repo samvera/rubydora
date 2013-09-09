@@ -286,15 +286,36 @@ module Rubydora
     end
 
     def profile= profile_xml
-      @profile = self.profile_xml_to_hash(profile_xml)
+      if (profile_xml.is_a? Nokogiri::XML::Node)
+        @profile_xml = nil
+        @profile = profile_node_to_hash profile_xml
+        attribute_will_change! :profile
+      elsif profile_xml.is_a? String 
+        unless profile_xml.eql? @profile_xml
+          @profile_xml = profile_xml
+          @profile = self.profile_xml_to_hash(profile_xml)
+          attribute_will_change! :profile
+        end
+      end
+    end
+
+    def initialize_profile profile_xml
+      profile= profile_xml
+      changed_attributes.delete :profile
     end
 
     def profile_xml_to_hash profile_xml
-      profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
+      #profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
       doc = Nokogiri::XML(profile_xml)
-      h = doc.xpath('/management:datastreamProfile/*', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).inject({}) do |sum, node|
-                   sum[node.name] ||= []
-                   sum[node.name] << node.text
+      # since the profile may be in the management or the access namespace, use the CSS selector
+      node = doc.css('datastreamProfile').first
+      profile_node_to_hash(node)
+    end
+
+    def profile_node_to_hash node
+      h = node.xpath('./*').inject({}) do |sum, c_node|
+                   sum[c_node.name] ||= []
+                   sum[c_node.name] << c_node.text
                    sum
                  end.reject { |key, values| values.empty? }
       h.select { |key, values| values.length == 1 }.each do |key, values|
