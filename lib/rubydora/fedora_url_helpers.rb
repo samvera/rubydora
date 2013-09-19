@@ -47,7 +47,7 @@ module Rubydora
     # @param [Hash] options to convert to URL parameters
     # @return [String] URI
     def dissemination_url pid, sdef = nil, method = nil, options = nil
-      raise "" unless pid
+      raise ArgumentError, "You must provide a pid" unless pid
       url_for(object_url(pid) + "/methods" +  (("/#{CGI::escape(sdef)}" if sdef) || '') +  (("/#{CGI::escape(method)}" if method) || ''), options)
     end
 
@@ -57,7 +57,7 @@ module Rubydora
     # @param [Hash] options to convert to URL parameters
     # @return [String] URI
     def datastream_url pid, dsid, options = nil
-      raise "" unless pid and dsid
+      raise ArgumentError, "You must provide a pid and a dsid" unless pid and dsid
       url_for(object_url(pid) + "/datastreams/#{CGI::escape(dsid)}", options)
     end
 
@@ -68,7 +68,7 @@ module Rubydora
     # @param [Hash] options to convert to URL parameters
     # @return [String] URI
     def datastreams_url pid, options = nil
-      raise "" unless pid
+      raise ArgumentError, "You must provide a pid" unless pid
       url_for(object_url(pid) + "/datastreams", options)
     end
 
