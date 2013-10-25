@@ -24,7 +24,7 @@ describe Rubydora::Repository do
 
   describe "find" do
     it "should load objects by pid" do
-      @mock_object = mock(Rubydora::DigitalObject)
+      @mock_object = double(Rubydora::DigitalObject)
       Rubydora::DigitalObject.should_receive(:find).with("pid", instance_of(Rubydora::Repository)).and_return @mock_object
 
       @repository.find('pid')
