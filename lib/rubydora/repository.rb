@@ -4,7 +4,25 @@ module Rubydora
   # Fedora Repository object that provides API access
   class Repository
     include ResourceIndex
-    include RestApiClient
+
+    attr_writer :api
+    def api
+      @api ||= FedoraDriver.new(config)
+    end
+
+    class FedoraDriver
+      include RestApiClient
+      attr_reader :config
+      def initialize(config)
+        @config = config
+      end
+    end
+
+
+    delegate :client, :transaction, :ingest, :object, :find_objects, :purge_object, :modify_object,
+      :datastreams, :datastream, :add_datastream, :modify_datastream, :set_datastream_options, 
+      :datastream_dissemination, :purge_datastream, :datastream_versions, :object_versions,
+      :describe, :add_relationship, :purge_relationship, to: :api
 
     # repository configuration (see #initialize)
     attr_reader :config
@@ -78,19 +96,7 @@ module Rubydora
     def profile
       @profile ||= begin
         profile_xml = self.describe.strip
-        profile_xml.gsub! '<fedoraRepository', '<fedoraRepository xmlns="http://www.fedora.info/definitions/1/0/access/"' unless profile_xml =~ /xmlns=/
-        doc = Nokogiri::XML(profile_xml)
-        xmlns = { 'access' => "http://www.fedora.info/definitions/1/0/access/"  }
-        h = doc.xpath('/access:fedoraRepository/*', xmlns).inject({}) do |sum, node|
-                     sum[node.name] ||= []
-                     case node.name
-                       when "repositoryPID"
-                         sum[node.name] << Hash[*node.xpath('access:*', xmlns).map { |x| [node.name, node.text]}.flatten]
-                       else
-                         sum[node.name] << node.text
-                     end
-                     sum
-                   end
+        h = ProfileParser.parse_repository_profile(profile_xml)
         h.select { |key, value| value.length == 1 }.each do |key, value|
           next if key == "objModels"
           h[key] = value.first

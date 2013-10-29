@@ -40,22 +40,23 @@ module Rubydora
 
       before_modify_object do |options|
         if Rubydora::Transactions.use_transactions
-          obj = find(options[:pid])
-          append_to_transactions_log :modify_object, :pid => options[:pid], :state => obj.state, :ownerId => obj.ownerId, :logMessage => 'reverting'
+          xml = object(pid: options[:pid])
+          profile = ProfileParser.parse_object_profile(xml)
+          append_to_transactions_log :modify_object, :pid => options[:pid], :state => profile[:objState], :ownerId => profile[:objOwnerId], :logMessage => 'reverting'
         end
       end
 
       before_set_datastream_options do |options|
         if Rubydora::Transactions.use_transactions
-          obj = find(options[:pid])
-          ds = obj.datastreams[options[:dsid]]
+          xml = datastream(pid: options[:pid], dsid: options[:dsid])
+          profile = ProfileParser.parse_datastream_profile(xml)
 
           if options[:options][:versionable]
-            append_to_transactions_log :set_datastream_options, :pid => options[:pid], :dsid => options[:dsid], :versionable => ds.versionable
+            append_to_transactions_log :set_datastream_options, :pid => options[:pid], :dsid => options[:dsid], :versionable => profile[:dsVersionable]
           end
 
           if options[:options][:state]
-            append_to_transactions_log :set_datastream_options, :pid => options[:pid], :dsid => options[:dsid], :state => ds.state
+            append_to_transactions_log :set_datastream_options, :pid => options[:pid], :dsid => options[:dsid], :state => profile[:dsState]
           end
         end
       end

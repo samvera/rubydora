@@ -4,7 +4,7 @@ describe Rubydora::Repository do
   include Rubydora::FedoraUrlHelpers
   
   before(:each) do
-    @repository = Rubydora::Repository.new
+    @repository = Rubydora::Repository.new 
   end
 
   describe "initialize" do
@@ -24,7 +24,7 @@ describe Rubydora::Repository do
 
   describe "find" do
     it "should load objects by pid" do
-      @mock_object = mock(Rubydora::DigitalObject)
+      @mock_object = double(Rubydora::DigitalObject)
       Rubydora::DigitalObject.should_receive(:find).with("pid", instance_of(Rubydora::Repository)).and_return @mock_object
 
       @repository.find('pid')
@@ -53,13 +53,13 @@ describe Rubydora::Repository do
 
   describe "profile" do
     it "should map the fedora repository description to a hash" do
-      @mock_response = mock()
-      @mock_client = mock(RestClient::Resource)
+      @mock_response = double
+      @mock_client = double
+      @repository.api.should_receive(:client).and_return(@mock_client)
+      @mock_client.should_receive(:[]).with(describe_repository_url(:xml=> true)).and_return(@mock_response)
       @mock_response.should_receive(:get).and_return <<-XML
         <?xml version="1.0" encoding="UTF-8"?><fedoraRepository  xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.fedora.info/definitions/1/0/access/ http://www.fedora.info/definitions/1/0/fedoraRepository.xsd"><repositoryName>Fedora Repository</repositoryName><repositoryBaseURL>http://localhost:8983/fedora</repositoryBaseURL><repositoryVersion>3.3</repositoryVersion><repositoryPID>    <PID-namespaceIdentifier>changeme</PID-namespaceIdentifier>    <PID-delimiter>:</PID-delimiter>    <PID-sample>changeme:100</PID-sample>    <retainPID>*</retainPID></repositoryPID><repositoryOAI-identifier>    <OAI-namespaceIdentifier>example.org</OAI-namespaceIdentifier>    <OAI-delimiter>:</OAI-delimiter>    <OAI-sample>oai:example.org:changeme:100</OAI-sample></repositoryOAI-identifier><sampleSearch-URL>http://localhost:8983/fedora/search</sampleSearch-URL><sampleAccess-URL>http://localhost:8983/fedora/get/demo:5</sampleAccess-URL><sampleOAI-URL>http://localhost:8983/fedora/oai?verb=Identify</sampleOAI-URL><adminEmail>bob@example.org</adminEmail><adminEmail>sally@example.org</adminEmail></fedoraRepository>
       XML
-      @mock_client.should_receive(:[]).with(describe_repository_url(:xml=> true)).and_return(@mock_response)
-      @repository.should_receive(:client).and_return(@mock_client)
       profile = @repository.profile
       profile['repositoryVersion'].should == '3.3'
     end

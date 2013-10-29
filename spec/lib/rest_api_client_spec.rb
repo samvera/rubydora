@@ -224,7 +224,7 @@ describe Rubydora::RestApiClient do
         RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
         file = StringIO.new('test', 'r') # StringIO is a good stand it for a real File (it has read, rewind and close)
         @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
-        lambda {file.read}.should_not raise_error IOError
+        lambda {file.read}.should_not raise_error
       end
     end
   end
@@ -243,7 +243,7 @@ describe Rubydora::RestApiClient do
         RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
         file = StringIO.new('test', 'r') # StringIO is a good stand it for a real File (it has read, rewind and close)
         @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
-        lambda {file.read}.should_not raise_error IOError
+        lambda {file.read}.should_not raise_error
       end
     end
   end

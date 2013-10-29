@@ -132,23 +132,7 @@ module Rubydora
       return {} if profile_xml.nil?
 
       @profile ||= begin
-        profile_xml.gsub! '<objectProfile', '<objectProfile xmlns="http://www.fedora.info/definitions/1/0/access/"' unless profile_xml =~ /xmlns=/
-        doc = Nokogiri::XML(profile_xml)
-        h = doc.xpath('/access:objectProfile/*', {'access' => "http://www.fedora.info/definitions/1/0/access/"} ).inject({}) do |sum, node|
-                     sum[node.name] ||= []
-                     sum[node.name] << node.text
-
-                     if node.name == "objModels"
-                       sum[node.name] = node.xpath('access:model', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).map { |x| x.text }
-                     end
-
-                     sum
-                   end.reject { |key, values| values.empty? }
-
-        h.select { |key, values| values.length == 1 }.each do |key, values|
-          next if key == "objModels"
-          h[key] = values.reject { |x| x.empty? }.first
-        end
+        h = ProfileParser.parse_object_profile(profile_xml)
         @new = false
 
         h

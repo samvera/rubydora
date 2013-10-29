@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Rubydora::DigitalObject do
   before do
-    @mock_repository = mock(Rubydora::Repository, :config=>{})
+    @mock_repository = double(Rubydora::Repository, :config=>{})
   end
   describe "new" do
     it "should load a DigitalObject instance" do
@@ -172,17 +172,17 @@ describe Rubydora::DigitalObject do
 
     describe "saving an object's datastreams" do
       before do
-        @new_ds = mock(Rubydora::Datastream)
+        @new_ds = double(Rubydora::Datastream)
         @new_ds.stub(:new? => true, :changed? => true, :content_changed? => true, :content => 'XXX')
-        @new_empty_ds = mock(Rubydora::Datastream)
+        @new_empty_ds = double(Rubydora::Datastream)
         @new_empty_ds.stub(:new? => true, :changed? => false, :content_changed? => false, :content => nil)
-        @existing_ds = mock(Rubydora::Datastream)
+        @existing_ds = double(Rubydora::Datastream)
         @existing_ds.stub(:new? => false, :changed? => false, :content_changed? => false, :content => 'YYY')
-        @changed_attr_ds = mock(Rubydora::Datastream)
+        @changed_attr_ds = double(Rubydora::Datastream)
         @changed_attr_ds.stub(:new? => false, :changed? => true, :content_changed? => false, :content => 'YYY')
-        @changed_ds = mock(Rubydora::Datastream)
+        @changed_ds = double(Rubydora::Datastream)
         @changed_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => 'ZZZ')
-        @changed_empty_ds = mock(Rubydora::Datastream)
+        @changed_empty_ds = double(Rubydora::Datastream)
         @changed_empty_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => nil)
 
       end
@@ -262,7 +262,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should remove models from fedora" do
-      @object.should_receive(:profile).any_number_of_times.and_return({"objModels" => ['asdf']})
+      @object.stub(:profile).and_return({"objModels" => ['asdf']})
       @mock_repository.should_receive(:purge_relationship) do |params|
         params.should have_key(:subject)
         params[:predicate].should == 'info:fedora/fedora-system:def/model#hasModel'
@@ -272,7 +272,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should be able to handle complete model replacemenet" do
-      @object.should_receive(:profile).any_number_of_times.and_return({"objModels" => ['asdf']})
+      @object.stub(:profile).and_return({"objModels" => ['asdf']})
       @mock_repository.should_receive(:add_relationship).with(instance_of(Hash))
       @mock_repository.should_receive(:purge_relationship).with(instance_of(Hash))
       @object.models = '1234'
@@ -301,7 +301,7 @@ describe Rubydora::DigitalObject do
         params[:predicate].should == 'info:fedora/fedora-system:def/relations-external#hasPart'
         params[:object].should == 'asdf'
       end
-      @mock_object = mock(Rubydora::DigitalObject)
+      @mock_object = double(Rubydora::DigitalObject)
       @mock_object.should_receive(:fqpid).and_return('asdf')
       @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([])
       @object.parts << @mock_object
@@ -313,7 +313,7 @@ describe Rubydora::DigitalObject do
         params[:predicate].should == 'info:fedora/fedora-system:def/relations-external#hasPart'
         params[:object].should == 'asdf'
       end
-      @mock_object = mock(Rubydora::DigitalObject)
+      @mock_object = double(Rubydora::DigitalObject)
       @mock_object.should_receive(:fqpid).and_return('asdf')
       @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([@mock_object])
       @object.parts.delete(@mock_object)

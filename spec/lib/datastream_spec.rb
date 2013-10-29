@@ -3,15 +3,15 @@ require 'stringio'
 
 describe Rubydora::Datastream do
   before do
-    @mock_repository = mock(Rubydora::Repository, :config=>{})
-    @mock_object = mock(Rubydora::DigitalObject)
+    @mock_repository = double(Rubydora::Repository, :config=>{})
+    @mock_object = double(Rubydora::DigitalObject)
     @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new? => false)
   end
 
   describe "stream" do
     subject { Rubydora::Datastream.new @mock_object, 'dsid' }
     before do
-      stub_response = stub()
+      stub_response = double
       stub_response.stub(:read_body).and_yield("one1").and_yield('two2').and_yield('thre').and_yield('four')
       @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_yield(stub_response) 
       prof = <<-XML
@@ -212,7 +212,7 @@ describe Rubydora::Datastream do
   describe "retrieve" do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+      @mock_repository.stub(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
           <dsLabel>label</dsLabel>
@@ -261,7 +261,7 @@ describe Rubydora::Datastream do
     describe "for a managed datastream" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-        @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+        @mock_repository.stub(:datastream).and_return <<-XML
           <datastreamProfile>
             <dsLocation>some:uri</dsLocation>
             <dsLabel>label</dsLabel>
@@ -307,7 +307,7 @@ describe Rubydora::Datastream do
 
     describe "for an inline datastream" do
       before(:each) do
-        @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+        @mock_repository.stub(:datastream).and_return <<-XML
           <datastreamProfile>
             <dsLocation>some:uri</dsLocation>
             <dsLabel>label</dsLabel>
@@ -335,7 +335,7 @@ describe Rubydora::Datastream do
       subject.stub(:new? => true)
     end
 
-    subject { Rubydora::Datastream.new mock(:pid => 'asdf', :new? => false), 'asdf' }
+    subject { Rubydora::Datastream.new double(:pid => 'asdf', :new? => false), 'asdf' }
     it "should have content if it is persisted" do
       subject.stub(:new? => false)
       subject.should have_content     
@@ -362,7 +362,7 @@ describe Rubydora::Datastream do
   describe "update" do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+      @mock_repository.stub(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
           <dsLabel>label</dsLabel>
@@ -411,7 +411,7 @@ describe Rubydora::Datastream do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
       @datastream.stub :content_changed? => false
-      @mock_repository.should_receive(:datastream).any_number_of_times.and_return <<-XML
+      @mock_repository.stub(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
           <dsLabel>label</dsLabel>
@@ -443,7 +443,7 @@ describe Rubydora::Datastream do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
         @datastream.stub(:new? => false)
-        @mock_repository.should_receive(:datastream_versions).any_number_of_times.and_return <<-XML
+        @mock_repository.stub(:datastream_versions).and_return <<-XML
         <datastreamHistory>
           <datastreamProfile>
             <dsVersionID>dsid.1</dsVersionID>
@@ -504,7 +504,7 @@ describe Rubydora::Datastream do
     describe "when no versions are found" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-        @mock_repository.should_receive(:datastream_versions).any_number_of_times.and_return nil
+        @mock_repository.stub(:datastream_versions).and_return nil
       end
 
       it "should have an emptylist of previous versions" do
@@ -709,7 +709,7 @@ describe Rubydora::Datastream do
     describe "with a digital_object that doesn't have a repository" do
       ### see UnsavedDigitalObject in ActiveFedora
       before(:each) do
-        @datastream = Rubydora::Datastream.new stub(:foo), 'dsid'
+        @datastream = Rubydora::Datastream.new double(:foo), 'dsid'
       end
       it "should be empty if the digital_object doesn't have a repository" do
         @datastream.profile.should == {}

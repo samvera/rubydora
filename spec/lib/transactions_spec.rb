@@ -4,8 +4,9 @@ describe Rubydora::Transactions do
   
 
   subject { 
-    Rubydora::Repository.any_instance.stub(:version).and_return(100)
-    repository = Rubydora::Repository.new :url => 'http://example.org'
+    # Rubydora::Repository.any_instance.stub(:version).and_return(100)
+    # repository = Rubydora::Repository.new :url => 'http://example.org'
+    Rubydora::Repository::FedoraDriver.new :url => 'http://example.org'
   }
 
   describe "#transaction_is_redundant?" do
@@ -69,9 +70,8 @@ describe Rubydora::Transactions do
     it "modify_object" do
       subject.client.stub_chain(:[], :put).and_return 'asdf'
 
-      mock_object = double('Rubydora::DigitalObject', :state => 'A', :ownerId => '567', :logMessage => 'dfghj')
-      subject.should_receive(:find).with('asdf').and_return mock_object
-      
+      profile_xml = "<objectProfile><objState>A</objState><objOwnerId>567</objOwnerId></objectProfile>"
+      subject.should_receive(:object).with(pid: 'asdf').and_return profile_xml 
 
       subject.transaction do |t|
         subject.modify_object :pid => 'asdf', :state => 'I', :ownerId => '123', :logMessage => 'changing asdf'
@@ -122,9 +122,8 @@ describe Rubydora::Transactions do
     it "set_datastream_options" do
       subject.client.stub_chain(:[], :put)
 
-      mock_object = double('Rubydora::DigitalObject')
-      mock_object.stub_chain(:datastreams, :[], :versionable).and_return(false)
-      subject.should_receive(:find).with('asdf').and_return mock_object
+      profile_xml = "<datastreamProfile><dsVersionable>false</dsVersionable></datastreamProfile>"
+      subject.should_receive(:datastream).with(pid: 'asdf', dsid: 'mydsid').and_return profile_xml
 
       subject.transaction do |t|
         subject.set_datastream_options :pid => 'asdf', :dsid => 'mydsid', :versionable => true

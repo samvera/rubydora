@@ -263,7 +263,7 @@ module Rubydora
       @profile = begin
         xml = profile_xml(opts)
 
-        (self.profile_xml_to_hash(xml) unless xml.blank?) || {}
+        (ProfileParser.parse_datastream_profile(xml) unless xml.blank?) || {}
       end
     end
 
@@ -286,26 +286,7 @@ module Rubydora
     end
 
     def profile= profile_xml
-      @profile = self.profile_xml_to_hash(profile_xml)
-    end
-
-    def profile_xml_to_hash profile_xml
-      profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
-      doc = Nokogiri::XML(profile_xml)
-      h = doc.xpath('/management:datastreamProfile/*', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).inject({}) do |sum, node|
-                   sum[node.name] ||= []
-                   sum[node.name] << node.text
-                   sum
-                 end.reject { |key, values| values.empty? }
-      h.select { |key, values| values.length == 1 }.each do |key, values|
-        h[key] = values.reject { |x| x.empty? }.first 
-      end
-
-      h['dsSize'] &&= h['dsSize'].to_i rescue h['dsSize']
-      h['dsCreateDate'] &&= Time.parse(h['dsCreateDate']) rescue h['dsCreateDate']
-      h['dsChecksumValid'] &&= h['dsChecksumValid'] == 'true' 
-      h['dsVersionable'] &&= h['dsVersionable'] == 'true' 
-      h
+      @profile = ProfileParser.parse_datastream_profile(profile_xml)
     end
 
     def versions
