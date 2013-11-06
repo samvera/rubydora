@@ -3,7 +3,7 @@ require 'stringio'
 
 describe Rubydora::Datastream do
   before do
-    @mock_repository = double(Rubydora::Repository, :config=>{})
+    @mock_repository = Rubydora::Fc3Service.new({})
     @mock_object = double(Rubydora::DigitalObject)
     @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new? => false)
   end
@@ -19,7 +19,7 @@ describe Rubydora::Datastream do
           <dsSize>16</dsSize>
         </datastreamProfile>
       XML
-      subject.profile = prof
+      subject.profile = Rubydora::ProfileParser.parse_datastream_profile(prof)
     end
     it "should send the whold thing" do
       e = subject.stream()
@@ -700,7 +700,7 @@ describe Rubydora::Datastream do
           <dsChecksumValid>true</dsChecksumValid>
         </datastreamProfile>
       XML
-      @datastream.profile = prof
+      @datastream.profile = Rubydora::ProfileParser.parse_datastream_profile(prof)
       @datastream.profile.should == {'dsChecksumValid' =>true}
     end
   end

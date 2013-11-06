@@ -75,7 +75,7 @@ module Rubydora
         return @asOfDateTime
       end
 
-      return self.class.new(@digital_object, @dsid, @options.merge(:asOfDateTime => asOfDateTime))
+      return self.class.new(@digital_object, dsid, @options.merge(:asOfDateTime => asOfDateTime))
     end
 
     def self.default_attributes
@@ -119,7 +119,7 @@ module Rubydora
     # Does this datastream already exist?
     # @return [Boolean]
     def new?
-      digital_object.nil? || digital_object.new? || profile_xml.blank?
+      digital_object.nil? || digital_object.new? || profile.empty?
     end
 
     # This method is overridden in ActiveFedora, so we didn't
@@ -260,42 +260,18 @@ module Rubydora
       
       return @profile = {} unless digital_object.respond_to? :repository
       
-      @profile = begin
-        xml = profile_xml(opts)
-
-        (ProfileParser.parse_datastream_profile(xml) unless xml.blank?) || {}
-      end
+      @profile = repository.datastream_profile(pid, dsid, opts[:validateChecksum], asOfDateTime)
     end
 
-    def profile_xml opts = {}
-      @profile_xml = nil unless opts.empty?
-      
-      @profile_xml ||= begin
-
-        options = { :pid => pid, :dsid => dsid }
-        options.merge!(opts)
-        options[:asOfDateTime] = asOfDateTime if asOfDateTime
-        options[:validateChecksum] = true if repository.config[:validateChecksum]
-        repository.datastream(options)
-      rescue RestClient::Unauthorized => e
-        raise e
-      rescue RestClient::ResourceNotFound
-        # the datastream is new
-        ''
-      end
-    end
-
-    def profile= profile_xml
-      @profile = ProfileParser.parse_datastream_profile(profile_xml)
+    def profile= profile_hash
+      raise ArgumentError, "Must pass a profile, you passed #{profile_hash.class}" unless profile_hash.kind_of? Hash
+      @profile = profile_hash
     end
 
     def versions
-      versions_xml = repository.datastream_versions(:pid => pid, :dsid => dsid)
-      return [] if versions_xml.nil?
-      versions_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless versions_xml =~ /xmlns=/
-      doc = Nokogiri::XML(versions_xml)
-      doc.xpath('//management:datastreamProfile', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).map do |ds|
-        self.class.new @digital_object, @dsid, :profile => ds.to_s, :asOfDateTime => ds.xpath('management:dsCreateDate', 'management' => "http://www.fedora.info/definitions/1/0/management/").text
+      versions = repository.versions_for_datastream(pid, dsid)
+      versions.map do |asOfDateTime, profile|
+        self.class.new(@digital_object, dsid, asOfDateTime: asOfDateTime, profile: profile)
       end
     end
 
@@ -393,7 +369,6 @@ module Rubydora
     # @return [Hash]
     def reset_profile_attributes
       @profile = nil
-      @profile_xml = nil
       @datastream_content = nil
       @content = nil
       @changed_attributes = {}
