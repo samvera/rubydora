@@ -16,6 +16,7 @@ module Rubydora
   autoload :Transactions, "rubydora/transactions"
   autoload :AuditTrail, "rubydora/audit_trail"
   autoload :ProfileParser, "rubydora/profile_parser"
+  autoload :Fc3Service, "rubydora/fc3_service"
 
   require 'csv'
   require 'time'

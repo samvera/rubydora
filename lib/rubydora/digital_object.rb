@@ -111,7 +111,7 @@ module Rubydora
     # Does this object already exist?
     # @return [Boolean]
     def new?
-      self.profile_xml.blank?
+      self.profile.empty?
     end
 
     def asOfDateTime asOfDateTime = nil
@@ -129,25 +129,10 @@ module Rubydora
     # Retrieve the object profile as a hash (and cache it)
     # @return [Hash] see Fedora #getObject documentation for keys
     def profile
-      return {} if profile_xml.nil?
-
       @profile ||= begin
-        h = ProfileParser.parse_object_profile(profile_xml)
         @new = false
-
-        h
-      
+        repository.object_profile(pid, asOfDateTime)
       end.freeze
-    end
-
-    def profile_xml
-      @profile_xml ||= begin
-        options = { :pid => pid }
-        options[:asOfDateTime] = asOfDateTime if asOfDateTime
-        repository.object(options)
-      rescue RestClient::ResourceNotFound => e
-        ''
-      end
     end
 
     def object_xml
@@ -155,11 +140,8 @@ module Rubydora
     end
 
     def versions
-      versions_xml = repository.object_versions(:pid => pid)
-      versions_xml.gsub! '<fedoraObjectHistory', '<fedoraObjectHistory xmlns="http://www.fedora.info/definitions/1/0/access/"' unless versions_xml =~ /xmlns=/
-      doc = Nokogiri::XML(versions_xml)
-      doc.xpath('//access:objectChangeDate', {'access' => 'http://www.fedora.info/definitions/1/0/access/' } ).map do |changeDate|
-        self.class.new pid, repository, :asOfDateTime => changeDate.text 
+      repository.versions_for_object(pid).map do |changeDate|
+        self.class.new pid, repository, :asOfDateTime => changeDate 
       end
     end
 
@@ -206,7 +188,6 @@ module Rubydora
         if self.new?
           self.pid = repository.ingest to_api_params.merge(:pid => pid)
           @profile = nil #will cause a reload with updated data
-          @profile_xml = nil
         else                       
           p = to_api_params
           repository.modify_object p.merge(:pid => pid) unless p.empty?
@@ -225,7 +206,6 @@ module Rubydora
       run_callbacks :destroy do
         @datastreams = nil
         @profile = nil
-        @profile_xml = nil
         @pid = nil
         nil
       end
