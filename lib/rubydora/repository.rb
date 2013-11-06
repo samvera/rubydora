@@ -1,4 +1,5 @@
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/module/delegation' # This line only needed for rails 3
 
 module Rubydora
   # Fedora Repository object that provides API access
@@ -7,22 +8,19 @@ module Rubydora
 
     attr_writer :api
     def api
-      @api ||= FedoraDriver.new(config)
+      @api ||= driver.new(config)
     end
 
-    class FedoraDriver
-      include RestApiClient
-      attr_reader :config
-      def initialize(config)
-        @config = config
-      end
+    # Eventually driver can decide between Fc3Service and Fc4Service
+    def driver
+      Fc3Service
     end
 
-
-    delegate :client, :transaction, :ingest, :object, :find_objects, :purge_object, :modify_object,
-      :datastreams, :datastream, :add_datastream, :modify_datastream, :set_datastream_options, 
-      :datastream_dissemination, :purge_datastream, :datastream_versions, :object_versions,
-      :describe, :add_relationship, :purge_relationship, to: :api
+    delegate :client, :transaction, :ingest, :find_objects, :purge_object, :modify_object,
+      :datastreams, :add_datastream, :modify_datastream, :set_datastream_options, 
+      :datastream_dissemination, :purge_datastream, :add_relationship, 
+      :purge_relationship, :repository_profile, :object_profile, :datastream_profile, 
+      :versions_for_datastream, :versions_for_object, to: :api
 
     # repository configuration (see #initialize)
     attr_reader :config
@@ -94,23 +92,12 @@ module Rubydora
     # repository profile (from API-A-LITE data)
     # @return [Hash]
     def profile
-      @profile ||= begin
-        profile_xml = self.describe.strip
-        h = ProfileParser.parse_repository_profile(profile_xml)
-        h.select { |key, value| value.length == 1 }.each do |key, value|
-          next if key == "objModels"
-          h[key] = value.first
-        end
-
-        h
-      rescue
-        nil
-      end
+      @profile ||= repository_profile
     end
 
     # @return [Float] repository version
     def version
-      @version ||= profile['repositoryVersion'].to_f rescue nil
+      @version ||= repository_profile['repositoryVersion'].to_f rescue nil
     end
 
     # Raise an error if unable to connect to the API endpoint

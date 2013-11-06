@@ -6,7 +6,7 @@ describe Rubydora::Transactions do
   subject { 
     # Rubydora::Repository.any_instance.stub(:version).and_return(100)
     # repository = Rubydora::Repository.new :url => 'http://example.org'
-    Rubydora::Repository::FedoraDriver.new :url => 'http://example.org'
+    Rubydora::Fc3Service.new :url => 'http://example.org'
   }
 
   describe "#transaction_is_redundant?" do
