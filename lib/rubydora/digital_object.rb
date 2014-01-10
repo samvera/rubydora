@@ -136,10 +136,6 @@ module Rubydora
       end.freeze
     end
 
-    def object_xml
-      repository.object_xml(pid: pid)
-    end
-
     def versions
       repository.versions_for_object(pid).map do |changeDate|
         self.class.new pid, repository, :asOfDateTime => changeDate 
