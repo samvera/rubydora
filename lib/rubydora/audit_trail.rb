@@ -1,9 +1,9 @@
 module Rubydora::AuditTrail
 
-  def audit_trail
-    @audit_trail ||= FedoraAuditTrail.new(self)
+  def audit_trail(pid)
+    FedoraAuditTrail.new(object_xml(pid: pid))
   end
-    
+
   private
     
   AT_NS = {'audit' => 'info:fedora/fedora-system:def/audit#'}
@@ -11,8 +11,8 @@ module Rubydora::AuditTrail
   AT_XPATH = '/foxml:digitalObject/foxml:datastream[@ID = "AUDIT"]/descendant::audit:auditTrail'
     
   class FedoraAuditTrail
-    def initialize(object)
-      @ng_xml = Nokogiri::XML(object.repository.object_xml(:pid => object.pid)).xpath(AT_XPATH, FOXML_NS.merge(AT_NS))  
+    def initialize(object_xml)
+      @ng_xml = Nokogiri::XML(object_xml).xpath(AT_XPATH, FOXML_NS.merge(AT_NS))  
     end
     def records
       if !@records

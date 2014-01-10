@@ -14,7 +14,6 @@ module Rubydora
     include ActiveModel::Dirty
     include Rubydora::ModelsMixin
     include Rubydora::RelationshipsMixin
-    include Rubydora::AuditTrail
 
     extend Deprecation
 
@@ -99,6 +98,11 @@ module Rubydora
         end
       end
     end
+
+    def audit_trail
+      @audit_trail ||= repository.audit_trail(self.pid)
+    end
+
 
     ##
     # Return a full uri pid (for use in relations, etc

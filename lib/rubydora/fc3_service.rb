@@ -4,6 +4,8 @@ module Rubydora
   # the ORM layer (e.g. Datastream, DigitalObject, Repository)
   class Fc3Service
     include RestApiClient
+    include Rubydora::AuditTrail
+
     attr_reader :config
     def initialize(config)
       @config = config
