@@ -5,7 +5,7 @@ describe Rubydora::Datastream do
   before do
     @mock_repository = Rubydora::Fc3Service.new({})
     @mock_object = double(Rubydora::DigitalObject)
-    @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new? => false)
+    @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new_record? => false)
   end
 
   describe "stream" do
