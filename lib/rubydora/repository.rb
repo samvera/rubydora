@@ -16,11 +16,12 @@ module Rubydora
       Fc3Service
     end
 
-    delegate :client, :transaction, :ingest, :find_objects, :purge_object, :modify_object,
-      :datastreams, :add_datastream, :modify_datastream, :set_datastream_options, 
-      :datastream_dissemination, :purge_datastream, :add_relationship, 
-      :purge_relationship, :repository_profile, :object_profile, :datastream_profile, 
-      :versions_for_datastream, :versions_for_object, to: :api
+    delegate :client, :transaction, :mint, :ingest, :find_objects, :purge_object,
+      :modify_object, :datastreams, :add_datastream, :modify_datastream,
+      :set_datastream_options, :datastream_dissemination, :purge_datastream,
+      :add_relationship, :purge_relationship, :repository_profile,
+      :object_profile, :datastream_profile, :versions_for_datastream,
+      :versions_for_object, to: :api
 
     # repository configuration (see #initialize)
     attr_reader :config
@@ -42,14 +43,6 @@ module Rubydora
 
     def find_or_initialize pid
       DigitalObject.find_or_initialize(pid, self)
-    end
-
-    # Reserve a new pid for the object
-    # @params [Hash] options
-    # @option options [String] :namespace the namespece for the pid
-    def mint(options={})
-      d = Nokogiri::XML(next_pid(options))
-      d.xpath('//fedora:pid', 'fedora' => 'http://www.fedora.info/definitions/1/0/management/').text
     end
 
     # High-level access to the Fedora find_objects API
