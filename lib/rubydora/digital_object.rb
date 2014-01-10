@@ -110,9 +110,10 @@ module Rubydora
 
     # Does this object already exist?
     # @return [Boolean]
-    def new?
+    def new_record?
       self.profile.empty?
     end
+    alias :new? :new_record?
 
     def asOfDateTime asOfDateTime = nil
       if asOfDateTime == nil
