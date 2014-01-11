@@ -21,7 +21,7 @@ module Rubydora
     attr_reader :pid
     
     # mapping object parameters to profile elements
-    OBJ_ATTRIBUTES = {:state => :objState, :ownerId => :objOwnerId, :label => :objLabel, :logMessage => nil, :lastModifiedDate => :objLastModDate }
+    OBJ_ATTRIBUTES = {:state => :objState, :ownerId => :objOwnerId, :label => :objLabel, :logMessage => nil, :lastModifiedDate => :objLastModDate, :createdDate => :objCreateDate }
 
     OBJ_DEFAULT_ATTRIBUTES = { }
 

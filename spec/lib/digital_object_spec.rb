@@ -483,6 +483,11 @@ describe Rubydora::DigitalObject do
     let(:method) { 'lastModifiedDate' }
   end
 
+  describe "#createdDate" do
+    it_behaves_like "an object attribute"
+    let(:method) { 'createdDate' }
+  end
+
   describe "#object_xml" do
     it "should return the FOXML record" do
       xml = File.read(File.join(File.dirname(__FILE__), '..', 'fixtures', 'audit_trail.foxml.xml'))
