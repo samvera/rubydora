@@ -9,6 +9,15 @@ module Rubydora
       @config = config
     end
 
+    # Reserve a new pid for the object
+    # @params [Hash] options
+    # @option options [String] :namespace the namespece for the pid
+    def mint(options={})
+      d = Nokogiri::XML(next_pid(options))
+      d.xpath('//fedora:pid', 'fedora' => 'http://www.fedora.info/definitions/1/0/management/').text
+    end
+
+
     # repository profile (from API-A-LITE data)
     # @return [Hash]
     def repository_profile

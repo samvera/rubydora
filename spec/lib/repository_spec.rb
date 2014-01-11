@@ -34,7 +34,7 @@ describe Rubydora::Repository do
   describe "mint" do
     before do
       xml = "<resp xmlns:fedora=\"http://www.fedora.info/definitions/1/0/management/\"><fedora:pid>test:123</fedora:pid></resp>"
-      @repository.should_receive(:next_pid).and_return xml 
+      @repository.api.should_receive(:next_pid).and_return xml 
     end
     it "should call nextPID" do
       @repository.mint.should == 'test:123'
