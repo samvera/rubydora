@@ -8,7 +8,7 @@ describe "#audit_trail" do
       @xml = f.read
     end
     @repo = Rubydora::Repository.new
-    @repo.stub(:object_xml).with(hash_including(:pid => 'foo:bar')).and_return(@xml)
+    @repo.api.stub(:object_xml).with(hash_including(:pid => 'foo:bar')).and_return(@xml)
     @test_object = Rubydora::DigitalObject.new('foo:bar', @repo)
   end
   it "should have the correct number of audit records" do

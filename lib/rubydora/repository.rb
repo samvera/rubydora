@@ -21,7 +21,7 @@ module Rubydora
       :set_datastream_options, :datastream_dissemination, :purge_datastream,
       :add_relationship, :purge_relationship, :repository_profile,
       :object_profile, :datastream_profile, :versions_for_datastream,
-      :versions_for_object, to: :api
+      :versions_for_object, :audit_trail, to: :api
 
     # repository configuration (see #initialize)
     attr_reader :config
