@@ -59,7 +59,7 @@ module Rubydora
         raise e
       rescue RestClient::ResourceNotFound
         # the datastream is new
-        ''
+        return {}
       end
 
       ProfileParser.parse_datastream_profile(xml)

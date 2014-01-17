@@ -1,13 +1,23 @@
 module Rubydora
   module ProfileParser
     def self.parse_datastream_profile profile_xml
-      profile_xml.gsub! '<datastreamProfile', '<datastreamProfile xmlns="http://www.fedora.info/definitions/1/0/management/"' unless profile_xml =~ /xmlns=/
-      doc = Nokogiri::XML(profile_xml)
-      h = doc.xpath('/management:datastreamProfile/*', {'management' => "http://www.fedora.info/definitions/1/0/management/"} ).inject({}) do |sum, node|
+      # since the profile may be in the management or the access namespace, use the CSS selector
+      ndoc = Nokogiri::XML(profile_xml)
+      doc = (ndoc.name == 'datastreamProfile') ? ndoc : ndoc.css('datastreamProfile').first
+      if doc.nil?
+        # the datastream is new
+        {}.with_indifferent_access
+      else
+        hash_datastream_profile_node(doc)
+      end
+    end
+
+    def self.hash_datastream_profile_node doc
+      h = doc.xpath('./*').inject({}) do |sum, node|
                    sum[node.name] ||= []
                    sum[node.name] << node.text
                    sum
-                 end.reject { |key, values| values.empty? }
+                 end.reject { |key, values| values.nil? or values.empty? }
       h.select { |key, values| values.length == 1 }.each do |key, values|
         h[key] = values.reject { |x| x.empty? }.first 
       end
