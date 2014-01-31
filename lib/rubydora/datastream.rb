@@ -214,6 +214,10 @@ module Rubydora
       behaves_like_io?(@content) || !content.blank?
     end
 
+    def empty?
+      !has_content?
+    end
+
     # Returns a streaming response of the datastream.  This is ideal for large datasteams because
     # it doesn't require holding the entire content in memory. If you specify the from and length
     # parameters it simulates a range request. Unfortunatly Fedora 3 doesn't have range requests,
