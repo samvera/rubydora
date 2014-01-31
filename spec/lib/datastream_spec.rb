@@ -8,6 +8,18 @@ describe Rubydora::Datastream do
     @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new_record? => false)
   end
 
+  describe "empty?" do
+    subject { Rubydora::Datastream.new @mock_object, 'dsid' }
+    context "has content" do
+      before { subject.stub(:has_content? => true) }
+      it { should_not be_empty }
+    end
+    context "does not have content" do
+      before { subject.stub(:has_content? => false) }
+      it { should be_empty }
+    end
+  end
+
   describe "stream" do
     subject { Rubydora::Datastream.new @mock_object, 'dsid' }
     before do
@@ -21,7 +33,7 @@ describe Rubydora::Datastream do
       XML
       subject.profile = Rubydora::ProfileParser.parse_datastream_profile(prof)
     end
-    it "should send the whold thing" do
+    it "should send the whole thing" do
       e = subject.stream()
       result = ''
       e.each do |blk|
