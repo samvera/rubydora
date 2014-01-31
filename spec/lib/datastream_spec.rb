@@ -346,11 +346,20 @@ describe Rubydora::Datastream do
       subject.should have_content     
     end
 
-    it "should have content if it has a dsLocation" do
-
-      subject.dsLocation = "urn:abc"
-      subject.controlGroup = 'E'
-      subject.should have_content     
+    context "it has a dsLocation" do
+      before { subject.dsLocation = "urn:abc" }
+      context "controlGroup 'E'" do
+        before { subject.controlGroup = 'E' }
+        it { should have_content }
+      end
+      context "controlGroup 'R'" do
+        before { subject.controlGroup = 'R' }
+        it { should have_content }
+      end
+      context "controlGroup 'M'" do
+        before { subject.controlGroup = 'M' }
+        it { should have_content }
+      end
     end
 
     it "should not have content otherwise" do

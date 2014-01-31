@@ -204,14 +204,14 @@ module Rubydora
       # persisted objects are required to have content
       return true unless new?
 
-      # type E and R objects should have content.
-      return !dsLocation.blank? if ['E','R'].include? controlGroup
+      # type E and R have content if dsLocation is set.
+      return dsLocation.present? if ['E','R'].include? controlGroup
 
-      # if we've set content, then we have content.
+      # type M has content if dsLocation is not empty
+      return true if controlGroup == 'M' and dsLocation.present?
 
-      # return true if instance_variable_defined? :@content
-
-      behaves_like_io?(@content) || !content.blank?
+      # if we've set content, then we have content
+      behaves_like_io?(@content) || content.present?
     end
 
     # Returns a streaming response of the datastream.  This is ideal for large datasteams because
