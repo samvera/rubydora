@@ -215,22 +215,43 @@ describe Rubydora::RestApiClient do
 
   describe "add_datastream" do
     it "should post to the correct url" do
-       RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa')))
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa')))
       @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa' 
     end
-
     describe "when a file is passed" do
+      let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand it for a real File (it has read, rewind and close)
       it "should rewind the file" do
         RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
-        file = StringIO.new('test', 'r') # StringIO is a good stand it for a real File (it has read, rewind and close)
         @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
         lambda {file.read}.should_not raise_error
+      end
+      describe "and mimeType is not provided" do
+        describe "and file responds to :content_type" do
+          it "should set the mimeType to file.content_type" do
+            file.stub(:content_type).and_return('image/tiff')
+            RestClient::Request.should_receive(:execute).with(hash_including(:headers=>{:multipart=>true, :content_type=>"image/tiff"}))
+            @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+          end
+        end
+        describe "and file responds to :path" do
+          it "should should try to discern the mime-type from file.path" do
+            file.stub(:path).and_return('foo.tiff')
+            RestClient::Request.should_receive(:execute).with(hash_including(:headers=>{:multipart=>true, :content_type=>"image/tiff"}))
+            @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+          end
+        end
+        describe "otherwise" do
+          it "should set the mimeType to 'application/octet-stream'" do
+            RestClient::Request.should_receive(:execute).with(hash_including(:headers=>{:multipart=>true, :content_type=>"application/octet-stream"}))
+            @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+          end
+        end
       end
     end
   end
 
   describe "modify datastream" do
-    it "should not set mime-type when it's not provided" do
+    it "should not set mime-type when it's not provided (and a file is not passed)" do
        RestClient::Request.should_receive(:execute).with(:url => base_url + "/" + datastream_url('mypid', 'aaa'),:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa' 
     end
@@ -239,11 +260,33 @@ describe Rubydora::RestApiClient do
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :mimeType=>'application/json'
     end
     describe "when a file is passed" do
+      let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand it for a real File (it has read, rewind and close) 
       it "should rewind the file" do
         RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
-        file = StringIO.new('test', 'r') # StringIO is a good stand it for a real File (it has read, rewind and close)
         @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
         lambda {file.read}.should_not raise_error
+      end
+      describe "and mimeType is not provided" do
+        describe "and file responds to :content_type" do
+          it "should set the mimeType to file.content_type" do
+            file.stub(:content_type).and_return('image/tiff')
+            RestClient::Request.should_receive(:execute).with(hash_including(:headers=>{:multipart=>true, :content_type=>"image/tiff"}))
+            @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+          end
+        end
+        describe "and file responds to :path" do
+          it "should should try to discern the mime-type from file.path" do
+            file.stub(:path).and_return('foo.tiff')
+            RestClient::Request.should_receive(:execute).with(hash_including(:headers=>{:multipart=>true, :content_type=>"image/tiff"}))
+            @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+          end
+        end
+        describe "otherwise" do
+          it "should set the mimeType to 'application/octet-stream'" do
+            RestClient::Request.should_receive(:execute).with(hash_including(:headers=>{:multipart=>true, :content_type=>"application/octet-stream"}))
+            @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
+          end
+        end
       end
     end
   end

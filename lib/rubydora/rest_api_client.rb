@@ -12,7 +12,7 @@ module Rubydora
     include ActiveSupport::Benchmarkable    
     extend Deprecation
 
-
+    DEFAULT_CONTENT_TYPE = "application/octet-stream"
 
     VALID_CLIENT_OPTIONS = [:user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
 
@@ -336,9 +336,7 @@ module Rubydora
       pid = query_options.delete(:pid)
       dsid = query_options.delete(:dsid)
       file = query_options.delete(:content)
-      # In ruby 1.8.7 StringIO (file) responds_to? :path, but it always returns nil,  In ruby 1.9.3 StringIO doesn't have path.
-      # When we discontinue ruby 1.8.7 support we can remove the `|| ''` part.
-      content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path || '').first if file.respond_to? :path) || 'application/octet-stream'
+      content_type = query_options.delete(:content_type) || query_options[:mimeType] || file_content_type(file)
       run_hook :before_add_datastream, :pid => pid, :dsid => dsid, :file => file, :options => options
       str = file.respond_to?(:read) ? file.read : file
       file.rewind if file.respond_to?(:rewind)
@@ -357,10 +355,7 @@ module Rubydora
       pid = query_options.delete(:pid)
       dsid = query_options.delete(:dsid)
       file = query_options.delete(:content)
-      # In ruby 1.8.7 StringIO (file) responds_to? :path, but it always returns nil,  In ruby 1.9.3 StringIO doesn't have path.
-      # When we discontinue ruby 1.8.7 support we can remove the `|| ''` part.
-      content_type = query_options.delete(:content_type) || query_options[:mimeType] || (MIME::Types.type_for(file.path || '').first if file.respond_to? :path) || 'application/octet-stream'
-
+      content_type = query_options.delete(:content_type) || query_options[:mimeType] || file_content_type(file)
       rest_client_options = {}
       if file
         rest_client_options[:multipart] = true
@@ -465,5 +460,12 @@ module Rubydora
         client.class.new(url, options)
       end
     end
+
+    private
+
+    def file_content_type(file)
+      (file.content_type if file.respond_to? :content_type) || (MIME::Types.type_for(file.path).first if file.respond_to? :path) || DEFAULT_CONTENT_TYPE
+    end
+
   end
 end
