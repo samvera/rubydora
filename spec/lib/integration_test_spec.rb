@@ -120,6 +120,15 @@ describe "Integration testing against a live Fedora repository", :integration =>
     ds.controlGroup.should == "M"
     ds.size.should be > 100
   end
+
+  it "should not mark existing datastreams as changed on load" do
+    obj = @repository.find('fedora-system:ContentModel-3.0')
+    obj.datastreams.each do |k,v|
+      v.changed?.should be_false
+      v.new?.should be_false
+    end
+  end
+
   end
 
   it "should delete datastreams" do
