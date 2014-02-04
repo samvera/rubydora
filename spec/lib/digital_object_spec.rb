@@ -139,6 +139,46 @@ describe Rubydora::DigitalObject do
 
   end
 
+  describe "retrieved with batch ds profiles" do
+    before(:each) do
+      @mock_repository.stub(:datastreams).and_return <<-XML
+      <objectDatastreams>
+        <datastreamProfile pid="pid" dsID="a">
+          <dsLocation>some:uri</dsLocation>
+          <dsLabel>label</dsLabel>
+          <dsChecksumValid>true</dsChecksumValid>
+        </datastreamProfile>
+        <datastreamProfile pid="pid" dsID="b">
+          <dsLocation>some:uri</dsLocation>
+          <dsLabel>label</dsLabel>
+          <dsChecksumValid>true</dsChecksumValid>
+        </datastreamProfile>
+        <datastreamProfile pid="pid" dsID="c">
+          <dsLocation>some:uri</dsLocation>
+          <dsLabel>label</dsLabel>
+          <dsChecksumValid>true</dsChecksumValid>
+        </datastreamProfile>
+      </objectDatastreams>
+      XML
+     @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object.stub(:new_record? => false)
+    end
+    describe "datastreams" do
+      it "should provide a hash populated by the existing datastreams" do
+
+        @object.datastreams.should have_key("a")
+        @object.datastreams["a"].new?.should be_false
+        @object.datastreams["a"].changed?.should be_false
+        @object.datastreams.should have_key("b")
+        @object.datastreams["b"].new?.should be_false
+        @object.datastreams["b"].changed?.should be_false
+        @object.datastreams.should have_key("c")
+        @object.datastreams["c"].new?.should be_false
+        @object.datastreams["c"].changed?.should be_false
+      end
+    end
+  end
+
   describe "update" do
 
     before(:each) do
