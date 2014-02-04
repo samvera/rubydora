@@ -90,16 +90,16 @@ describe Rubydora::DigitalObject do
     end
   end
 
-  describe "retreive" do
-    before(:each) do
-      @mock_repository.stub :datastreams do |hash|
-        "<objectDatastreams><datastream dsid='a'></datastream>><datastream dsid='b'></datastream>><datastream dsid='c'></datastream></objectDatastreams>"
+  describe "retreive datastreams" do
+    describe "without profiles (fedora < 3.6)" do 
+      before(:each) do
+        @mock_repository.stub :datastreams do |hash|
+          "<objectDatastreams><datastream dsid='a'></datastream><datastream dsid='b'></datastream><datastream dsid='c'></datastream></objectDatastreams>"
+        end
+        @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+        @object.stub(:new_record? => false)
       end
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
-      @object.stub(:new_record? => false)
-    end
 
-    describe "datastreams" do
       it "should provide a hash populated by the existing datastreams" do
 
         @object.datastreams.should have_key("a")
@@ -134,9 +134,32 @@ describe Rubydora::DigitalObject do
 
         object.datastreams['asdf'].should be_a_kind_of(MyCustomDatastreamClass)
       end
-      
     end
+    describe "with profiles (fedora >= 3.6)" do 
+      before(:each) do
+        @mock_repository.stub :datastreams do |hash|
+          "<objectDatastreams>
+             <datastreamProfile dsID='a'><dsLabel>Test label</dsLabel></datastreamProfile>
+             <datastreamProfile dsID='b'></datastreamProfile>
+             <datastreamProfile dsID='c'></datastreamProfile>
+           </objectDatastreams>"
+        end
+        @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+        @object.stub(:new_record? => false)
+      end
 
+      it "should provide a hash populated by the existing datastreams" do
+        @object.datastreams.should have_key("a")
+        @object.datastreams.should have_key("b")
+        @object.datastreams.should have_key("c")
+      end
+      it "should load the profile attributes" do
+        expect(@object['a'].label).to eq 'Test label'
+      end
+      it "should not set the new datastream as changed" do
+        expect(@object['a']).to_not be_changed
+      end
+    end
   end
 
   describe "update" do
