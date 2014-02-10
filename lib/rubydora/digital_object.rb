@@ -197,7 +197,10 @@ module Rubydora
           @profile = nil #will cause a reload with updated data
         else                       
           p = to_api_params
-          repository.modify_object p.merge(:pid => pid) unless p.empty?
+          unless p.empty?
+            mod_time = repository.modify_object p.merge(:pid => pid)
+            self.lastModifiedDate = mod_time
+          end
         end
       end
 
