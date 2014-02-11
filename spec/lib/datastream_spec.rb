@@ -3,7 +3,9 @@ require 'stringio'
 
 describe Rubydora::Datastream do
   before do
-    @mock_repository = Rubydora::Fc3Service.new({})
+    @mock_api = Rubydora::Fc3Service.new({})
+    @mock_api.stub(:repository_profile, {"repositoryVersion" => "3.4"})
+    @mock_repository = Rubydora::Repository.new({}, @mock_api)
     @mock_object = double(Rubydora::DigitalObject)
     @mock_object.stub(:repository => @mock_repository, :pid => 'pid', :new_record? => false)
   end
@@ -25,7 +27,7 @@ describe Rubydora::Datastream do
     before do
       stub_response = double
       stub_response.stub(:read_body).and_yield("one1").and_yield('two2').and_yield('thre').and_yield('four')
-      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_yield(stub_response) 
+      @mock_api.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_yield(stub_response) 
       prof = <<-XML
         <datastreamProfile>
           <dsSize>16</dsSize>
@@ -69,7 +71,7 @@ describe Rubydora::Datastream do
 
   describe "create" do
     before(:each) do
-      @mock_repository.stub(:datastream) { raise(RestClient::ResourceNotFound) }
+      @mock_api.stub(:datastream) { raise(RestClient::ResourceNotFound) }
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
     end
 
@@ -147,12 +149,12 @@ describe Rubydora::Datastream do
 
     it "should call the appropriate api on save" do
       @datastream.stub(:content => 'content')
-      @mock_repository.should_receive(:add_datastream).with(hash_including(:content => 'content', :pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A'))
+      @mock_api.should_receive(:add_datastream).with(hash_including(:content => 'content', :pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A'))
       @datastream.save
     end
 
     it "should be able to override defaults" do
-      @mock_repository.should_receive(:add_datastream).with(hash_including(:controlGroup => 'E'))
+      @mock_api.should_receive(:add_datastream).with(hash_including(:controlGroup => 'E'))
       @datastream.controlGroup = 'E'
       @datastream.dsLocation = "uri:asdf"
       @datastream.save
@@ -164,7 +166,7 @@ describe Rubydora::Datastream do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
     end
     it "should be true by default" do
-      @mock_repository.should_receive(:datastream).and_return <<-XML
+      @mock_api.should_receive(:datastream).and_return <<-XML
         <datastreamProfile>
         </datastreamProfile>
       XML
@@ -172,7 +174,7 @@ describe Rubydora::Datastream do
     end
 
     it "should be true when it's returned as true" do
-      @mock_repository.should_receive(:datastream).and_return <<-XML
+      @mock_api.should_receive(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsVersionable>true</dsVersionable>
         </datastreamProfile>
@@ -181,7 +183,7 @@ describe Rubydora::Datastream do
     end
 
     it "should be false when it's returned as false" do
-      @mock_repository.should_receive(:datastream).and_return <<-XML
+      @mock_api.should_receive(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsVersionable>false</dsVersionable>
         </datastreamProfile>
@@ -195,7 +197,7 @@ describe Rubydora::Datastream do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
     end
     it "should be nil when it hasn't been set" do
-      @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
+      @mock_api.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
         <datastreamProfile>
         </datastreamProfile>
       XML
@@ -203,7 +205,7 @@ describe Rubydora::Datastream do
     end
 
     it "should be true when it's returned as true" do
-      @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
+      @mock_api.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
         <datastreamProfile>
           <dsChecksumValid>true</dsChecksumValid>
         </datastreamProfile>
@@ -212,7 +214,7 @@ describe Rubydora::Datastream do
     end
 
     it "should be false when it's returned as false" do
-      @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
+      @mock_api.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
         <datastreamProfile>
           <dsChecksumValid>false</dsChecksumValid>
         </datastreamProfile>
@@ -224,7 +226,7 @@ describe Rubydora::Datastream do
   describe "retrieve" do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @mock_repository.stub(:datastream).and_return <<-XML
+      @mock_api.stub(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
           <dsLabel>label</dsLabel>
@@ -246,12 +248,12 @@ describe Rubydora::Datastream do
     end
 
     it "should mediate access to datastream contents" do
-      @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+      @mock_api.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
       @datastream.content.should == "asdf"
     end
 
     it "should not load contents if they say not to" do
-      @mock_repository.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
+      @mock_api.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
       @datastream.local_or_remote_content(false).should be_nil
     end
 
@@ -273,7 +275,7 @@ describe Rubydora::Datastream do
     describe "for a managed datastream" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-        @mock_repository.stub(:datastream).and_return <<-XML
+        @mock_api.stub(:datastream).and_return <<-XML
           <datastreamProfile>
             <dsLocation>some:uri</dsLocation>
             <dsLabel>label</dsLabel>
@@ -282,35 +284,35 @@ describe Rubydora::Datastream do
       end
 
       it "should not be changed after a read-only access" do
-        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
         @datastream.content
         @datastream.content_changed?.should == false
       end
       it "should not load content just to check and see if it was changed." do
-        @mock_repository.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
+        @mock_api.should_not_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid'))
         @datastream.content_changed?.should == false
       end
       it "should be changed when the new content is different than the old content" do
-        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
         @datastream.content = "test"
         @datastream.content_changed?.should == true 
       end
 
       it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
-        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
         @datastream.eager_load_datastream_content = true
         @datastream.content = "test"
         @datastream.content_changed?.should  == false 
       end
 
       it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
-        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
         @datastream.content = "test"
         @datastream.content_changed?.should  == true
       end
 
       it "should not be changed when the new content is the same as the existing content (and we have accessed #content previously)" do
-        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
         @datastream.content
         @datastream.content = "test"
         @datastream.content_changed?.should  == false 
@@ -319,7 +321,7 @@ describe Rubydora::Datastream do
 
     describe "for an inline datastream" do
       before(:each) do
-        @mock_repository.stub(:datastream).and_return <<-XML
+        @mock_api.stub(:datastream).and_return <<-XML
           <datastreamProfile>
             <dsLocation>some:uri</dsLocation>
             <dsLabel>label</dsLabel>
@@ -328,14 +330,14 @@ describe Rubydora::Datastream do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid', :controlGroup => 'X'
       end
       it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
-        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
         @datastream.eager_load_datastream_content = true
         @datastream.content = "<xml>test</xml>"
         @datastream.content_changed?.should  == false 
       end
 
       it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
-        @mock_repository.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
         @datastream.content = "<xml>test</xml>"
         @datastream.content_changed?.should  == true
       end
@@ -383,7 +385,7 @@ describe Rubydora::Datastream do
   describe "update" do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @mock_repository.stub(:datastream).and_return <<-XML
+      @mock_api.stub(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
           <dsLabel>label</dsLabel>
@@ -406,7 +408,7 @@ describe Rubydora::Datastream do
       end
 
       it "should call the appropriate api with any dirty attributes" do
-        @mock_repository.should_receive(:modify_datastream).with(hash_including(:dsLabel => "New Label"))
+        @mock_api.should_receive(:modify_datastream).with(hash_including(:dsLabel => "New Label"))
         @datastream.dsLabel = "New Label"
         @datastream.save
       end
@@ -414,7 +416,7 @@ describe Rubydora::Datastream do
 
     describe "update when content is changed" do
       it "should update the datastream when the content is changed" do
-        @mock_repository.should_receive(:modify_datastream).with(hash_including(:content => 'test'))
+        @mock_api.should_receive(:modify_datastream).with(hash_including(:content => 'test'))
         @datastream.content = "test"
         @datastream.save
       end
@@ -432,7 +434,7 @@ describe Rubydora::Datastream do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
       @datastream.stub :content_changed? => false
-      @mock_repository.stub(:datastream).and_return <<-XML
+      @mock_api.stub(:datastream).and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
           <dsLabel>label</dsLabel>
@@ -446,13 +448,13 @@ describe Rubydora::Datastream do
     end
 
     it "before saving an object" do
-      @mock_repository.should_receive(:modify_datastream)
+      @mock_api.should_receive(:modify_datastream)
       @datastream.should_receive(:check_if_read_only)
       @datastream.save
     end
 
     it "before deleting an object" do
-      @mock_repository.should_receive(:purge_datastream)
+      @mock_api.should_receive(:purge_datastream)
       @mock_object.should_receive(:datastreams).and_return([])
       @datastream.should_receive(:check_if_read_only)
       @datastream.delete
@@ -464,7 +466,7 @@ describe Rubydora::Datastream do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
         @datastream.stub(:new? => false)
-        @mock_repository.stub(:datastream_versions).and_return <<-XML
+        @mock_api.stub(:datastream_versions).and_return <<-XML
         <datastreamHistory>
           <datastreamProfile>
             <dsVersionID>dsid.1</dsVersionID>
@@ -487,13 +489,13 @@ describe Rubydora::Datastream do
       end
 
       it "should lookup content of datastream using the asOfDateTime parameter" do
-        @mock_repository.should_receive(:datastream_dissemination).with(hash_including(:asOfDateTime => '2008-08-05T01:30:05.012Z'))
+        @mock_api.should_receive(:datastream_dissemination).with(hash_including(:asOfDateTime => '2008-08-05T01:30:05.012Z'))
         Rubydora::Datastream.any_instance.stub(:new? => false)
         @datastream.versions.last.content
       end
 
       it "should be the current version" do
-        @mock_repository.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return <<-XML
+        @mock_api.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return <<-XML
           <datastreamProfile>
             <dsVersionID>dsid.1</dsVersionID>
             <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
@@ -503,7 +505,7 @@ describe Rubydora::Datastream do
       end
 
       it "should be the current version if it's the first version" do
-        @mock_repository.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :asOfDateTime =>'2010-01-02T00:00:00.012Z')).and_return <<-XML
+        @mock_api.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :asOfDateTime =>'2010-01-02T00:00:00.012Z')).and_return <<-XML
           <datastreamProfile>
             <dsVersionID>dsid.1</dsVersionID>
             <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
@@ -513,7 +515,7 @@ describe Rubydora::Datastream do
       end
 
       it "should not be the current version if it's the second version" do
-        @mock_repository.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :asOfDateTime => '2008-08-05T01:30:05.012Z')).and_return <<-XML
+        @mock_api.stub(:datastream).with(hash_including(:pid => 'pid', :dsid => 'dsid', :asOfDateTime => '2008-08-05T01:30:05.012Z')).and_return <<-XML
           <datastreamProfile>
             <dsVersionID>dsid.0</dsVersionID>
             <dsCreateDate>2008-08-05T01:30:05.012Z</dsCreateDate>
@@ -525,7 +527,7 @@ describe Rubydora::Datastream do
     describe "when no versions are found" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-        @mock_repository.stub(:datastream_versions).and_return nil
+        @mock_api.stub(:datastream_versions).and_return nil
       end
 
       it "should have an emptylist of previous versions" do
@@ -543,7 +545,7 @@ describe Rubydora::Datastream do
 
   describe "datastream attributes" do
     before do
-      @mock_repository.stub(:datastream => <<-XML
+      @mock_api.stub(:datastream => <<-XML
         <datastreamProfile>
         <anyProfileValue />
         </datastreamProfile>
@@ -587,7 +589,7 @@ describe Rubydora::Datastream do
         end
 
         it "should appear in the save request" do 
-          @mock_repository.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'new_value'))
+          @mock_api.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'new_value'))
           subject.send("#{method}=", 'new_value')
           subject.save
         end
@@ -633,7 +635,7 @@ describe Rubydora::Datastream do
       end
 
       it "should appear in the save request" do
-          @mock_repository.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'http://example.com'))
+          @mock_api.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'http://example.com'))
           subject.stub(:content_changed? => false)
           subject.dsLocation = 'http://example.com'
           subject.save
@@ -741,7 +743,7 @@ describe Rubydora::Datastream do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
       end
       it "should accept a validateChecksum argument" do
-        @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
+        @mock_api.should_receive(:datastream).with(hash_including(:validateChecksum => true)).and_return <<-XML
           <datastreamProfile>
             <dsChecksumValid>true</dsChecksumValid>
           </datastreamProfile>
@@ -749,13 +751,13 @@ describe Rubydora::Datastream do
         @datastream.profile(:validateChecksum=>true).should == {'dsChecksumValid' =>true}
       end
       it "should reraise Unauthorized errors" do
-        @mock_repository.should_receive(:datastream).and_raise(RestClient::Unauthorized)
+        @mock_api.should_receive(:datastream).and_raise(RestClient::Unauthorized)
         lambda{@datastream.profile}.should raise_error(RestClient::Unauthorized)
       end
 
       describe "once it has a profile" do
         it "should use the profile from cache" do
-          @mock_repository.should_receive(:datastream).once.and_return <<-XML
+          @mock_api.should_receive(:datastream).once.and_return <<-XML
             <datastreamProfile>
               <dsChecksumValid>true</dsChecksumValid>
             </datastreamProfile>
@@ -765,12 +767,12 @@ describe Rubydora::Datastream do
           @datastream.profile().should == {'dsChecksumValid' =>true}
         end
         it "should re-fetch and replace the profile when validateChecksum is passed in, and there is no dsChecksumValid in the existing profile" do
-          @mock_repository.should_receive(:datastream).once.and_return <<-XML
+          @mock_api.should_receive(:datastream).once.and_return <<-XML
             <datastreamProfile>
               <dsLabel>The description of the content</dsLabel>
             </datastreamProfile>
           XML
-          @mock_repository.should_receive(:datastream).with(hash_including(:validateChecksum => true)).once.and_return <<-XML
+          @mock_api.should_receive(:datastream).with(hash_including(:validateChecksum => true)).once.and_return <<-XML
             <datastreamProfile>
               <dsLabel>The description of the content</dsLabel>
               <dsChecksumValid>true</dsChecksumValid>
@@ -820,6 +822,17 @@ describe Rubydora::Datastream do
         @datastream.dsLabel = nil
         @datastream.send(:to_api_params).should == {:versionable=>true, :controlGroup=>"M", :dsState=>"A", :content => '123' }
       end
+    end
+  end
+
+  describe "url" do
+    before(:each) do
+      @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
+    end
+
+    it "should call appropriate repository methods" do
+      @mock_api.should_receive(:datastream_url).once.and_return("http://example.org/foo")
+      @datastream.url.should == "http://example.org/foo/content"
     end
   end
 end

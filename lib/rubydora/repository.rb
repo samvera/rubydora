@@ -31,8 +31,9 @@ module Rubydora
     # @option options [String] :user
     # @option options [String] :password
     # @option options [Boolean] :validateChecksum
-    def initialize options = {}
+    def initialize options = {}, api = nil
       @config = options.symbolize_keys
+      @api = api if api
       check_repository_version!
     end
 
