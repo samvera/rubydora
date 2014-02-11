@@ -17,7 +17,7 @@ module Rubydora
     end
 
     delegate :client, :transaction, :mint, :ingest, :find_objects, :purge_object,
-      :modify_object, :datastreams, :add_datastream, :modify_datastream,
+      :modify_object, :datastream_url, :datastreams, :add_datastream, :modify_datastream,
       :set_datastream_options, :datastream_dissemination, :purge_datastream,
       :add_relationship, :purge_relationship, :repository_profile,
       :object_profile, :datastream_profile, :versions_for_datastream,

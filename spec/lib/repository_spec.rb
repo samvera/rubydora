@@ -100,4 +100,11 @@ describe Rubydora::Repository do
     end
   end
 
+  describe "delegation of methods to api" do
+    it "should delegate :datastream_url" do
+      @repository.api.should_receive(:datastream_url).with("foo:bar", "descMetadata", {})
+      @repository.datastream_url("foo:bar", "descMetadata", {})
+    end
+  end
+
 end
