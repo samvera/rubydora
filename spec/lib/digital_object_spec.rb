@@ -2,7 +2,9 @@ require 'spec_helper'
 
 describe Rubydora::DigitalObject do
   before do
-    @mock_repository = Rubydora::Fc3Service.new({})
+    @mock_api = Rubydora::Fc3Service.new({})
+    @mock_api.stub(:repository_profile, {"repositoryVersion" => "3.4"})
+    @mock_repository = Rubydora::Repository.new({}, @mock_api)
   end
   describe "profile" do
     before(:each) do
@@ -10,7 +12,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should convert object profile to a simple hash" do
-      @mock_repository.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
+      @mock_api.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
       h = @object.profile
 
       h.should have_key("a")
@@ -23,28 +25,28 @@ describe Rubydora::DigitalObject do
     end
 
     it "should be frozen (to prevent modification)" do
-      @mock_repository.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
+      @mock_api.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
       h = @object.profile
 
       expect { h['asdf'] = 'asdf' }.to raise_error
     end
 
     it "should return nil for empty profile fields" do
-      @mock_repository.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a></a></objectProfile>")
+      @mock_api.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a></a></objectProfile>")
       @object.profile['a'].should be_nil
     end
 
     it "should throw exceptions that arise" do
-      @mock_repository.should_receive(:object).with(:pid => 'pid').and_raise(Net::HTTPBadResponse)
+      @mock_api.should_receive(:object).with(:pid => 'pid').and_raise(Net::HTTPBadResponse)
       expect { @object.profile }.to raise_error(Net::HTTPBadResponse)
     end
   end
 
   describe "initialize" do
     before(:each) do
-      @mock_repository.stub(:object) { raise RestClient::ResourceNotFound }
+      @mock_api.stub(:object) { raise RestClient::ResourceNotFound }
     end
-    subject { Rubydora::DigitalObject.new 'pid', @mock_repository }
+    subject { Rubydora::DigitalObject.new 'pid', @mock_api }
 
     it "should load a DigitalObject instance" do
       expect(subject).to be_a_kind_of(Rubydora::DigitalObject)
@@ -60,15 +62,15 @@ describe Rubydora::DigitalObject do
 
     it "should call ingest on save" do
       subject.stub(:datastreams) { {} }
-      expect(@mock_repository).to receive(:ingest).with(hash_including(:pid => 'pid')).and_return('pid')
+      expect(@mock_api).to receive(:ingest).with(hash_including(:pid => 'pid')).and_return('pid')
       subject.save
     end
 
     describe "without a provided pid" do
-      subject { Rubydora::DigitalObject.new nil, @mock_repository }
+      subject { Rubydora::DigitalObject.new nil, @mock_api }
       it "should create a new Fedora object with a generated PID if no PID is provided" do 
-        @mock_repository.should_receive(:ingest).with(hash_including(:pid => nil)).and_return('pid')
-        @mock_repository.should_receive(:datastreams).with(hash_including(:pid => 'pid')).and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:ingest).with(hash_including(:pid => nil)).and_return('pid')
+        @mock_api.should_receive(:datastreams).with(hash_including(:pid => 'pid')).and_raise(RestClient::ResourceNotFound)
         subject.save
         subject.pid.should == 'pid'
       end
@@ -77,14 +79,14 @@ describe Rubydora::DigitalObject do
 
   describe "create" do
     it "should call the Fedora REST API to create a new object" do
-      @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
-      obj = Rubydora::DigitalObject.create "pid", { :a => 1, :b => 2}, @mock_repository
+      @mock_api.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
+      obj = Rubydora::DigitalObject.create "pid", { :a => 1, :b => 2}, @mock_api
       obj.should be_a_kind_of(Rubydora::DigitalObject)
     end
 
     it "should return a new object with the Fedora response pid when no pid is provided" do
-      @mock_repository.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
-      obj = Rubydora::DigitalObject.create "new", { :a => 1, :b => 2}, @mock_repository
+      @mock_api.should_receive(:ingest).with(instance_of(Hash)).and_return("pid")
+      obj = Rubydora::DigitalObject.create "new", { :a => 1, :b => 2}, @mock_api
       obj.should be_a_kind_of(Rubydora::DigitalObject)
       obj.pid.should == "pid"
     end
@@ -93,10 +95,10 @@ describe Rubydora::DigitalObject do
   describe "retreive datastreams" do
     describe "without profiles (fedora < 3.6)" do 
       before(:each) do
-        @mock_repository.stub :datastreams do |hash|
+        @mock_api.stub :datastreams do |hash|
           "<objectDatastreams><datastream dsid='a'></datastream><datastream dsid='b'></datastream><datastream dsid='c'></datastream></objectDatastreams>"
         end
-        @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+        @object = Rubydora::DigitalObject.new 'pid', @mock_api
         @object.stub(:new_record? => false)
       end
 
@@ -108,7 +110,7 @@ describe Rubydora::DigitalObject do
       end
 
       it "should allow other datastreams to be added" do
-        @mock_repository.should_receive(:datastream).with(:pid => 'pid', :dsid => 'z').and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:datastream).with(:pid => 'pid', :dsid => 'z').and_raise(RestClient::ResourceNotFound)
 
         @object.datastreams.length.should == 3
 
@@ -127,7 +129,7 @@ describe Rubydora::DigitalObject do
 
       it "should provide a way to override the type of datastream object to use" do
         class MyCustomDatastreamClass < Rubydora::Datastream; end
-        object = Rubydora::DigitalObject.new 'pid', @mock_repository
+        object = Rubydora::DigitalObject.new 'pid', @mock_api
         object.stub(:datastream_object_for) do |dsid|
           MyCustomDatastreamClass.new(self, dsid)
         end
@@ -137,14 +139,14 @@ describe Rubydora::DigitalObject do
     end
     describe "with profiles (fedora >= 3.6)" do 
       before(:each) do
-        @mock_repository.stub :datastreams do |hash|
+        @mock_api.stub :datastreams do |hash|
           "<objectDatastreams>
              <datastreamProfile dsID='a'><dsLabel>Test label</dsLabel></datastreamProfile>
              <datastreamProfile dsID='b'></datastreamProfile>
              <datastreamProfile dsID='c'></datastreamProfile>
            </objectDatastreams>"
         end
-        @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+        @object = Rubydora::DigitalObject.new 'pid', @mock_api
         @object.stub(:new_record? => false)
       end
 
@@ -164,7 +166,7 @@ describe Rubydora::DigitalObject do
 
   describe "retrieved with batch ds profiles" do
     before(:each) do
-      @mock_repository.stub(:datastreams).and_return <<-XML
+      @mock_api.stub(:datastreams).and_return <<-XML
       <objectDatastreams>
         <datastreamProfile pid="pid" dsID="a">
           <dsLocation>some:uri</dsLocation>
@@ -183,7 +185,7 @@ describe Rubydora::DigitalObject do
         </datastreamProfile>
       </objectDatastreams>
       XML
-     @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+     @object = Rubydora::DigitalObject.new 'pid', @mock_api
       @object.stub(:new_record? => false)
     end
     describe "datastreams" do
@@ -205,14 +207,14 @@ describe Rubydora::DigitalObject do
   describe "update" do
 
     before(:each) do
-      @mock_repository.stub(:object) { <<-XML
+      @mock_api.stub(:object) { <<-XML
       <objectProfile>
         <objLabel>label</objLabel>
       </objectProfile>
       XML
       }
 
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
     end
 
     it "should not say changed if the value is set the same" do
@@ -227,14 +229,14 @@ describe Rubydora::DigitalObject do
 
   describe "save" do
     before(:each) do
-      @mock_repository.stub(:object) { <<-XML
+      @mock_api.stub(:object) { <<-XML
       <objectProfile>
         <not>empty</not>
       </objectProfile>
       XML
       }
 
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
     end
 
     describe "saving an object's datastreams" do
@@ -293,34 +295,34 @@ describe Rubydora::DigitalObject do
     it "should save all changed attributes" do
       @object.label = "asdf"
       @object.should_receive(:datastreams).and_return({})
-      @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
+      @mock_api.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
       @object.save
     end
   end
 
   describe "delete" do
     before(:each) do
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
     end
 
     it "should call the Fedora REST API" do
-      @mock_repository.should_receive(:purge_object).with({:pid => 'pid'})
+      @mock_api.should_receive(:purge_object).with({:pid => 'pid'})
       @object.delete
     end
   end
 
   describe "models" do
     before(:each) do
-      @mock_repository.stub(:object) { <<-XML
+      @mock_api.stub(:object) { <<-XML
       <objectProfile>
       </objectProfile>
       XML
       }
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
     end
 
     it "should add models to fedora" do
-      @mock_repository.should_receive(:add_relationship) do |params|
+      @mock_api.should_receive(:add_relationship) do |params|
         params.should have_key(:subject)
         params[:predicate].should == 'info:fedora/fedora-system:def/model#hasModel'
         params[:object].should == 'asdf'
@@ -330,7 +332,7 @@ describe Rubydora::DigitalObject do
 
     it "should remove models from fedora" do
       @object.stub(:profile).and_return({"objModels" => ['asdf']})
-      @mock_repository.should_receive(:purge_relationship) do |params|
+      @mock_api.should_receive(:purge_relationship) do |params|
         params.should have_key(:subject)
         params[:predicate].should == 'info:fedora/fedora-system:def/model#hasModel'
         params[:object].should == 'asdf'
@@ -340,8 +342,8 @@ describe Rubydora::DigitalObject do
 
     it "should be able to handle complete model replacemenet" do
       @object.stub(:profile).and_return({"objModels" => ['asdf']})
-      @mock_repository.should_receive(:add_relationship).with(instance_of(Hash))
-      @mock_repository.should_receive(:purge_relationship).with(instance_of(Hash))
+      @mock_api.should_receive(:add_relationship).with(instance_of(Hash))
+      @mock_api.should_receive(:purge_relationship).with(instance_of(Hash))
       @object.models = '1234'
 
     end
@@ -349,60 +351,60 @@ describe Rubydora::DigitalObject do
 
   describe "relations" do
     before(:each) do
-      @mock_repository.stub(:object) { <<-XML
+      @mock_api.stub(:object) { <<-XML
       <objectProfile>
       </objectProfile>
       XML
       }
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
     end
 
     it "should fetch related objects using sparql" do
-      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([1])
+      @mock_api.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([1])
       @object.parts.should == [1]
     end
 
     it "should add related objects" do
-      @mock_repository.should_receive(:add_relationship) do |params|
+      @mock_api.should_receive(:add_relationship) do |params|
         params.should have_key(:subject)
         params[:predicate].should == 'info:fedora/fedora-system:def/relations-external#hasPart'
         params[:object].should == 'asdf'
       end
       @mock_object = double(Rubydora::DigitalObject)
       @mock_object.should_receive(:fqpid).and_return('asdf')
-      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([])
+      @mock_api.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([])
       @object.parts << @mock_object
     end
 
     it "should remove related objects" do
-      @mock_repository.should_receive(:purge_relationship) do |params|
+      @mock_api.should_receive(:purge_relationship) do |params|
         params.should have_key(:subject)
         params[:predicate].should == 'info:fedora/fedora-system:def/relations-external#hasPart'
         params[:object].should == 'asdf'
       end
       @mock_object = double(Rubydora::DigitalObject)
       @mock_object.should_receive(:fqpid).and_return('asdf')
-      @mock_repository.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([@mock_object])
+      @mock_api.should_receive(:find_by_sparql_relationship).with('info:fedora/pid', 'info:fedora/fedora-system:def/relations-external#hasPart').and_return([@mock_object])
       @object.parts.delete(@mock_object)
     end
   end
 
   describe "versions" do
     before(:each) do
-      @mock_repository.stub(:object) { <<-XML
+      @mock_api.stub(:object) { <<-XML
       <objectProfile>
       </objectProfile>
       XML
       }
 
-      @mock_repository.stub(:object_versions) { <<-XML
+      @mock_api.stub(:object_versions) { <<-XML
       <fedoraObjectHistory>
         <objectChangeDate>2011-09-26T20:41:02.450Z</objectChangeDate>
         <objectChangeDate>2011-10-11T21:17:48.124Z</objectChangeDate>
       </fedoraObjectHistory>
       XML
       }
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
     end
 
     it "should have a list of previous versions" do
@@ -415,7 +417,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should lookup content of datastream using the asOfDateTime parameter" do
-      @mock_repository.should_receive(:datastreams).with(hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z')).and_return('')
+      @mock_api.should_receive(:datastreams).with(hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z')).and_return('')
       Rubydora::Datastream.should_receive(:new).with(anything, 'my_ds', hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z'))
       ds = @object.versions.first['my_ds']
     end
@@ -424,7 +426,7 @@ describe Rubydora::DigitalObject do
 
   describe "to_api_params" do
     before(:each) do
-      @object = Rubydora::DigitalObject.new 'pid', @mock_repository
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
     end
     it "should compile parameters to hash" do
       @object.send(:to_api_params).should == {}
@@ -432,7 +434,7 @@ describe Rubydora::DigitalObject do
   end
 
   shared_examples "an object attribute" do
-    subject { Rubydora::DigitalObject.new 'pid', @mock_repository }
+    subject { Rubydora::DigitalObject.new 'pid', @mock_api }
 
     describe "getter" do
       it "should return the value" do
@@ -446,7 +448,7 @@ describe Rubydora::DigitalObject do
       end
 
       it "should fall-back to the set of default attributes" do
-        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
         subject.send(method).should == 'zxcv'
       end
@@ -457,7 +459,7 @@ describe Rubydora::DigitalObject do
         subject.stub(:datastreams => [])
       end
       it "should mark the object as changed after setting" do
-        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.send("#{method}=", 'new_value')
         subject.should be_changed
       end
@@ -468,8 +470,8 @@ describe Rubydora::DigitalObject do
       end
 
       it "should appear in the save request" do 
-        @mock_repository.should_receive(:ingest).with(hash_including(method.to_sym => 'new_value'))
-        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:ingest).with(hash_including(method.to_sym => 'new_value'))
+        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.send("#{method}=", 'new_value')
         subject.save
       end
@@ -477,7 +479,7 @@ describe Rubydora::DigitalObject do
   end
 
   describe "#state" do
-    subject { Rubydora::DigitalObject.new 'pid', @mock_repository }
+    subject { Rubydora::DigitalObject.new 'pid', @mock_api }
 
     describe "getter" do
       it "should return the value" do
@@ -491,7 +493,7 @@ describe Rubydora::DigitalObject do
       end
 
       it "should fall-back to the set of default attributes" do
-        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(:state) { 'zxcv'} 
         subject.state.should == 'zxcv'
       end
@@ -502,7 +504,7 @@ describe Rubydora::DigitalObject do
         subject.stub(:datastreams => [])
       end
       it "should mark the object as changed after setting" do
-        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.state= 'D'
         subject.should be_changed
       end
@@ -518,8 +520,8 @@ describe Rubydora::DigitalObject do
       end
 
       it "should appear in the save request" do 
-        @mock_repository.should_receive(:ingest).with(hash_including(:state => 'A'))
-        @mock_repository.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:ingest).with(hash_including(:state => 'A'))
+        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.state='A'
         subject.save
       end
