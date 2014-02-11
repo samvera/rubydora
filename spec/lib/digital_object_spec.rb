@@ -296,6 +296,20 @@ describe Rubydora::DigitalObject do
       @mock_repository.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
       @object.save
     end
+
+    it "updates the modification time" do
+      ds = double(Rubydora::Datastream)
+      ds.stub(:changed? => false)
+      @object.stub(:datastreams) { { :ds => ds } }
+
+      mod_time = Time.local(2012, 1, 2, 5, 15, 45).to_s
+      @mock_repository.should_receive(:modify_object).and_return(mod_time)
+
+      @object.lastModifiedDate = 'old time'
+      @object.save
+      @object.lastModifiedDate.should == mod_time
+    end
+
   end
 
   describe "delete" do
