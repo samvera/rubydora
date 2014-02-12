@@ -305,9 +305,9 @@ describe Rubydora::DigitalObject do
       @object.stub(:datastreams) { { :ds => ds } }
 
       mod_time = Time.local(2012, 1, 2, 5, 15, 45).to_s
-      @mock_repository.should_receive(:modify_object).and_return(mod_time)
+      @mock_api.should_receive(:modify_object).and_return(mod_time)
 
-      @object.lastModifiedDate = 'old time'
+      @object.label = "asdf"
       @object.save
       @object.lastModifiedDate.should == mod_time
     end
