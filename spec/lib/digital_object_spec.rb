@@ -229,10 +229,10 @@ describe Rubydora::DigitalObject do
 
   describe "save" do
     before(:each) do
-      @original_modified = Time.local(2011, 1, 2, 5, 15, 45).to_s
+      @original_modified = "2011-01-02:05:15:45.1Z"
       @mock_api.stub(:object) { <<-XML
       <objectProfile>
-        <objLastModDate>#{@original_modified}</objLastModDate>
+        <objLastModDate>2011-01-02:05:15:45.100Z</objLastModDate>
       </objectProfile>
       XML
       }
@@ -307,7 +307,7 @@ describe Rubydora::DigitalObject do
       @object.stub(:datastreams) { { :ds => ds } }
 
       @object.lastModifiedDate.should == @original_modified
-      mod_time = Time.local(2012, 1, 2, 5, 15, 45).to_s
+      mod_time = "2012-01-02:05:15:00.1Z"
       @mock_api.should_receive(:modify_object).and_return(mod_time)
 
       @object.label = "asdf"

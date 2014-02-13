@@ -145,6 +145,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.save
 
     obj.datastreams["new_ds"].new?.should == false
+    obj.datastreams["new_ds"].changed?.should == false
     obj.datastreams["empty_ds"].new?.should == true
   end
 

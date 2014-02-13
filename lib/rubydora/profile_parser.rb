@@ -46,6 +46,7 @@ module Rubydora
         next if key == "objModels"
         h[key] = values.reject { |x| x.empty? }.first
       end
+      h['objLastModDate'] = canonicalize_date_string(h['objLastModDate']) if h['objLastModDate']
       h.with_indifferent_access
     end
 
@@ -65,5 +66,19 @@ module Rubydora
                  end
       h.with_indifferent_access
     end
+
+    # Some versions of Fedora 3 return lexical representations of a w3c date
+    # in the object profile, which will not compare correctly to the canonical
+    # representations returned from update operations
+    def self.canonicalize_date_string(input)
+      if input =~ /0Z/
+        lmd = input.sub(/\.[0]+Z$/,'Z')
+        lmd = lmd.sub(/\.([^0]+)[0]+Z$/,'.\1Z')
+        lmd
+      else
+        input
+      end
+    end
+
   end
 end
