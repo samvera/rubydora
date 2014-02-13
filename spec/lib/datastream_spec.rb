@@ -592,7 +592,8 @@ describe Rubydora::Datastream do
           @mock_api.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'new_value'))
           subject.send("#{method}=", 'new_value')
           subject.save
-        end
+          expect(subject).to_not be_changed, "#{subject.changes.inspect}"
+       end
       end
     end
 

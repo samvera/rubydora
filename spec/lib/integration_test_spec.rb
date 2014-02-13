@@ -72,10 +72,11 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.label.should == 'asdf'
     obj.label = 'qwerty'
     obj.save
-
+    # get 'cached' lastModifiedDate
+    e_date = obj.lastModifiedDate
     obj = @repository.find('test:3')
     obj.label.should == 'qwerty'
-
+    obj.lastModifiedDate.should == e_date
   end
 
   describe "datastream stuff" do

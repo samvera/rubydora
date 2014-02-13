@@ -229,9 +229,10 @@ describe Rubydora::DigitalObject do
 
   describe "save" do
     before(:each) do
+      @original_modified = Time.local(2011, 1, 2, 5, 15, 45).to_s
       @mock_api.stub(:object) { <<-XML
       <objectProfile>
-        <not>empty</not>
+        <objLastModDate>#{@original_modified}</objLastModDate>
       </objectProfile>
       XML
       }
@@ -297,6 +298,7 @@ describe Rubydora::DigitalObject do
       @object.should_receive(:datastreams).and_return({})
       @mock_api.should_receive(:modify_object).with(hash_including(:pid => 'pid'))
       @object.save
+      expect(@object).to_not be_changed, "#{@object.changes.inspect}"
     end
 
     it "updates the modification time" do
@@ -304,12 +306,14 @@ describe Rubydora::DigitalObject do
       ds.stub(:changed? => false)
       @object.stub(:datastreams) { { :ds => ds } }
 
+      @object.lastModifiedDate.should == @original_modified
       mod_time = Time.local(2012, 1, 2, 5, 15, 45).to_s
       @mock_api.should_receive(:modify_object).and_return(mod_time)
 
       @object.label = "asdf"
       @object.save
       @object.lastModifiedDate.should == mod_time
+      expect(@object).to_not be_changed, "#{@object.changes.inspect}"
     end
 
   end

@@ -200,6 +200,7 @@ module Rubydora
           unless p.empty?
             mod_time = repository.modify_object p.merge(:pid => pid)
             self.lastModifiedDate = mod_time
+            changed_attributes.clear
           end
         end
       end
