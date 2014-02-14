@@ -175,6 +175,18 @@ describe "Integration testing against a live Fedora repository", :integration =>
     ds.content
   end
 
+  it "should cache object's lastModifiedDate from ds changes" do
+    @repository.ping.should == true
+    obj = @repository.find_or_initialize('test:1')
+    obj.save
+    obj.label = "abc"
+    obj.datastreams["my_ds"].content = "XXX"
+    obj.save
+    obj.label = "123"
+    obj.save
+  end
+
+
   describe "with transactions" do
     it "should work on ingest" do
        @repository.find('transactions:1').delete rescue nil

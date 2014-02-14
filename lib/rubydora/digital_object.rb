@@ -185,12 +185,13 @@ module Rubydora
     # persist the object to Fedora, either as a new object 
     # by modifing the existing object
     #
-    # also will save all `:dirty?` datastreams that already exist 
+    # also will save all `:changed?` datastreams that already exist 
     # new datastreams must be directly saved
     # 
     # @return [Rubydora::DigitalObject] a new copy of this object
     def save
       check_if_read_only
+      mod_time = nil
       run_callbacks :save do
         if self.new?
           self.pid = repository.ingest to_api_params.merge(:pid => pid)
@@ -199,13 +200,16 @@ module Rubydora
           p = to_api_params
           unless p.empty?
             mod_time = repository.modify_object p.merge(:pid => pid)
-            self.lastModifiedDate = mod_time
             changed_attributes.clear
           end
         end
       end
-
-      self.datastreams.select { |dsid, ds| ds.changed? }.each { |dsid, ds| ds.save }
+      mod_time = save_datastreams(mod_time)
+      # mod_time will be nil on new objects with no ds changes
+      unless mod_time.nil?
+        self.lastModifiedDate = mod_time
+        changed_attributes.delete 'lastModifiedDate'
+      end
       self
     end
 
@@ -272,5 +276,16 @@ module Rubydora
       super
     end
 
+    # save changed datastreams
+    # @param [String] memo_time : the time before changes, or nil
+    # @return [String] the time of the last datastream change, or nil if no changes
+    def save_datastreams(memo_time=nil)
+      mod_time = memo_time
+      self.datastreams.select { |dsid, ds| ds.changed? }.each do |dsid, ds|
+        ds.save
+        mod_time = ProfileParser.canonicalize_date(ds.dsCreateDate)
+      end
+      mod_time
+    end
   end
 end
