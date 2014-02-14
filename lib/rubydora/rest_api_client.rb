@@ -340,7 +340,7 @@ module Rubydora
       run_hook :before_add_datastream, :pid => pid, :dsid => dsid, :file => file, :options => options
       str = file.respond_to?(:read) ? file.read : file
       file.rewind if file.respond_to?(:rewind)
-      client[datastream_url(pid, dsid, query_options)].post(str, :content_type => content_type.to_s, :multipart => true)
+      client[datastream_url(pid, dsid, query_options)].post(str, :content_type => content_type.to_s)
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -358,7 +358,6 @@ module Rubydora
       content_type = query_options.delete(:content_type) || query_options[:mimeType] || file_content_type(file)
       rest_client_options = {}
       if file
-        rest_client_options[:multipart] = true
         rest_client_options[:content_type] = content_type
       end
 
