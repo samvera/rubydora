@@ -79,6 +79,12 @@ module Rubydora
         input
       end
     end
-
+    def self.canonicalize_date(input)
+      if input.is_a? Time
+        canonicalize_date_string(input.utc.strftime("%Y-%m-%dT%H:%M:%S.%3NZ"))
+      else
+        canonicalize_date_string(input.to_s)
+      end
+    end
   end
 end

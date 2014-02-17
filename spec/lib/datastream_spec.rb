@@ -385,7 +385,7 @@ describe Rubydora::Datastream do
   describe "update" do
     before(:each) do
       @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
-      @mock_api.stub(:datastream).and_return <<-XML
+      @mock_api.should_receive(:datastream).once.and_return <<-XML
         <datastreamProfile>
           <dsLocation>some:uri</dsLocation>
           <dsLabel>label</dsLabel>
@@ -416,9 +416,10 @@ describe Rubydora::Datastream do
 
     describe "update when content is changed" do
       it "should update the datastream when the content is changed" do
-        @mock_api.should_receive(:modify_datastream).with(hash_including(:content => 'test'))
+        @mock_api.should_receive(:modify_datastream).with(hash_including(:content => 'test')).and_return({'dsLocation' => 'some:uri', 'dsLabel' => 'label', 'dsSize' => 4})
         @datastream.content = "test"
         @datastream.save
+        @datastream.dsSize.should == 4
       end
 
       it "should be marked as changed when the content is updated" do

@@ -340,7 +340,7 @@ module Rubydora
       run_hook :before_add_datastream, :pid => pid, :dsid => dsid, :file => file, :options => options
       str = file.respond_to?(:read) ? file.read : file
       file.rewind if file.respond_to?(:rewind)
-      client[datastream_url(pid, dsid, query_options)].post(str, :content_type => content_type.to_s, :multipart => true)
+      ProfileParser.parse_datastream_profile(client[datastream_url(pid, dsid, query_options)].post(str, :content_type => content_type.to_s, :multipart => true))
     rescue Exception => exception
         rescue_with_handler(exception) || raise
     end
@@ -365,7 +365,7 @@ module Rubydora
       run_hook :before_modify_datastream, :pid => pid, :dsid => dsid, :file => file, :content_type => content_type, :options => options
       str = file.respond_to?(:read) ? file.read : file
       file.rewind if file.respond_to?(:rewind)
-      client[datastream_url(pid, dsid, query_options)].put(str, rest_client_options)
+      ProfileParser.parse_datastream_profile(client[datastream_url(pid, dsid, query_options)].put(str, rest_client_options))
 
     rescue Exception => exception
         rescue_with_handler(exception) || raise

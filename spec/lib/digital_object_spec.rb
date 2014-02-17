@@ -243,17 +243,17 @@ describe Rubydora::DigitalObject do
     describe "saving an object's datastreams" do
       before do
         @new_ds = double(Rubydora::Datastream)
-        @new_ds.stub(:new? => true, :changed? => true, :content_changed? => true, :content => 'XXX')
+        @new_ds.stub(:new? => true, :changed? => true, :content_changed? => true, :content => 'XXX', :dsCreateDate => '12345')
         @new_empty_ds = double(Rubydora::Datastream)
-        @new_empty_ds.stub(:new? => true, :changed? => false, :content_changed? => false, :content => nil)
+        @new_empty_ds.stub(:new? => true, :changed? => false, :content_changed? => false, :content => nil, :dsCreateDate => '12345')
         @existing_ds = double(Rubydora::Datastream)
-        @existing_ds.stub(:new? => false, :changed? => false, :content_changed? => false, :content => 'YYY')
+        @existing_ds.stub(:new? => false, :changed? => false, :content_changed? => false, :content => 'YYY', :dsCreateDate => '12345')
         @changed_attr_ds = double(Rubydora::Datastream)
-        @changed_attr_ds.stub(:new? => false, :changed? => true, :content_changed? => false, :content => 'YYY')
+        @changed_attr_ds.stub(:new? => false, :changed? => true, :content_changed? => false, :content => 'YYY', :dsCreateDate => '12345')
         @changed_ds = double(Rubydora::Datastream)
-        @changed_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => 'ZZZ')
+        @changed_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => 'ZZZ', :dsCreateDate => '2012-01-02:05:15:45.100Z')
         @changed_empty_ds = double(Rubydora::Datastream)
-        @changed_empty_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => nil)
+        @changed_empty_ds.stub(:new? => false, :changed? => true, :content_changed? => true, :content => nil, :dsCreateDate => '12345')
 
       end
       it "should save a new datastream with content" do
@@ -266,6 +266,8 @@ describe Rubydora::DigitalObject do
         @object.stub(:datastreams) { { :changed_ds => @changed_ds } }
         @changed_ds.should_receive(:save)
         @object.save
+        # object date should be canonicalized and updated
+        @object.lastModifiedDate.should == '2012-01-02:05:15:45.1Z'
       end
 
       it "should save a datastream whose attributes have changed" do
