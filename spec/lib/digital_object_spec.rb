@@ -269,6 +269,16 @@ describe Rubydora::DigitalObject do
         # object date should be canonicalized and updated
         @object.lastModifiedDate.should == '2012-01-02:05:15:45.1Z'
       end
+      
+      it "should not set lastModifiedDate if the before_save callback is false" do
+        @object.stub(:datastreams) { { :changed_ds => @changed_ds } }
+        @changed_ds.should_receive(:dsCreateDate).and_return(nil)
+        @changed_ds.should_receive(:save)
+        @object.should_not_receive(:lastModifiedDate=)
+        @object.save
+        # object date should be unchanged from its original value
+        @object.lastModifiedDate.should == '2011-01-02:05:15:45.1Z'
+      end
 
       it "should save a datastream whose attributes have changed" do
         @object.stub(:datastreams) { { :changed_attr_ds => @changed_attr_ds } }

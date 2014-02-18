@@ -283,7 +283,9 @@ module Rubydora
       mod_time = memo_time
       self.datastreams.select { |dsid, ds| ds.changed? }.each do |dsid, ds|
         ds.save
-        mod_time = ProfileParser.canonicalize_date(ds.dsCreateDate)
+        if ds.dsCreateDate
+          mod_time = ProfileParser.canonicalize_date(ds.dsCreateDate)
+        end
       end
       mod_time
     end
