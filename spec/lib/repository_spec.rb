@@ -40,7 +40,16 @@ describe Rubydora::Repository do
       @repository.mint.should == 'test:123'
     end
   end
-
+  
+  describe "mint (Fedora 3.4)" do
+    before do
+      xml = "<resp><pid>test:123</pid></resp>"
+      @repository.api.should_receive(:next_pid).and_return xml 
+    end
+    it "should call nextPID" do
+      @repository.mint.should == 'test:123'
+    end
+  end
 
   describe "sparql" do
     it "should return csv results for sparql queries" do

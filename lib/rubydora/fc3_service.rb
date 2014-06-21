@@ -16,7 +16,11 @@ module Rubydora
     # @option options [String] :namespace the namespece for the pid
     def mint(options={})
       d = Nokogiri::XML(next_pid(options))
-      d.xpath('//fedora:pid', 'fedora' => 'http://www.fedora.info/definitions/1/0/management/').text
+      if d.namespaces.values.include? 'http://www.fedora.info/definitions/1/0/management/'
+        d.xpath('//fedora:pid', 'fedora' => 'http://www.fedora.info/definitions/1/0/management/').text
+      else
+        d.xpath('//pid').text
+      end
     end
 
 
