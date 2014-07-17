@@ -125,8 +125,8 @@ describe "Integration testing against a live Fedora repository", :integration =>
   it "should not mark existing datastreams as changed on load" do
     obj = @repository.find('fedora-system:ContentModel-3.0')
     obj.datastreams.each do |k,v|
-      v.changed?.should be_false
-      v.new?.should be_false
+      v.changed?.should be false
+      v.new?.should be false
     end
   end
 
@@ -348,7 +348,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
       obj = @repository.find_or_initialize('test:1')
       versions_count = obj.datastreams["my_ds"].versions.length
 
-      obj.datastreams["my_ds"].versionable.should be_true
+      obj.datastreams["my_ds"].versionable.should be true
 
       obj.datastreams["my_ds"].versionable = false
       obj.datastreams["my_ds"].content = "ZZZ"
@@ -361,7 +361,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
       obj.datastreams["my_ds"].save
 
       obj = @repository.find('test:1')
-      obj.datastreams["my_ds"].versionable.should be_false
+      obj.datastreams["my_ds"].versionable.should be false
       obj.datastreams["my_ds"].versions.length.should == (versions_count + 1)
     end
   end

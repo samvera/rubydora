@@ -192,14 +192,14 @@ describe Rubydora::DigitalObject do
       it "should provide a hash populated by the existing datastreams" do
 
         @object.datastreams.should have_key("a")
-        @object.datastreams["a"].new?.should be_false
-        @object.datastreams["a"].changed?.should be_false
+        @object.datastreams["a"].new?.should be false
+        @object.datastreams["a"].changed?.should be false
         @object.datastreams.should have_key("b")
-        @object.datastreams["b"].new?.should be_false
-        @object.datastreams["b"].changed?.should be_false
+        @object.datastreams["b"].new?.should be false
+        @object.datastreams["b"].changed?.should be false
         @object.datastreams.should have_key("c")
-        @object.datastreams["c"].new?.should be_false
-        @object.datastreams["c"].changed?.should be_false
+        @object.datastreams["c"].new?.should be false
+        @object.datastreams["c"].changed?.should be false
       end
     end
   end
@@ -438,7 +438,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should have a list of previous versions" do
-      @object.versions.should have(2).items
+      expect(@object.versions.size).to eq 2
       @object.versions.first.asOfDateTime.should == '2011-09-26T20:41:02.450Z'
     end
 
