@@ -91,7 +91,7 @@ describe Rubydora::Datastream do
     it "should have default values" do
       @datastream.controlGroup == "M"
       @datastream.dsState.should == "A"
-      @datastream.versionable.should be_true
+      @datastream.versionable.should be true
       @datastream.changed.should be_empty
     end
 
@@ -134,16 +134,16 @@ describe Rubydora::Datastream do
 
     it "should allow versionable to be set to false" do
       @datastream.versionable = false
-      @datastream.versionable.should be_false
+      @datastream.versionable.should be false
     end
 
     it "should be the current version" do
-      @datastream.current_version?.should be_true
+      @datastream.current_version?.should be true
     end
 
     # it "should cast versionable to boolean" do
     #   @datastream.profile['versionable'] = 'true'
-    #   @datastream.versionable.should be_true
+    #   @datastream.versionable.should be true
     # end
 
 
@@ -170,7 +170,7 @@ describe Rubydora::Datastream do
         <datastreamProfile>
         </datastreamProfile>
       XML
-      @datastream.versionable.should be_true
+      @datastream.versionable.should be true
     end
 
     it "should be true when it's returned as true" do
@@ -179,7 +179,7 @@ describe Rubydora::Datastream do
           <dsVersionable>true</dsVersionable>
         </datastreamProfile>
       XML
-      @datastream.versionable.should be_true
+      @datastream.versionable.should be true
     end
 
     it "should be false when it's returned as false" do
@@ -188,7 +188,7 @@ describe Rubydora::Datastream do
           <dsVersionable>false</dsVersionable>
         </datastreamProfile>
       XML
-      @datastream.versionable.should be_false
+      @datastream.versionable.should be false
     end
   end
 
@@ -210,7 +210,7 @@ describe Rubydora::Datastream do
           <dsChecksumValid>true</dsChecksumValid>
         </datastreamProfile>
       XML
-      @datastream.dsChecksumValid.should be_true
+      @datastream.dsChecksumValid.should be true
     end
 
     it "should be false when it's returned as false" do
@@ -219,7 +219,7 @@ describe Rubydora::Datastream do
           <dsChecksumValid>false</dsChecksumValid>
         </datastreamProfile>
       XML
-      @datastream.dsChecksumValid.should be_false
+      @datastream.dsChecksumValid.should be false
     end
   end
 
@@ -423,9 +423,9 @@ describe Rubydora::Datastream do
       end
 
       it "should be marked as changed when the content is updated" do
-        @datastream.changed?.should be_false
+        @datastream.changed?.should be false
         @datastream.content = "test"
-        @datastream.changed?.should be_true
+        @datastream.changed?.should be true
       end
 
     end
@@ -482,7 +482,7 @@ describe Rubydora::Datastream do
       end
 
       it "should have a list of previous versions" do
-        @datastream.versions.should have(2).items
+        expect(@datastream.versions.size).to eq 2
       end
 
       it "should access versions as read-only copies" do
@@ -502,7 +502,7 @@ describe Rubydora::Datastream do
             <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
           </datastreamProfile>
           XML
-        @datastream.current_version?.should be_true
+        @datastream.current_version?.should be true
       end
 
       it "should be the current version if it's the first version" do
@@ -512,7 +512,7 @@ describe Rubydora::Datastream do
             <dsCreateDate>2010-01-02T00:00:00.012Z</dsCreateDate>
           </datastreamProfile>
           XML
-        @datastream.versions.first.current_version?.should be_true
+        @datastream.versions.first.current_version?.should be true
       end
 
       it "should not be the current version if it's the second version" do
@@ -522,7 +522,7 @@ describe Rubydora::Datastream do
             <dsCreateDate>2008-08-05T01:30:05.012Z</dsCreateDate>
           </datastreamProfile>
           XML
-        @datastream.versions[1].current_version?.should be_false
+        @datastream.versions[1].current_version?.should be false
       end
     end
     describe "when no versions are found" do
@@ -537,7 +537,7 @@ describe Rubydora::Datastream do
 
       it "should be the current version" do
         @datastream.stub(:new? => false)
-        @datastream.current_version?.should be_true
+        @datastream.current_version?.should be true
       end
 
     end

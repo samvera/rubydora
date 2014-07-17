@@ -10,7 +10,7 @@ describe Rubydora::Repository do
   describe "initialize" do
     it "should symbolize config keys" do
       repository = Rubydora::Repository.new "validateChecksum"=> true
-      repository.config[:validateChecksum].should be_true
+      repository.config[:validateChecksum].should be true
     end
   end
 

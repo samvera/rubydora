@@ -30,30 +30,32 @@ module Rubydora
 
   require 'rubydora/version'
 
-  # Connect to Fedora Repository
-  # @return Rubydora::Repository
-  def self.connect *args
-    Repository.new *args
-  end
+  class << self
+    # Connect to Fedora Repository
+    # @return Rubydora::Repository
+    def connect *args
+      Repository.new *args
+    end
 
-  # Connect to the default Fedora Repository
-  # @return Rubydora::Repository
-  def self.repository
-    @repository ||= self.connect(self.default_config)
-  end
+    # Connect to the default Fedora Repository
+    # @return Rubydora::Repository
+    def repository
+      @repository ||= connect(default_config)
+    end
 
-  # Set the default Fedora Repository
-  # @param [Rubydora::Repository] repository
-  # @return Rubydora::Repository
-  def self.repository= repository
-    @repository = repository
-  end
+    # Set the default Fedora Repository
+    # @param [Rubydora::Repository] repository
+    # @return Rubydora::Repository
+    def repository= repository
+      @repository = repository
+    end
 
-  # Default repository connection information
-  # TODO: read ENV variables?
-  # @return Hash
-  def self.default_config
-    {:validateChecksum=>false}
+    # Default repository connection information
+    # TODO: read ENV variables?
+    # @return Hash
+    def default_config
+      {validateChecksum: false}
+    end
   end
 
   class RubydoraError < StandardError; end
