@@ -21,13 +21,15 @@ module Rubydora
 
 
       rescue_from RestClient::InternalServerError do |e|
-        logger.error e.response
-        logger.flush if logger.respond_to? :flush
+        if Rubydora.logger
+          Rubydora.logger.error e.response
+          Rubydora.logger.flush if Rubydora.logger.respond_to? :flush
+        end
         raise FedoraInvalidRequest, "See logger for details"
       end
 
       rescue_from Errno::ECONNREFUSED, Errno::EHOSTUNREACH do |exception|
-        logger.error "Unable to connect to Fedora at #{@client.url}"
+        Rubydora.logger.error "Unable to connect to Fedora at #{@client.url}" if Rubydora.logger
         raise exception
       end
 
@@ -234,7 +236,7 @@ module Rubydora
 
       val
     rescue RestClient::Unauthorized => e
-      logger.error "Unauthorized at #{client.url}/#{datastream_url(pid, dsid, query_options)}"
+      Rubydora.logger.error "Unauthorized at #{client.url}/#{datastream_url(pid, dsid, query_options)}" if Rubydora.logger
       raise e
     rescue Exception => exception
         rescue_with_handler(exception) || raise
@@ -257,7 +259,7 @@ module Rubydora
 
       val
     rescue RestClient::Unauthorized => e
-      logger.error "Unauthorized at #{client.url}/#{datastreams_url(pid, query_options)}"
+      Rubydora.logger.error "Unauthorized at #{client.url}/#{datastreams_url(pid, query_options)}" if Rubydora.logger
       raise e
     rescue Exception => exception
         rescue_with_handler(exception) || raise
@@ -459,6 +461,11 @@ module Rubydora
       else
         client.class.new(url, options)
       end
+    end
+
+    # The logger is called by ActiveSupport::Benchmarkable
+    def logger
+      Rubydora.logger
     end
 
     private
