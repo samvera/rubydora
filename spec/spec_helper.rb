@@ -11,7 +11,6 @@ if ENV['COVERAGE'] and RUBY_VERSION =~ /^1.9/
 end
 
 require 'rspec/autorun'
-require 'loggable'
 require 'rubydora'
 require 'webmock/rspec'
 
