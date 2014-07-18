@@ -1,3 +1,11 @@
+h3. 1.8.0 (17 Jul 2014)
+  2014-07-17: Use the system libxml2 on travis [Justin Coyne]
+
+  2014-07-17: Add the ability to set a logger and not depend on
+  mediashelf-loggable [Justin Coyne]
+
+  2014-07-17: Fixed styles and rspec deprecations [Justin Coyne]
+
 h3. 1.6.3 (2 May 2013)
 * Don't require backports gem
 
