@@ -1,6 +1,7 @@
 # Fedora Commons REST API module
 require 'active_model'
 require 'deprecation'
+require 'active_support/core_ext/module/attribute_accessors'
 
 module Rubydora
   autoload :Datastream, "rubydora/datastream"
@@ -29,6 +30,7 @@ module Rubydora
   require 'nokogiri'
 
   require 'rubydora/version'
+  mattr_accessor :logger
 
   class << self
     # Connect to Fedora Repository

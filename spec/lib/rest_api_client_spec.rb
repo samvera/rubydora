@@ -160,39 +160,67 @@ describe Rubydora::RestApiClient do
     @mock_repository.object_xml :pid => 'mypid'
   end
 
-  it "datastream" do
-    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastreams_url('mypid', :format => 'xml')))
-    logger.should_receive(:debug) # squelch message "Loaded datastream list for mypid (time)"
-    @mock_repository.datastreams :pid => 'mypid'
+  context "Loading a list of datastreams" do
+    let(:request_options) { { url: base_url + "/" + datastreams_url('mypid',  format: 'xml') } }
+    let(:my_logger) { double }
+
+    before do
+      @initial_logger = Rubydora.logger
+      Rubydora.logger = my_logger
+    end
+
+    after { Rubydora.logger = @initial_logger }
+
+    it "calls Fedora with the correct url" do
+      RestClient::Request.should_receive(:execute).with(hash_including(request_options))
+      my_logger.should_receive(:debug) # squelch message "Loaded datastream list for mypid (time)"
+      @mock_repository.datastreams :pid => 'mypid'
+    end
   end
 
-  it "datastreams" do
-    @mock_repository.should_receive(:datastream).with(:pid => 'mypid', :dsid => 'asdf')
-    Deprecation.should_receive(:warn)
-    @mock_repository.datastreams :pid => 'mypid', :dsid => 'asdf'
+  context "Calling datastreams with a dsid" do
+    it "warns of deprecated behavior" do
+      @mock_repository.should_receive(:datastream).with(:pid => 'mypid', :dsid => 'asdf')
+      Deprecation.should_receive(:warn)
+      @mock_repository.datastreams :pid => 'mypid', :dsid => 'asdf'
+    end
   end
 
-  it "datastream" do
-    @mock_repository.should_receive(:datastreams).with(:pid => 'mypid')
-    Deprecation.should_receive(:warn)
-    @mock_repository.datastream :pid => 'mypid'
+  context "Calling datastream without a dsid" do
+    it "warns of deprecated behavior" do
+      @mock_repository.should_receive(:datastreams).with(:pid => 'mypid')
+      Deprecation.should_receive(:warn)
+      @mock_repository.datastream :pid => 'mypid'
+    end
   end
 
-  it "datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa', :format => 'xml')))
-    logger.should_receive(:debug) # squelch message "Loaded datastream mypid/aaa (time)"
-    @mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'
-  end
+  context "Loading a datastream" do
+    let(:request_options) { { url: base_url + "/" + datastream_url('mypid', 'aaa', format: 'xml') } }
+    let(:my_logger) { double }
 
-  it "should raise not found exception when getting a datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa', :format => 'xml'))).and_raise( RestClient::ResourceNotFound)
-    lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
-  end
+    before do
+      @initial_logger = Rubydora.logger
+      Rubydora.logger = my_logger
+    end
 
-  it "should raise Unauthorized exception when getting a datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa', :format => 'xml'))).and_raise( RestClient::Unauthorized)
-    logger.should_receive(:error).with("Unauthorized at #{base_url + "/" + datastream_url('mypid', 'aaa', :format => 'xml')}")
-    lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::Unauthorized
+    after { Rubydora.logger = @initial_logger }
+
+    it "datastream" do
+       RestClient::Request.should_receive(:execute).with(hash_including(request_options))
+      my_logger.should_receive(:debug) # squelch message "Loaded datastream mypid/aaa (time)"
+      @mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'
+    end
+
+    it "should raise not found exception when getting a datastream" do
+       RestClient::Request.should_receive(:execute).with(hash_including(request_options)).and_raise(RestClient::ResourceNotFound)
+      lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
+    end
+
+    it "should raise Unauthorized exception when getting a datastream" do
+       RestClient::Request.should_receive(:execute).with(hash_including(request_options)).and_raise(RestClient::Unauthorized)
+      my_logger.should_receive(:error).with("Unauthorized at #{base_url + "/" + datastream_url('mypid', 'aaa', :format => 'xml')}")
+      lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::Unauthorized
+    end
   end
 
   it "datastream_dissemination" do
