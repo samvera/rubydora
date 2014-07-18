@@ -9,7 +9,6 @@ describe Rubydora::RestApiClient do
   end
   class MockRepository
     include Rubydora::RestApiClient
-    include Loggable
 
     attr_accessor :config
   end
