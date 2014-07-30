@@ -837,5 +837,60 @@ describe Rubydora::Datastream do
       @datastream.url.should == "http://example.org/foo/content"
     end
   end
+
+  describe "callbacks" do
+    before(:all) do
+      class MyDatastream < Rubydora::Datastream
+        before_save :before_save_callback
+        def before_save_callback; end
+
+        after_save :after_save_callback
+        def after_save_callback; end
+
+        before_create :before_create_callback
+        def before_create_callback; end
+
+        after_create :after_create_callback
+        def after_create_callback; end
+      end
+    end
+
+    before(:each) { @datastream = MyDatastream.new @mock_object, 'dsid' }
+
+    after(:all) do
+      Object.send(:remove_const, :MyDatastream)
+    end
+    
+    describe "saving new datastream" do
+      before do
+        allow(@mock_api).to receive(:add_datastream).with(hash_including(:content => 'content', :pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A')) { {} }
+      end
+      it "should fire save and create callbacks" do
+        @datastream = MyDatastream.new @mock_object, 'dsid'
+        expect(@datastream).to receive(:before_save_callback)
+        expect(@datastream).to receive(:after_save_callback)
+        expect(@datastream).to receive(:before_create_callback)
+        expect(@datastream).to receive(:after_create_callback)
+        @datastream.content = 'content'
+        @datastream.stub(:profile => {})
+        @datastream.save
+      end
+    end
+    describe "saving persisted datastream" do
+      before do
+        allow(@mock_api).to receive(:modify_datastream).with(hash_including(:content => 'content', :pid => 'pid', :dsid => 'dsid')) { {} }
+      end
+      it "should fire only save callbacks" do
+        expect(@datastream).to receive(:before_save_callback)
+        expect(@datastream).to receive(:after_save_callback)
+        expect(@datastream).not_to receive(:before_create_callback)
+        expect(@datastream).not_to receive(:after_create_callback)
+        @datastream.content = 'content'
+        @datastream.stub(:profile => {dsLabel: "label"})
+        @datastream.save
+      end
+    end
+  end
+
 end
 

@@ -303,11 +303,14 @@ module Rubydora
       check_if_read_only
       run_callbacks :save do
         raise RubydoraError.new("Unable to save #{self.inspect} without content") unless has_content?
-        return create if new?
-        p = repository.modify_datastream(to_api_params.merge({ :pid => pid, :dsid => dsid })) || {}
-        reset_profile_attributes
-        self.profile= p unless p.empty?
-        self.class.new(digital_object, dsid, @options)
+        if new?
+          create 
+        else
+          p = repository.modify_datastream(to_api_params.merge({ :pid => pid, :dsid => dsid })) || {}
+          reset_profile_attributes
+          self.profile= p unless p.empty?
+          self.class.new(digital_object, dsid, @options)
+        end
       end
     end
 
