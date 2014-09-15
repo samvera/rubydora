@@ -27,45 +27,65 @@ describe Rubydora::Datastream do
     before do
       stub_response = double
       stub_response.stub(:read_body).and_yield("one1").and_yield('two2').and_yield('thre').and_yield('four')
+      allow(stub_response).to receive(:headers) { {content_length: "16"} }
       @mock_api.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_yield(stub_response) 
-      prof = <<-XML
+      subject.profile = Rubydora::ProfileParser.parse_datastream_profile(prof)
+    end
+    shared_examples "a streamable datastream" do
+      it "should send the whole thing" do
+        e = subject.stream()
+        result = ''
+        e.each do |blk|
+          result << blk
+        end
+        result.should == 'one1two2threfour'
+      end
+      it "should send the whole thing when the range is open ended" do
+        e = subject.stream(0)
+        result = ''
+        e.each do |blk|
+          result << blk
+        end
+        result.should == 'one1two2threfour'
+      end
+      it "should get a range not starting at the beginning" do
+        e = subject.stream(3, 13)
+        result = ''
+        e.each do |blk|
+          result << blk
+        end
+        result.should == '1two2threfour'
+      end
+      it "should get a range not ending at the end" do
+        e = subject.stream(4, 8)
+        result = ''
+        e.each do |blk|
+          result << blk
+        end
+        result.should == 'two2thre'
+      end
+    end
+    describe "default" do
+      let(:prof) do
+        <<-XML
         <datastreamProfile>
           <dsSize>16</dsSize>
         </datastreamProfile>
-      XML
-      subject.profile = Rubydora::ProfileParser.parse_datastream_profile(prof)
-    end
-    it "should send the whole thing" do
-      e = subject.stream()
-      result = ''
-      e.each do |blk|
-        result << blk
+        XML
       end
-      result.should == 'one1two2threfour'
+      it_behaves_like "a streamable datastream"
     end
-    it "should send the whole thing when the range is open ended" do
-      e = subject.stream(0)
-      result = ''
-      e.each do |blk|
-        result << blk
+    describe "controlGroup 'E'" do
+      let(:prof) do
+        <<-XML
+        <datastreamProfile>
+          <dsSize>0</dsSize>
+          <dsLocation>file:/path/to/some/file</dsLocation>
+          <dsControlGroup>E</dsControlGroup>
+        </datastreamProfile>
+        XML
       end
-      result.should == 'one1two2threfour'
-    end
-    it "should get a range not starting at the beginning" do
-      e = subject.stream(3, 13)
-      result = ''
-      e.each do |blk|
-        result << blk
-      end
-      result.should == '1two2threfour'
-    end
-    it "should get a range not ending at the end" do
-      e = subject.stream(4, 8)
-      result = ''
-      e.each do |blk|
-        result << blk
-      end
-      result.should == 'two2thre'
+      it_behaves_like "a streamable datastream"
     end
   end
 

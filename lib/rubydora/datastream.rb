@@ -226,11 +226,14 @@ module Rubydora
     # @param [Integer] from (bytes) the starting point you want to return. 
     # 
     def stream (from = 0, length = nil)
-      raise "Can't determine dsSize" unless dsSize
-      length = dsSize - from unless length
       counter = 0
       Enumerator.new do |blk|
         repository.datastream_dissemination(:pid => pid, :dsid => dsid) do |response|
+          unless length
+            size = external? ? entity_size(response) : dsSize
+            raise "Can't determine content length" unless size
+            length = size - from
+          end
           response.read_body do |chunk|
             last_counter = counter
             counter += chunk.size
@@ -412,5 +415,13 @@ module Rubydora
       check_if_read_only
       super
     end
+
+    def entity_size(response)
+      if content_length = response.headers[:content_length]
+        return content_length.to_i
+      end
+      response.body.length
+    end
+
   end
 end
