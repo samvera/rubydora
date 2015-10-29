@@ -23,28 +23,24 @@ module Rubydora
       end
     end
 
-
     # repository profile (from API-A-LITE data)
     # @return [Hash]
     def repository_profile
-      begin
-        profile_xml = self.describe.strip
-        h = ProfileParser.parse_repository_profile(profile_xml)
-        h.select { |key, value| value.length == 1 }.each do |key, value|
-          next if key == "objModels"
-          h[key] = value.first
-        end
-
-        h
-      rescue
-        nil
+      profile_xml = self.describe.strip
+      h = ProfileParser.parse_repository_profile(profile_xml)
+      h.select { |key, value| value.length == 1 }.each do |key, value|
+        next if key == 'objModels'
+        h[key] = value.first
       end
+      h
+    rescue
+      nil
     end
 
     def object_profile(pid, asOfDateTime = nil)
       options = {pid: pid}
       options[:asOfDateTime] = asOfDateTime if asOfDateTime
-      begin 
+      begin
         xml = object(options)
         ProfileParser.parse_object_profile(xml)
       rescue RestClient::ResourceNotFound
@@ -54,7 +50,7 @@ module Rubydora
 
     def datastream_profile(pid, dsid, validateChecksum, asOfDateTime = nil)
       xml = begin
-        options = { pid: pid, dsid: dsid}
+        options = {pid: pid, dsid: dsid}
         options[:validateChecksum] = validateChecksum if validateChecksum
         options[:asOfDateTime] = asOfDateTime if asOfDateTime
         options[:validateChecksum] = true if config[:validateChecksum]
