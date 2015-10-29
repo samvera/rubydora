@@ -9,6 +9,9 @@ gemfile:
   - gemfiles/gemfile.rails3
   - gemfiles/gemfile.rails4
 
+jdk:
+  - oraclejdk8
+
 notifications:
   irc: "irc.freenode.org#projecthydra"
 
