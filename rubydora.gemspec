@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Chris Beer']
   s.email       = ['chris@cbeer.info']
-  s.summary     = %q{Fedora Commons REST API ruby library}
-  s.description = %q{Fedora Commons REST API ruby library}
+  s.summary     = 'Fedora Commons REST API ruby library'
+  s.description = 'Fedora Commons REST API ruby library'
   s.homepage    = 'http://github.com/projecthydra/rubydora'
 
   s.files         = `git ls-files`.split("\n")

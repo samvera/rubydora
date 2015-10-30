@@ -24,5 +24,5 @@ describe "#audit_trail" do
     record.date.should == "2013-02-25T16:43:06.219Z"
     record.justification.should == ""
   end
-  
+
 end

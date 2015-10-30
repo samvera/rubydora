@@ -1,6 +1,6 @@
 module Rubydora
   #
-  # This model inject RELS-EXT-based helper methods 
+  # This model inject RELS-EXT-based helper methods
   # for Fedora objects
   #
   module RelationshipsMixin
@@ -32,9 +32,9 @@ module Rubydora
     # generate accessor methods for each RELS_EXT property
     def self.included(base)
 
-        # FIXME: ugly, but functional..
-        RELS_EXT.each do |name, property|
-          base.class_eval <<-RUBY
+      # FIXME: ugly, but functional..
+      RELS_EXT.each do |name, property|
+        base.class_eval <<-RUBY
             def #{name.to_s} args = {}
               relationships[:#{name}] = nil if args.delete(:refetch)
               relationships[:#{name}] ||= relationship('#{property}', args)
@@ -49,9 +49,9 @@ module Rubydora
               arr
             end
           RUBY
-        end
+      end
     end
-          
+
     ##
     # Provides an accessor to the `predicate` RELS-EXT relationship
     # Using ArrayWithCallback, will commit any changes to Fedora
@@ -60,13 +60,12 @@ module Rubydora
     # @param [Hash] args
     # @option args [Array] :values if nil, will query the resource index for related objects
     # @return [ArrayWithCallback<Rubydora::DigitalObject>] an array that will call the #relationship_changed callback when values are modified
-    def relationship predicate, args = {}
+    def relationship(predicate, args = {})
       arr = ArrayWithCallback.new(args[:values] || repository.find_by_sparql_relationship(fqpid, predicate))
-      arr.on_change << lambda { |arr, diff| relationship_changed(predicate, diff, arr) } 
+      arr.on_change << lambda { |arr, diff| relationship_changed(predicate, diff, arr) }
 
       arr
     end
-
 
     ##
     # Given a predicate and a diff between before and after states
@@ -77,24 +76,24 @@ module Rubydora
     # @option diff [Hash] :+ additions
     # @option diff [Hash] :- deletions
     # @param [Array] arr the current relationship state
-    def relationship_changed predicate, diff, arr = []
+    def relationship_changed(predicate, diff, arr = [])
       diff[:+] ||= []
       diff[:-] ||= []
 
-      diff[:+].each do |o| 
+      diff[:+].each do |o|
         add_relationship(predicate, o)
-      end        
+      end
 
-      diff[:-].each do |o| 
+      diff[:-].each do |o|
         purge_relationship(predicate, o)
-      end        
+      end
     end
 
     # Add a relationship for this object
     # @param [String] predicate
     # @param [String, Rubydora::DigitalObject] object
     # @return self
-    def add_relationship predicate, object
+    def add_relationship(predicate, object)
       obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || object )
       repository.add_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
       self
@@ -104,7 +103,7 @@ module Rubydora
     # @param [String] predicate
     # @param [String, Rubydora::DigitalObject] object
     # @return self
-    def purge_relationship predicate, object
+    def purge_relationship(predicate, object)
       obj_uri = (( object.fqpid if object.respond_to? :fqpid ) || ( object.uri if object.respond_to? :uri ) || (object.to_s if object.respond_to? :to_s?) || object )
       repository.purge_relationship :subject => fqpid, :predicate => predicate, :object => obj_uri
     end

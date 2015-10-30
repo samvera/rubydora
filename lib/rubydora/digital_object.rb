@@ -2,10 +2,10 @@ module Rubydora
 
   # This class represents a Fedora object and provides
   # helpers for managing attributes, datastreams, and
-  # relationships. 
+  # relationships.
   #
-  # Using the extension framework, implementors may 
-  # provide additional functionality to this base 
+  # Using the extension framework, implementors may
+  # provide additional functionality to this base
   # implementation.
   class DigitalObject
     extend ActiveModel::Callbacks
@@ -18,14 +18,14 @@ module Rubydora
     extend Deprecation
 
     attr_reader :pid
-    
+
     # mapping object parameters to profile elements
     OBJ_ATTRIBUTES = {:state => :objState, :ownerId => :objOwnerId, :label => :objLabel, :logMessage => nil, :lastModifiedDate => :objLastModDate, :createdDate => :objCreateDate }
 
     OBJ_DEFAULT_ATTRIBUTES = { }
 
     define_attribute_methods OBJ_ATTRIBUTES.keys
-      
+
     OBJ_ATTRIBUTES.each do |attribute, profile_name|
       class_eval <<-RUBY
       def #{attribute.to_s}
@@ -39,7 +39,7 @@ module Rubydora
       RUBY
     end
 
-    def state= val
+    def state=(val)
       raise ArgumentError, "Allowed values for state are 'I', 'A' and 'D'. You provided '#{val}'" unless ['I', 'A', 'D'].include?(val)
       state_will_change! unless val == state
       @state = val
@@ -49,8 +49,8 @@ module Rubydora
     #
     # @param [String] pid
     # @param [Rubydora::Repository] context
-    # @raise [RecordNotFound] if the record is not found in Fedora 
-    def self.find pid, repository = nil, options = {}
+    # @raise [RecordNotFound] if the record is not found in Fedora
+    def self.find(pid, repository = nil, options = {})
       obj = self.new pid, repository, options
       if obj.new?
         raise Rubydora::RecordNotFound, "DigitalObject.find called for an object that doesn't exist"
@@ -63,7 +63,7 @@ module Rubydora
     # @param [String] pid
     # @param [Rubydora::Repository] repository context
     # @param [Hash] options default attribute values (used esp. for creating new datastreams
-    def self.find_or_initialize *args
+    def self.find_or_initialize(*args)
       self.new *args
     end
 
@@ -71,7 +71,7 @@ module Rubydora
     # @param [String] pid
     # @param [Hash] options
     # @param [Rubydora::Repository] context
-    def self.create pid, options = {}, repository = nil
+    def self.create(pid, options = {}, repository = nil)
       repository ||= Rubydora.repository
       assigned_pid = repository.ingest(options.merge(:pid => pid))
 
@@ -83,11 +83,11 @@ module Rubydora
     # may not already exist in the data store.
     #
     # Provides `after_initialize` callback for extensions
-    # 
+    #
     # @param [String] pid
     # @param [Rubydora::Repository] repository context
     # @param [Hash] options default attribute values (used esp. for creating new datastreams
-    def initialize pid, repository = nil, options = {}
+    def initialize(pid, repository = nil, options = {})
       run_callbacks :initialize do
         self.pid = pid
         @repository = repository
@@ -102,7 +102,6 @@ module Rubydora
     def audit_trail
       @audit_trail ||= repository.audit_trail(self.pid)
     end
-
 
     ##
     # Return a full uri pid (for use in relations, etc
@@ -119,15 +118,15 @@ module Rubydora
     end
     alias :new? :new_record?
 
-    def asOfDateTime asOfDateTime = nil
-      if asOfDateTime == nil
+    def asOfDateTime(asOfDateTime = nil)
+      if asOfDateTime.nil?
         return @asOfDateTime
       end
 
-      return self.class.new(pid, @repository, @options.merge(:asOfDateTime => asOfDateTime))
+      self.class.new(pid, @repository, @options.merge(:asOfDateTime => asOfDateTime))
     end
 
-    def asOfDateTime= val
+    def asOfDateTime=(val)
       @asOfDateTime = val
     end
 
@@ -142,16 +141,15 @@ module Rubydora
 
     def versions
       repository.versions_for_object(pid).map do |changeDate|
-        self.class.new pid, repository, :asOfDateTime => changeDate 
+        self.class.new pid, repository, :asOfDateTime => changeDate
       end
     end
 
-
     # List of datastreams
-    # @return [Array<Rubydora::Datastream>] 
+    # @return [Array<Rubydora::Datastream>]
     def datastreams
       @datastreams ||= begin
-        h = Hash.new { |h,k| h[k] = datastream_object_for(k) }                
+        h = Hash.new { |h,k| h[k] = datastream_object_for(k) }
 
         begin
           options = { :pid => pid, :profiles => 'true' }
@@ -160,8 +158,8 @@ module Rubydora
           # pre-3.6, the profiles parm will be ignored
           datastreams_xml.gsub! '<objectDatastreams', '<objectDatastreams xmlns="http://www.fedora.info/definitions/1/0/access/"' unless datastreams_xml =~ /xmlns=/
           doc = Nokogiri::XML(datastreams_xml)
-          doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds| 
-            h[ds['dsid']] = datastream_object_for ds['dsid'] 
+          doc.xpath('//access:datastream', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds|
+            h[ds['dsid']] = datastream_object_for ds['dsid']
           end
           # post-3.6, full ds profiles will be returned
           doc.xpath('//access:datastreamProfile', {'access' => "http://www.fedora.info/definitions/1/0/access/"}).each do |ds|
@@ -176,18 +174,18 @@ module Rubydora
     end
     alias_method :datastream, :datastreams
 
-    # provide an hash-like way to access datastreams 
-    def fetch dsid
+    # provide an hash-like way to access datastreams
+    def fetch(dsid)
       datastreams[dsid]
     end
     alias_method :[], :fetch
 
-    # persist the object to Fedora, either as a new object 
+    # persist the object to Fedora, either as a new object
     # by modifing the existing object
     #
-    # also will save all `:changed?` datastreams that already exist 
+    # also will save all `:changed?` datastreams that already exist
     # new datastreams must be directly saved
-    # 
+    #
     # @return [Rubydora::DigitalObject] a new copy of this object
     def save
       check_if_read_only
@@ -196,7 +194,7 @@ module Rubydora
         if self.new?
           self.pid = repository.ingest to_api_params.merge(:pid => pid)
           @profile = nil #will cause a reload with updated data
-        else                       
+        else
           p = to_api_params
           unless p.empty?
             mod_time = repository.modify_object p.merge(:pid => pid)
@@ -237,11 +235,11 @@ module Rubydora
     # set the pid of the object
     # @param [String] pid
     # @return [String] the base pid
-    def pid= pid=nil
+    def pid=(pid=nil)
       @pid = pid.gsub('info:fedora/', '') if pid
     end
 
-    # datastream parameters 
+    # datastream parameters
     # @return [Hash]
     def to_api_params
       h = default_api_params
@@ -261,7 +259,7 @@ module Rubydora
     # instantiate a datastream object for a dsid
     # @param [String] dsid
     # @return [Datastream]
-    def datastream_object_for dsid, options = {}
+    def datastream_object_for(dsid, options = {})
       options[:asOfDateTime] ||= asOfDateTime if asOfDateTime
       Datastream.new self, dsid, options
     end
@@ -271,7 +269,7 @@ module Rubydora
     end
 
     private
-    def attribute_will_change! *args
+    def attribute_will_change!(*args)
       check_if_read_only
       super
     end

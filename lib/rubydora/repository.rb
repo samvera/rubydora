@@ -31,18 +31,18 @@ module Rubydora
     # @option options [String] :user
     # @option options [String] :password
     # @option options [Boolean] :validateChecksum
-    def initialize options = {}, api = nil
+    def initialize(options = {}, api = nil)
       @config = options.symbolize_keys
       @api = api if api
       check_repository_version!
     end
 
     # {include:DigitalObject.find}
-    def find pid
+    def find(pid)
       DigitalObject.find(pid, self)
     end
 
-    def find_or_initialize pid
+    def find_or_initialize(pid)
       DigitalObject.find_or_initialize(pid, self)
     end
 
@@ -51,22 +51,22 @@ module Rubydora
     # @params [String] query
     # @params [Hash] options
     # @yield [DigitalObject] Yield a DigitalObject for each search result, skipping forbidden objects
-    def search query, options = {}, &block
+    def search(query, options = {}, &block)
       return to_enum(:search, query, options).to_a unless block_given?
-      
-      sessionToken = nil 
+
+      sessionToken = nil
       doc = nil
 
-      begin 
+      begin
         sessionOptions = {}
-        sessionOptions[:sessionToken] = sessionToken unless sessionToken.nil? or sessionToken.blank?
+        sessionOptions[:sessionToken] = sessionToken unless sessionToken.nil? || sessionToken.blank?
 
         response = self.find_objects(options.merge(:query => query, :resultFormat => 'xml', :pid => true).merge(sessionOptions))
 
         doc = Nokogiri::XML(response)
         doc.xpath('//xmlns:objectFields/xmlns:pid', doc.namespaces).each do |pid|
           begin
-            obj = self.find(pid.text);
+            obj = self.find(pid.text)
           rescue RestClient::Unauthorized
             next
           end
@@ -74,12 +74,12 @@ module Rubydora
         end
 
         sessionToken = doc.xpath('//xmlns:listSession/xmlns:token', doc.namespaces).text
-      end until sessionToken.nil? or sessionToken.empty? or doc.xpath('//xmlns:resultList/xmlns:objectFields', doc.namespaces).empty?
+      end until sessionToken.nil? || sessionToken.empty? || doc.xpath('//xmlns:resultList/xmlns:objectFields', doc.namespaces).empty?
 
     end
 
     # {include:DigitalObject.create}
-    def create pid, options = {}
+    def create(pid, options = {})
       DigitalObject.create(pid, options = {}, self)
     end
 

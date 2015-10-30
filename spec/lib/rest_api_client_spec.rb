@@ -1,7 +1,7 @@
-require 'spec_helper' 
+require 'spec_helper'
 
 describe Rubydora::RestApiClient do
-  
+
   include Rubydora::FedoraUrlHelpers
 
   class FakeException < Exception
@@ -13,12 +13,10 @@ describe Rubydora::RestApiClient do
     attr_accessor :config
   end
 
-
-
   describe "exception handling" do
-  
+
     shared_examples "RestClient error handling" do
-      subject { 
+      subject {
         mock_repository = MockRepository.new
         mock_repository.config = { :url => 'http://example.org' }
 
@@ -47,11 +45,9 @@ describe Rubydora::RestApiClient do
 
   end
 
-
   let :base_url do
     "http://example.org"
   end
-
 
   before(:each) do
     @fedora_user = 'fedoraAdmin'
@@ -62,11 +58,11 @@ describe Rubydora::RestApiClient do
 
   it "should create a REST client" do
     client = @mock_repository.client
-    
+
     client.should be_a_kind_of(RestClient::Resource)
     client.options[:user].should == @fedora_user
   end
-  
+
   it "should create a REST client with a client certificate" do
     client = @mock_repository.client :ssl_client_cert => OpenSSL::X509::Certificate.new, :ssl_client_key => OpenSSL::PKey::RSA.new
 
@@ -80,20 +76,19 @@ describe Rubydora::RestApiClient do
     lambda { client.should == @mock_repository.client }.should_not raise_error
     lambda { @mock_repository.client(:timeout => 120) }.should raise_error(ArgumentError)
   end
-  
+
   it "should call nextPID" do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + next_pid_url(:format => 'xml')))
     @mock_repository.next_pid
   end
 
   it "should find objects" do
-     RestClient::Request.should_receive(:execute) do |params|
-       params.should have_key(:url)
-       params[:url].should =~ /^#{Regexp.escape(base_url + "/" + find_objects_url + "?")}.*query=a/
-     end
+    RestClient::Request.should_receive(:execute) do |params|
+      params.should have_key(:url)
+      params[:url].should =~ /^#{Regexp.escape(base_url + "/" + find_objects_url + "?")}.*query=a/
+    end
     @mock_repository.find_objects :query => 'a'
   end
-
 
   it "should show object properties" do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_url('z', :format => 'xml')))
@@ -104,12 +99,11 @@ describe Rubydora::RestApiClient do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_url('z', :format => 'xml'))).and_raise( RestClient::ResourceNotFound)
     lambda {@mock_repository.object(:pid => 'z')}.should raise_error RestClient::ResourceNotFound
   end
-  
+
   it "ingest" do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + new_object_url))
     @mock_repository.ingest
   end
-
 
   it "mint_pid_and_ingest" do
     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + new_object_url))
@@ -117,13 +111,13 @@ describe Rubydora::RestApiClient do
   end
 
   it "ingest with pid" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_url('mypid')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_url('mypid')))
     @mock_repository.ingest :pid => 'mypid'
   end
 
   describe "export" do
     it "should work on the happy path" do
-       RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + export_object_url('mypid')))
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + export_object_url('mypid')))
       @mock_repository.export :pid => 'mypid'
     end
     it "should require a pid" do
@@ -132,15 +126,15 @@ describe Rubydora::RestApiClient do
   end
 
   it "modify_object" do
-     RestClient::Request.should_receive(:execute) do |params|
-       params.should have_key(:url)
-       params[:url].should =~ /^#{Regexp.escape(base_url + "/" + object_url('mypid'))}.*state=Z/
-     end
+    RestClient::Request.should_receive(:execute) do |params|
+      params.should have_key(:url)
+      params[:url].should =~ /^#{Regexp.escape(base_url + "/" + object_url('mypid'))}.*state=Z/
+    end
     @mock_repository.modify_object :pid => 'mypid', :state => 'Z'
   end
 
   it "purge_object" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_url('mypid')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_url('mypid')))
     @mock_repository.purge_object :pid => 'mypid'
   end
 
@@ -150,12 +144,12 @@ describe Rubydora::RestApiClient do
   end
 
   it "object_versions" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_versions_url('mypid', :format => 'xml')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_versions_url('mypid', :format => 'xml')))
     @mock_repository.object_versions :pid => 'mypid'
   end
 
   it "object_xml" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_xml_url('mypid', :format => 'xml')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_xml_url('mypid', :format => 'xml')))
     @mock_repository.object_xml :pid => 'mypid'
   end
 
@@ -205,45 +199,45 @@ describe Rubydora::RestApiClient do
     after { Rubydora.logger = @initial_logger }
 
     it "datastream" do
-       RestClient::Request.should_receive(:execute).with(hash_including(request_options))
+      RestClient::Request.should_receive(:execute).with(hash_including(request_options))
       my_logger.should_receive(:debug) # squelch message "Loaded datastream mypid/aaa (time)"
       @mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'
     end
 
     it "should raise not found exception when getting a datastream" do
-       RestClient::Request.should_receive(:execute).with(hash_including(request_options)).and_raise(RestClient::ResourceNotFound)
+      RestClient::Request.should_receive(:execute).with(hash_including(request_options)).and_raise(RestClient::ResourceNotFound)
       lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
     end
 
     it "should raise Unauthorized exception when getting a datastream" do
-       RestClient::Request.should_receive(:execute).with(hash_including(request_options)).and_raise(RestClient::Unauthorized)
+      RestClient::Request.should_receive(:execute).with(hash_including(request_options)).and_raise(RestClient::Unauthorized)
       my_logger.should_receive(:error).with("Unauthorized at #{base_url + "/" + datastream_url('mypid', 'aaa', :format => 'xml')}")
       lambda {@mock_repository.datastream :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::Unauthorized
     end
   end
 
   it "datastream_dissemination" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_content_url('mypid', 'aaa')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_content_url('mypid', 'aaa')))
     @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa'
   end
   it "should allow http methods besides GET on datastream_dissemination" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:method => :head))
+    RestClient::Request.should_receive(:execute).with(hash_including(:method => :head))
     @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa', :method => :head
   end
   it "should pass a block to the rest client to process the response in datastream_dissemination" do
-     _proc = lambda { |x| x }
-     RestClient::Request.should_receive(:execute).with(hash_including(:block_response => _proc))
+    _proc = lambda { |x| x }
+    RestClient::Request.should_receive(:execute).with(hash_including(:block_response => _proc))
     @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa', &_proc
   end
   it "should raise not found exception when retrieving datastream_dissemination" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_content_url('mypid', 'aaa'))).and_raise( RestClient::ResourceNotFound)
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_content_url('mypid', 'aaa'))).and_raise( RestClient::ResourceNotFound)
     lambda {@mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa'}.should raise_error RestClient::ResourceNotFound
   end
 
   describe "add_datastream" do
     it "should post to the correct url" do
       RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa')))
-      @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa' 
+      @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa'
     end
     describe "when a file is passed" do
       let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand it for a real File (it has read, rewind and close)
@@ -279,15 +273,15 @@ describe Rubydora::RestApiClient do
 
   describe "modify datastream" do
     it "should not set mime-type when it's not provided (and a file is not passed)" do
-       RestClient::Request.should_receive(:execute).with(:url => base_url + "/" + datastream_url('mypid', 'aaa'),:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
-      @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa' 
+      RestClient::Request.should_receive(:execute).with(:url => base_url + "/" + datastream_url('mypid', 'aaa'),:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
+      @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa'
     end
     it "should pass the provided mimeType header" do
-       RestClient::Request.should_receive(:execute).with(:url => base_url + "/" + datastream_url('mypid', 'aaa', :mimeType => 'application/json'),:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
+      RestClient::Request.should_receive(:execute).with(:url => base_url + "/" + datastream_url('mypid', 'aaa', :mimeType => 'application/json'),:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :mimeType=>'application/json'
     end
     describe "when a file is passed" do
-      let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand it for a real File (it has read, rewind and close) 
+      let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand it for a real File (it has read, rewind and close)
       it "should rewind the file" do
         RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
         @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
@@ -319,74 +313,74 @@ describe Rubydora::RestApiClient do
   end
 
   it "purge_datastream" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa')))
-    @mock_repository.purge_datastream :pid => 'mypid', :dsid => 'aaa' 
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa')))
+    @mock_repository.purge_datastream :pid => 'mypid', :dsid => 'aaa'
   end
 
   it "set_datastream_options" do
-     RestClient::Request.should_receive(:execute) do |params|
-       params.should have_key(:url)
-       params[:url].should =~ /^#{Regexp.escape(base_url + "/" + datastream_url('mypid', 'aaa') + "?")}.*aparam=true/ 
-     end
-    @mock_repository.set_datastream_options :pid => 'mypid', :dsid => 'aaa', :aparam => true 
+    RestClient::Request.should_receive(:execute) do |params|
+      params.should have_key(:url)
+      params[:url].should =~ /^#{Regexp.escape(base_url + "/" + datastream_url('mypid', 'aaa') + "?")}.*aparam=true/
+    end
+    @mock_repository.set_datastream_options :pid => 'mypid', :dsid => 'aaa', :aparam => true
   end
 
   describe "datastream_versions" do
     it "should be successful" do
-       RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_history_url('mypid', 'aaa', :format=>'xml'))).and_return("expected result")
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_history_url('mypid', 'aaa', :format=>'xml'))).and_return("expected result")
       @mock_repository.datastream_versions(:pid => 'mypid', :dsid => 'aaa').should == 'expected result'
     end
     it "should not break when fedora doesn't have datastream history" do
-       RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_history_url('mypid', 'aaa', :format=>'xml'))).and_raise(RestClient::ResourceNotFound)
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_history_url('mypid', 'aaa', :format=>'xml'))).and_raise(RestClient::ResourceNotFound)
       @mock_repository.datastream_versions(:pid => 'mypid', :dsid => 'aaa').should be_nil
     end
   end
 
   it "datastream_history" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_history_url('mypid', 'aaa', :format=>'xml')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_history_url('mypid', 'aaa', :format=>'xml')))
     @mock_repository.datastream_history :pid => 'mypid', :dsid => 'aaa'
   end
 
   it "relationships" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_relationship_url('mypid', :format => 'xml')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + object_relationship_url('mypid', :format => 'xml')))
     @mock_repository.relationships :pid => 'mypid'
   end
 
   it "add_relationship" do
-     RestClient::Request.should_receive(:execute) do |params|
-       params.should have_key(:url)
-       params[:url].should =~ /^#{Regexp.escape(base_url + "/" + new_object_relationship_url('mypid') + "?")}.*subject=z/
-     end
+    RestClient::Request.should_receive(:execute) do |params|
+      params.should have_key(:url)
+      params[:url].should =~ /^#{Regexp.escape(base_url + "/" + new_object_relationship_url('mypid') + "?")}.*subject=z/
+    end
     @mock_repository.add_relationship :pid => 'mypid', :subject => 'z'
   end
 
   it "purge_relationships" do
-     RestClient::Request.should_receive(:execute) do |params|
-       params.should have_key(:url)
-       params[:url].should =~ /^#{Regexp.escape(base_url + "/" + object_relationship_url('mypid') + "?")}.*subject=z/
-     end
-    @mock_repository.purge_relationship :pid => 'mypid', :subject => 'z' 
+    RestClient::Request.should_receive(:execute) do |params|
+      params.should have_key(:url)
+      params[:url].should =~ /^#{Regexp.escape(base_url + "/" + object_relationship_url('mypid') + "?")}.*subject=z/
+    end
+    @mock_repository.purge_relationship :pid => 'mypid', :subject => 'z'
   end
 
   it "dissemination" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + dissemination_url('mypid', nil, nil, :format => 'xml')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + dissemination_url('mypid', nil, nil, :format => 'xml')))
     @mock_repository.dissemination :pid => 'mypid'
   end
 
   it "dissemination" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + dissemination_url('mypid', 'sdef', nil, :format => 'xml')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + dissemination_url('mypid', 'sdef', nil, :format => 'xml')))
     @mock_repository.dissemination :pid => 'mypid', :sdef => 'sdef'
   end
 
   it "dissemination" do
-     RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + dissemination_url('mypid', 'sdef', 'method')))
+    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + dissemination_url('mypid', 'sdef', 'method')))
     @mock_repository.dissemination :pid => 'mypid', :sdef => 'sdef', :method => 'method'
   end
 
   it "should pass a block to the rest client to process the response in datastream_dissemination" do
-     _proc = lambda { |x| x }
-     RestClient::Request.should_receive(:execute).with(hash_including(:block_response => _proc))
-     @mock_repository.dissemination :pid => 'mypid', :sdef => 'sdef', :method => 'method', &_proc
+    _proc = lambda { |x| x }
+    RestClient::Request.should_receive(:execute).with(hash_including(:block_response => _proc))
+    @mock_repository.dissemination :pid => 'mypid', :sdef => 'sdef', :method => 'method', &_proc
   end
 
 end

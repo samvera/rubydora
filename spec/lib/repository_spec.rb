@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe Rubydora::Repository do
   include Rubydora::FedoraUrlHelpers
-  
+
   before(:each) do
-    @repository = Rubydora::Repository.new 
+    @repository = Rubydora::Repository.new
   end
 
   describe "initialize" do
@@ -34,17 +34,17 @@ describe Rubydora::Repository do
   describe "mint" do
     before do
       xml = "<resp xmlns:fedora=\"http://www.fedora.info/definitions/1/0/management/\"><fedora:pid>test:123</fedora:pid></resp>"
-      @repository.api.should_receive(:next_pid).and_return xml 
+      @repository.api.should_receive(:next_pid).and_return xml
     end
     it "should call nextPID" do
       @repository.mint.should == 'test:123'
     end
   end
-  
+
   describe "mint (Fedora 3.4)" do
     before do
       xml = "<resp><pid>test:123</pid></resp>"
-      @repository.api.should_receive(:next_pid).and_return xml 
+      @repository.api.should_receive(:next_pid).and_return xml
     end
     it "should call nextPID" do
       @repository.mint.should == 'test:123'

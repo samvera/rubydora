@@ -5,19 +5,19 @@ module Rubydora::AuditTrail
   end
 
   private
-    
+
   AT_NS = {'audit' => 'info:fedora/fedora-system:def/audit#'}
   FOXML_NS = {'foxml' => 'info:fedora/fedora-system:def/foxml#'}
   AT_XPATH = '/foxml:digitalObject/foxml:datastream[@ID = "AUDIT"]/descendant::audit:auditTrail'
-    
+
   class FedoraAuditTrail
     def initialize(object_xml)
-      @ng_xml = Nokogiri::XML(object_xml).xpath(AT_XPATH, FOXML_NS.merge(AT_NS))  
+      @ng_xml = Nokogiri::XML(object_xml).xpath(AT_XPATH, FOXML_NS.merge(AT_NS))
     end
     def records
-      if !@records
+      unless @records
         @records = []
-        @ng_xml.xpath('.//audit:record', AT_NS).each do |node| 
+        @ng_xml.xpath('.//audit:record', AT_NS).each do |node|
           @records << FedoraAuditRecord.new(node)
         end
       end
@@ -27,7 +27,7 @@ module Rubydora::AuditTrail
       @ng_xml.to_xml
     end
   end
-  
+
   class FedoraAuditRecord
     def initialize(node)
       @record = node
@@ -53,6 +53,6 @@ module Rubydora::AuditTrail
     def justification
       @record.at_xpath('audit:justification', AT_NS).text
     end
-  end    
+  end
 
 end

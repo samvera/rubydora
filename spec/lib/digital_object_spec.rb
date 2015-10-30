@@ -68,7 +68,7 @@ describe Rubydora::DigitalObject do
 
     describe "without a provided pid" do
       subject { Rubydora::DigitalObject.new nil, @mock_api }
-      it "should create a new Fedora object with a generated PID if no PID is provided" do 
+      it "should create a new Fedora object with a generated PID if no PID is provided" do
         @mock_api.should_receive(:ingest).with(hash_including(:pid => nil)).and_return('pid')
         @mock_api.should_receive(:datastreams).with(hash_including(:pid => 'pid')).and_raise(RestClient::ResourceNotFound)
         subject.save
@@ -93,7 +93,7 @@ describe Rubydora::DigitalObject do
   end
 
   describe "retreive datastreams" do
-    describe "without profiles (fedora < 3.6)" do 
+    describe "without profiles (fedora < 3.6)" do
       before(:each) do
         @mock_api.stub :datastreams do |hash|
           "<objectDatastreams><datastream dsid='a'></datastream><datastream dsid='b'></datastream><datastream dsid='c'></datastream></objectDatastreams>"
@@ -137,7 +137,7 @@ describe Rubydora::DigitalObject do
         object.datastreams['asdf'].should be_a_kind_of(MyCustomDatastreamClass)
       end
     end
-    describe "with profiles (fedora >= 3.6)" do 
+    describe "with profiles (fedora >= 3.6)" do
       before(:each) do
         @mock_api.stub :datastreams do |hash|
           "<objectDatastreams>
@@ -185,7 +185,7 @@ describe Rubydora::DigitalObject do
         </datastreamProfile>
       </objectDatastreams>
       XML
-     @object = Rubydora::DigitalObject.new 'pid', @mock_api
+      @object = Rubydora::DigitalObject.new 'pid', @mock_api
       @object.stub(:new_record? => false)
     end
     describe "datastreams" do
@@ -269,7 +269,7 @@ describe Rubydora::DigitalObject do
         # object date should be canonicalized and updated
         @object.lastModifiedDate.should == '2012-01-02:05:15:45.1Z'
       end
-      
+
       it "should not set lastModifiedDate if the before_save callback is false" do
         @object.stub(:datastreams) { { :changed_ds => @changed_ds } }
         @changed_ds.should_receive(:dsCreateDate).and_return(nil)
@@ -451,7 +451,7 @@ describe Rubydora::DigitalObject do
       Rubydora::Datastream.should_receive(:new).with(anything, 'my_ds', hash_including(:asOfDateTime => '2011-09-26T20:41:02.450Z'))
       ds = @object.versions.first['my_ds']
     end
-    
+
   end
 
   describe "to_api_params" do
@@ -479,7 +479,7 @@ describe Rubydora::DigitalObject do
 
       it "should fall-back to the set of default attributes" do
         @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
-        Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'} 
+        Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'}
         subject.send(method).should == 'zxcv'
       end
     end
@@ -499,7 +499,7 @@ describe Rubydora::DigitalObject do
         subject.send("#{method}=", 'zxcv')
       end
 
-      it "should appear in the save request" do 
+      it "should appear in the save request" do
         @mock_api.should_receive(:ingest).with(hash_including(method.to_sym => 'new_value'))
         @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.send("#{method}=", 'new_value')
@@ -524,7 +524,7 @@ describe Rubydora::DigitalObject do
 
       it "should fall-back to the set of default attributes" do
         @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
-        Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(:state) { 'zxcv'} 
+        Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(:state) { 'zxcv'}
         subject.state.should == 'zxcv'
       end
     end
@@ -549,7 +549,7 @@ describe Rubydora::DigitalObject do
         subject.should_not be_changed
       end
 
-      it "should appear in the save request" do 
+      it "should appear in the save request" do
         @mock_api.should_receive(:ingest).with(hash_including(:state => 'A'))
         @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
         subject.state='A'

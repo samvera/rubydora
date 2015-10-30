@@ -150,20 +150,6 @@ Style/AlignParameters:
   Exclude:
     - 'lib/rubydora/repository.rb'
 
-# Offense count: 17
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/AndOr:
-  Exclude:
-    - 'Rakefile'
-    - 'lib/rubydora/datastream.rb'
-    - 'lib/rubydora/fedora_url_helpers.rb'
-    - 'lib/rubydora/profile_parser.rb'
-    - 'lib/rubydora/repository.rb'
-    - 'lib/rubydora/rest_api_client.rb'
-    - 'lib/rubydora/transactions.rb'
-    - 'spec/spec_helper.rb'
-
 # Offense count: 5
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
@@ -224,13 +210,6 @@ Style/ColonMethodCall:
 
 # Offense count: 2
 # Cop supports --auto-correct.
-Style/CommentIndentation:
-  Exclude:
-    - 'lib/rubydora/callbacks.rb'
-    - 'spec/lib/transactions_spec.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
 Style/DeprecatedHashMethods:
   Exclude:
     - 'lib/rubydora/datastream.rb'
@@ -258,22 +237,6 @@ Style/EmptyLineBetweenDefs:
   Exclude:
     - 'lib/rubydora/audit_trail.rb'
     - 'lib/rubydora/profile_parser.rb'
-
-# Offense count: 22
-# Cop supports --auto-correct.
-Style/EmptyLines:
-  Exclude:
-    - 'lib/rubydora/datastream.rb'
-    - 'lib/rubydora/digital_object.rb'
-    - 'lib/rubydora/fc3_service.rb'
-    - 'lib/rubydora/fedora_url_helpers.rb'
-    - 'lib/rubydora/relationships_mixin.rb'
-    - 'lib/rubydora/rest_api_client.rb'
-    - 'spec/lib/datastream_spec.rb'
-    - 'spec/lib/integration_test_spec.rb'
-    - 'spec/lib/rest_api_client_spec.rb'
-    - 'spec/lib/transactions_spec.rb'
-    - 'spec/spec_helper.rb'
 
 # Offense count: 3
 # Cop supports --auto-correct.
@@ -345,12 +308,6 @@ Style/ExtraSpacing:
     - 'spec/lib/datastream_spec.rb'
     - 'spec/lib/rest_api_client_spec.rb'
 
-# Offense count: 1
-# Configuration parameters: MinBodyLength.
-Style/GuardClause:
-  Exclude:
-    - 'lib/rubydora/transactions.rb'
-
 # Offense count: 584
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles, UseHashRocketsWithSymbolValues.
@@ -367,29 +324,6 @@ Style/IfUnlessModifier:
     - 'lib/rubydora/datastream.rb'
     - 'lib/rubydora/digital_object.rb'
     - 'lib/rubydora/rest_api_client.rb'
-
-# Offense count: 38
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/IndentationConsistency:
-  Exclude:
-    - 'lib/rubydora/datastream.rb'
-    - 'spec/lib/digital_object_spec.rb'
-    - 'spec/lib/integration_test_spec.rb'
-    - 'spec/lib/rest_api_client_spec.rb'
-
-# Offense count: 58
-# Cop supports --auto-correct.
-# Configuration parameters: Width.
-Style/IndentationWidth:
-  Exclude:
-    - 'lib/rubydora/datastream.rb'
-    - 'lib/rubydora/relationships_mixin.rb'
-    - 'lib/rubydora/rest_api_client.rb'
-    - 'lib/rubydora/transactions.rb'
-    - 'spec/lib/datastream_spec.rb'
-    - 'spec/lib/integration_test_spec.rb'
-    - 'spec/lib/rest_api_client_spec.rb'
 
 # Offense count: 17
 # Cop supports --auto-correct.
@@ -418,12 +352,6 @@ Style/MethodCallParentheses:
     - 'spec/lib/datastream_spec.rb'
     - 'spec/lib/resource_index_spec.rb'
 
-# Offense count: 90
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/MethodDefParentheses:
-  Enabled: false
-
 # Offense count: 6
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/MethodName:
@@ -439,26 +367,6 @@ Style/MultilineBlockChain:
 Style/MultilineBlockLayout:
   Exclude:
     - 'spec/lib/digital_object_spec.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/NegatedIf:
-  Exclude:
-    - 'lib/rubydora/audit_trail.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/NilComparison:
-  Exclude:
-    - 'lib/rubydora/datastream.rb'
-    - 'lib/rubydora/digital_object.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/Not:
-  Exclude:
-    - 'lib/rubydora/fedora_url_helpers.rb'
-    - 'lib/rubydora/rest_api_client.rb'
 
 # Offense count: 1
 # Cop supports --auto-correct.
@@ -487,20 +395,6 @@ Style/PredicateName:
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/RaiseArgs:
   Enabled: false
-
-# Offense count: 1
-# Cop supports --auto-correct.
-Style/RedundantBegin:
-  Exclude:
-    - 'lib/rubydora/fc3_service.rb'
-
-# Offense count: 3
-# Cop supports --auto-correct.
-# Configuration parameters: AllowMultipleReturnValues.
-Style/RedundantReturn:
-  Exclude:
-    - 'lib/rubydora/datastream.rb'
-    - 'lib/rubydora/digital_object.rb'
 
 # Offense count: 22
 # Cop supports --auto-correct.
@@ -531,13 +425,6 @@ Style/RescueModifier:
     - 'lib/rubydora/resource_index.rb'
     - 'lib/rubydora/transactions.rb'
     - 'spec/lib/integration_test_spec.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: AllowAsExpressionSeparator.
-Style/Semicolon:
-  Exclude:
-    - 'lib/rubydora/repository.rb'
 
 # Offense count: 28
 # Cop supports --auto-correct.
@@ -665,19 +552,6 @@ Style/SymbolProc:
     - 'lib/rubydora/profile_parser.rb'
     - 'spec/lib/integration_test_spec.rb'
 
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, SupportedStyles.
-Style/TrailingBlankLines:
-  Exclude:
-    - 'spec/lib/datastream_spec.rb'
-    - 'spec/lib/profile_parser_spec.rb'
-
-# Offense count: 130
-# Cop supports --auto-correct.
-Style/TrailingWhitespace:
-  Enabled: false
-
 # Offense count: 3
 # Cop supports --auto-correct.
 # Configuration parameters: ExactNameMatch, AllowPredicates, AllowDSLWriters, IgnoreClassMethods, Whitelist.
@@ -687,15 +561,7 @@ Style/TrivialAccessors:
     - 'lib/rubydora/datastream.rb'
     - 'lib/rubydora/digital_object.rb'
 
-# Offense count: 6
-# Cop supports --auto-correct.
-Style/UnneededPercentQ:
-  Exclude:
-    - 'lib/rubydora/callbacks.rb'
-    - 'lib/rubydora/datastream.rb'
-    - 'rubydora.gemspec'
-
-# Offense count: 5
+    # Offense count: 5
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 Style/VariableName:
   Enabled: false

@@ -35,7 +35,7 @@ module Rubydora
   class << self
     # Connect to Fedora Repository
     # @return Rubydora::Repository
-    def connect *args
+    def connect(*args)
       Repository.new *args
     end
 
@@ -48,7 +48,7 @@ module Rubydora
     # Set the default Fedora Repository
     # @param [Rubydora::Repository] repository
     # @return Rubydora::Repository
-    def repository= repository
+    def repository=(repository)
       @repository = repository
     end
 
@@ -64,6 +64,6 @@ module Rubydora
 
   class FedoraInvalidRequest < RubydoraError; end
 
-  class RecordNotFound < RubydoraError; end 
+  class RecordNotFound < RubydoraError; end
 
 end

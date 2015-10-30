@@ -28,7 +28,7 @@ describe Rubydora::Datastream do
       stub_response = double
       stub_response.stub(:read_body).and_yield("one1").and_yield('two2').and_yield('thre').and_yield('four')
       allow(stub_response).to receive(:headers) { {content_length: "16"} }
-      @mock_api.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_yield(stub_response) 
+      @mock_api.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_yield(stub_response)
       subject.profile = Rubydora::ProfileParser.parse_datastream_profile(prof)
     end
     shared_examples "a streamable datastream" do
@@ -166,7 +166,6 @@ describe Rubydora::Datastream do
     #   @datastream.versionable.should be true
     # end
 
-
     it "should call the appropriate api on save" do
       @datastream.stub(:content => 'content')
       @mock_api.should_receive(:add_datastream).with(hash_including(:content => 'content', :pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A'))
@@ -221,7 +220,7 @@ describe Rubydora::Datastream do
         <datastreamProfile>
         </datastreamProfile>
       XML
-      @datastream.dsChecksumValid.should be_nil 
+      @datastream.dsChecksumValid.should be_nil
     end
 
     it "should be true when it's returned as true" do
@@ -268,7 +267,7 @@ describe Rubydora::Datastream do
     end
 
     it "should mediate access to datastream contents" do
-      @mock_api.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+      @mock_api.should_receive(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf')
       @datastream.content.should == "asdf"
     end
 
@@ -288,7 +287,6 @@ describe Rubydora::Datastream do
 
     end
 
-
   end
 
   describe "content changed behavior" do
@@ -304,7 +302,7 @@ describe Rubydora::Datastream do
       end
 
       it "should not be changed after a read-only access" do
-        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf')
         @datastream.content
         @datastream.content_changed?.should == false
       end
@@ -313,29 +311,29 @@ describe Rubydora::Datastream do
         @datastream.content_changed?.should == false
       end
       it "should be changed when the new content is different than the old content" do
-        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf')
         @datastream.content = "test"
-        @datastream.content_changed?.should == true 
+        @datastream.content_changed?.should == true
       end
 
       it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
-        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test')
         @datastream.eager_load_datastream_content = true
         @datastream.content = "test"
-        @datastream.content_changed?.should  == false 
+        @datastream.content_changed?.should  == false
       end
 
       it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
-        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test')
         @datastream.content = "test"
         @datastream.content_changed?.should  == true
       end
 
       it "should not be changed when the new content is the same as the existing content (and we have accessed #content previously)" do
-        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('test')
         @datastream.content
         @datastream.content = "test"
-        @datastream.content_changed?.should  == false 
+        @datastream.content_changed?.should  == false
       end
     end
 
@@ -350,14 +348,14 @@ describe Rubydora::Datastream do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid', :controlGroup => 'X'
       end
       it "should not be changed when the new content is the same as the existing content (when eager-loading is enabled)" do
-        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>')
         @datastream.eager_load_datastream_content = true
         @datastream.content = "<xml>test</xml>"
-        @datastream.content_changed?.should  == false 
+        @datastream.content_changed?.should  == false
       end
 
       it "should  be changed when the new content is the same as the existing content (without eager loading, the default)" do
-        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>') 
+        @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('<xml>test</xml>')
         @datastream.content = "<xml>test</xml>"
         @datastream.content_changed?.should  == true
       end
@@ -372,12 +370,12 @@ describe Rubydora::Datastream do
     subject { Rubydora::Datastream.new double(:pid => 'asdf', :new? => false), 'asdf' }
     it "should have content if it is persisted" do
       subject.stub(:new? => false)
-      subject.should have_content     
+      subject.should have_content
     end
 
     it "should have content if it has content" do
       subject.content = "123"
-      subject.should have_content     
+      subject.should have_content
     end
 
     context "it has a dsLocation" do
@@ -398,7 +396,7 @@ describe Rubydora::Datastream do
 
     it "should not have content otherwise" do
       subject.stub(:content => nil)
-      subject.should_not have_content     
+      subject.should_not have_content
     end
   end
 
@@ -561,7 +559,7 @@ describe Rubydora::Datastream do
       end
 
     end
-    
+
   end
 
   describe "datastream attributes" do
@@ -609,11 +607,11 @@ describe Rubydora::Datastream do
           subject.send("#{method}=", 'zxcv')
         end
 
-        it "should appear in the save request" do 
-          @mock_api.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'new_value'))
-          subject.send("#{method}=", 'new_value')
-          subject.save
-          expect(subject).to_not be_changed, "#{subject.changes.inspect}"
+        it "should appear in the save request" do
+         @mock_api.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'new_value'))
+         subject.send("#{method}=", 'new_value')
+         subject.save
+         expect(subject).to_not be_changed, "#{subject.changes.inspect}"
        end
       end
     end
@@ -657,10 +655,10 @@ describe Rubydora::Datastream do
       end
 
       it "should appear in the save request" do
-          @mock_api.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'http://example.com'))
-          subject.stub(:content_changed? => false)
-          subject.dsLocation = 'http://example.com'
-          subject.save
+        @mock_api.should_receive(:modify_datastream).with(hash_including(method.to_sym => 'http://example.com'))
+        subject.stub(:content_changed? => false)
+        subject.dsLocation = 'http://example.com'
+        subject.save
       end
     end
 
@@ -829,7 +827,6 @@ describe Rubydora::Datastream do
       end
     end
 
-
     describe "without existing properties" do
       before(:each) do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
@@ -880,7 +877,7 @@ describe Rubydora::Datastream do
     after(:all) do
       Object.send(:remove_const, :MyDatastream)
     end
-    
+
     describe "saving new datastream" do
       before do
         allow(@mock_api).to receive(:add_datastream).with(hash_including(:content => 'content', :pid => 'pid', :dsid => 'dsid', :controlGroup => 'M', :dsState => 'A')) { {} }
@@ -913,4 +910,3 @@ describe Rubydora::Datastream do
   end
 
 end
-

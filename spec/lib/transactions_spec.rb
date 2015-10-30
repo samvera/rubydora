@@ -1,9 +1,8 @@
 require 'spec_helper'
 
 describe Rubydora::Transactions do
-  
 
-  subject { 
+  subject {
     # Rubydora::Repository.any_instance.stub(:version).and_return(100)
     # repository = Rubydora::Repository.new :url => 'http://example.org'
     Rubydora::Fc3Service.new :url => 'http://example.org'
@@ -15,14 +14,13 @@ describe Rubydora::Transactions do
       subject.client.stub_chain(:[], :put).and_return 'asdf'
       subject.client.stub_chain(:[], :delete)
 
-        # this should be squelched
+      # this should be squelched
       subject.should_not_receive(:export).with(hash_including(:pid => 'asdf', :context => :archive))
-      
+
       subject.transaction do |t|
         subject.ingest :pid => 'asdf', :file => '<a />'
         subject.purge_object :pid => 'asdf'
         subject.modify_datastream :pid => 'asdf', :dsid => 'mydsid'
-
 
         subject.should_receive(:purge_object).with(hash_including(:pid => 'asdf'))
 
@@ -71,7 +69,7 @@ describe Rubydora::Transactions do
       subject.client.stub_chain(:[], :put).and_return 'asdf'
 
       profile_xml = "<objectProfile><objState>A</objState><objOwnerId>567</objOwnerId></objectProfile>"
-      subject.should_receive(:object).with(pid: 'asdf').and_return profile_xml 
+      subject.should_receive(:object).with(pid: 'asdf').and_return profile_xml
 
       subject.transaction do |t|
         subject.modify_object :pid => 'asdf', :state => 'I', :ownerId => '123', :logMessage => 'changing asdf'

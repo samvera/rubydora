@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 # These tests require a fedora repository with the resource index enabled (and with syncUpdates = true)
 describe "Integration testing against a live Fedora repository", :integration => true do
   REPOSITORY_CONFIG = { :url => "http://localhost:#{ENV['TEST_JETTY_PORT'] || 8983}/fedora", :user => 'fedoraAdmin', :password => 'fedoraAdmin' }
@@ -81,54 +80,54 @@ describe "Integration testing against a live Fedora repository", :integration =>
 
   describe "datastream stuff" do
 
-  it "should create a managed datastream" do
-    obj = @repository.find_or_initialize('test:1')
-    obj.save
-    ds = obj.datastreams["Test"]
+    it "should create a managed datastream" do
+      obj = @repository.find_or_initialize('test:1')
+      obj.save
+      ds = obj.datastreams["Test"]
 
-    ds.content = open(__FILE__).read
-    ds.mimeType = 'text/plain'
-    ds.save
-  end
-
-  it "should create a redirect datastream" do
-    obj = @repository.find_or_initialize('test:1')
-    ds = obj.datastreams["Redirect"]
-    ds.controlGroup = "R"
-    ds.dsLocation = "http://example.org"
-    ds.save
-  end
-
-  it "should have datastreams" do
-    obj = @repository.find_or_initialize('test:1')
-    obj.datastreams.keys.should include("Test")
-    obj.datastreams.keys.should include("Redirect")
-  end
-
-  it "should have datastream content" do
-    obj = @repository.find('test:1')
-    obj.datastreams["Test"].content.should match( "Integration testing against a live Fedora repository")
-  end
-
-  it "should have profile attributes" do
-    obj = @repository.find_or_initialize('test:1')
-    ds = obj.datastreams["Test"]
-
-    ds.versionID.should == "Test.0"
-
-    (Time.now - ds.createDate).should be < 60*60 # 1 hour
-    ds.state.should == "A"
-    ds.controlGroup.should == "M"
-    ds.size.should be > 100
-  end
-
-  it "should not mark existing datastreams as changed on load" do
-    obj = @repository.find('fedora-system:ContentModel-3.0')
-    obj.datastreams.each do |k,v|
-      v.changed?.should be false
-      v.new?.should be false
+      ds.content = open(__FILE__).read
+      ds.mimeType = 'text/plain'
+      ds.save
     end
-  end
+
+    it "should create a redirect datastream" do
+      obj = @repository.find_or_initialize('test:1')
+      ds = obj.datastreams["Redirect"]
+      ds.controlGroup = "R"
+      ds.dsLocation = "http://example.org"
+      ds.save
+    end
+
+    it "should have datastreams" do
+      obj = @repository.find_or_initialize('test:1')
+      obj.datastreams.keys.should include("Test")
+      obj.datastreams.keys.should include("Redirect")
+    end
+
+    it "should have datastream content" do
+      obj = @repository.find('test:1')
+      obj.datastreams["Test"].content.should match( "Integration testing against a live Fedora repository")
+    end
+
+    it "should have profile attributes" do
+      obj = @repository.find_or_initialize('test:1')
+      ds = obj.datastreams["Test"]
+
+      ds.versionID.should == "Test.0"
+
+      (Time.now - ds.createDate).should be < 60*60 # 1 hour
+      ds.state.should == "A"
+      ds.controlGroup.should == "M"
+      ds.size.should be > 100
+    end
+
+    it "should not mark existing datastreams as changed on load" do
+      obj = @repository.find('fedora-system:ContentModel-3.0')
+      obj.datastreams.each do |k,v|
+        v.changed?.should be false
+        v.new?.should be false
+      end
+    end
 
   end
 
@@ -186,99 +185,98 @@ describe "Integration testing against a live Fedora repository", :integration =>
     obj.save
   end
 
-
   describe "with transactions" do
     it "should work on ingest" do
-       @repository.find('transactions:1').delete rescue nil
+      @repository.find('transactions:1').delete rescue nil
 
-       @repository.transaction do |t|
-         obj = @repository.find_or_initialize('transactions:1')
-         obj.save
+      @repository.transaction do |t|
+        obj = @repository.find_or_initialize('transactions:1')
+        obj.save
 
-         t.rollback
-       end
+        t.rollback
+      end
 
-       lambda { @repository.find('transactions:1') }.should raise_error Rubydora::RecordNotFound
+      lambda { @repository.find('transactions:1') }.should raise_error Rubydora::RecordNotFound
     end
 
     it "should work on purge" do
-       @repository.find('transactions:1').delete rescue nil
+      @repository.find('transactions:1').delete rescue nil
 
-       obj = @repository.find_or_initialize('transactions:1')
-       obj.save
+      obj = @repository.find_or_initialize('transactions:1')
+      obj.save
 
-       @repository.transaction do |t|
-         obj.delete
+      @repository.transaction do |t|
+        obj.delete
 
-         t.rollback
-       end
+        t.rollback
+      end
 
-       obj = @repository.find('transactions:1')
-       obj.should_not be_new
+      obj = @repository.find('transactions:1')
+      obj.should_not be_new
     end
 
     it "should work on datastreams" do
-       @repository.find('transactions:1').delete rescue nil
-       obj = Rubydora::DigitalObject.new('transactions:1', @repository)
-       obj.save
+      @repository.find('transactions:1').delete rescue nil
+      obj = Rubydora::DigitalObject.new('transactions:1', @repository)
+      obj.save
 
-       ds = obj.datastreams['datastream_to_delete']
-       ds.content = 'asdf'
-       ds.save
+      ds = obj.datastreams['datastream_to_delete']
+      ds.content = 'asdf'
+      ds.save
 
-       ds2 = obj.datastreams['datastream_to_change']
-       ds2.content = 'asdf'
-       ds2.save
+      ds2 = obj.datastreams['datastream_to_change']
+      ds2.content = 'asdf'
+      ds2.save
 
-       ds3 = obj.datastreams['datastream_to_change_properties']
-       ds3.content = 'asdf'
-       ds3.versionable = true
-       ds3.dsState = 'I'
-       ds3.save
+      ds3 = obj.datastreams['datastream_to_change_properties']
+      ds3.content = 'asdf'
+      ds3.versionable = true
+      ds3.dsState = 'I'
+      ds3.save
 
-       @repository.transaction do |t|
-         ds.delete
+      @repository.transaction do |t|
+        ds.delete
 
-         ds2.content = '1234'
-         ds2.save
+        ds2.content = '1234'
+        ds2.save
 
-         @repository.set_datastream_options :pid => obj.pid, :dsid => 'datastream_to_change_properties', :state => 'A'
-         @repository.set_datastream_options :pid => obj.pid, :dsid => 'datastream_to_change_properties', :versionable => false
+        @repository.set_datastream_options :pid => obj.pid, :dsid => 'datastream_to_change_properties', :state => 'A'
+        @repository.set_datastream_options :pid => obj.pid, :dsid => 'datastream_to_change_properties', :versionable => false
 
-         ds4 = obj.datastreams['datastream_to_create']
-         ds4.content = 'asdf'
-         ds4.save
+        ds4 = obj.datastreams['datastream_to_create']
+        ds4.content = 'asdf'
+        ds4.save
 
-         t.rollback
-       end
+        t.rollback
+      end
 
-       obj = @repository.find('transactions:1')
-       obj.datastreams.keys.should_not include('datsatream_to_create')
-       obj.datastreams.keys.should include('datastream_to_delete')
-       obj.datastreams['datastream_to_change'].content.should == 'asdf'
-       obj.datastreams['datastream_to_change_properties'].versionable.should == true
-       obj.datastreams['datastream_to_change_properties'].dsState.should == 'I'
+      obj = @repository.find('transactions:1')
+      obj.datastreams.keys.should_not include('datsatream_to_create')
+      obj.datastreams.keys.should include('datastream_to_delete')
+      obj.datastreams['datastream_to_change'].content.should == 'asdf'
+      obj.datastreams['datastream_to_change_properties'].versionable.should == true
+      obj.datastreams['datastream_to_change_properties'].dsState.should == 'I'
     end
 
     it "should work on relationships" do
       pending("fcrepo 3.6's relationship api is busted; skipping") if @repository.version == 3.6
-       @repository.find('transactions:1').delete rescue nil
+      @repository.find('transactions:1').delete rescue nil
 
       obj = @repository.find_or_initialize('transactions:1')
-       obj.save
-       @repository.add_relationship :subject => obj.pid, :predicate => 'uri:asdf', :object => 'fedora:object'
+      obj.save
+      @repository.add_relationship :subject => obj.pid, :predicate => 'uri:asdf', :object => 'fedora:object'
 
-       ds = obj.datastreams['RELS-EXT'].content
+      ds = obj.datastreams['RELS-EXT'].content
 
-       @repository.transaction do |t|
-         @repository.purge_relationship :subject => obj.pid, :predicate => 'uri:asdf', :object => 'fedora:object'
-         @repository.add_relationship :subject => obj.pid, :predicate => 'uri:qwerty', :object => 'fedora:object'
+      @repository.transaction do |t|
+        @repository.purge_relationship :subject => obj.pid, :predicate => 'uri:asdf', :object => 'fedora:object'
+        @repository.add_relationship :subject => obj.pid, :predicate => 'uri:qwerty', :object => 'fedora:object'
 
-         t.rollback
+        t.rollback
 
-       end
-       obj = @repository.find('transactions:1')
-       obj.datastreams['RELS-EXT'].content.should == ds
+      end
+      obj = @repository.find('transactions:1')
+      obj.datastreams['RELS-EXT'].content.should == ds
     end
   end
 
@@ -341,7 +339,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
       ds.save
 
       versions = obj.datastreams["my_ds"].versions
-      versions.map { |x| x.content }.should include("XXX", "YYY") 
+      versions.map { |x| x.content }.should include("XXX", "YYY")
     end
 
     it "should allow the user to go from a versioned datastream to an unversioned datastream" do
@@ -451,19 +449,18 @@ describe "Integration testing against a live Fedora repository", :integration =>
   end
 
   it "should not destroy content when datastream properties are changed" do
-      obj = @repository.find('test:1')
-      obj.datastreams["my_ds"].content = "XXX"
-      obj.datastreams["my_ds"].mimeType = "text/plain"
-      obj.save
+    obj = @repository.find('test:1')
+    obj.datastreams["my_ds"].content = "XXX"
+    obj.datastreams["my_ds"].mimeType = "text/plain"
+    obj.save
 
-      obj = @repository.find('test:1')
-      obj.datastreams["my_ds"].mimeType = 'application/json'
-      obj.save
+    obj = @repository.find('test:1')
+    obj.datastreams["my_ds"].mimeType = 'application/json'
+    obj.save
 
-      obj = @repository.find('test:1')
-      obj.datastreams["my_ds"].content.should == "XXX"
+    obj = @repository.find('test:1')
+    obj.datastreams["my_ds"].content.should == "XXX"
   end
-
 
   after(:all) do
     @repository.find('test:1').delete rescue nil

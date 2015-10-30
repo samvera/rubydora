@@ -2,7 +2,7 @@ require 'equivalent-xml'
 module Rubydora
   # This class represents a Fedora datastream object
   # and provides helper methods for creating and manipulating
-  # them. 
+  # them.
   class Datastream
     extend ActiveModel::Callbacks
     define_model_callbacks :save, :create, :destroy
@@ -21,41 +21,40 @@ module Rubydora
 
     define_attribute_methods DS_ATTRIBUTES.keys
 
-    # accessors for datastream attributes 
+    # accessors for datastream attributes
     DS_ATTRIBUTES.each do |attribute, profile_name|
       define_method attribute.to_s do
         var = "@#{attribute.to_s}".to_sym
         if instance_variable_defined?(var)
           instance_variable_get var
         elsif profile.has_key? profile_name.to_s
-           profile[profile_name.to_s]
+          profile[profile_name.to_s]
         else
           default_attributes[attribute.to_sym]
         end
       end
 
-      class_eval %Q{
+      class_eval "
       def #{attribute.to_s}= val
         validate_#{attribute.to_s}!(val) if respond_to?(:validate_#{attribute.to_s}!, true)
         #{attribute.to_s}_will_change! unless val == #{attribute.to_s}
         @#{attribute.to_s} = val
       end
-      }
+      "
     end
 
     DS_READONLY_ATTRIBUTES = [ :dsCreateDate , :dsSize, :dsVersionID ]
     DS_READONLY_ATTRIBUTES.each do |attribute|
-      class_eval %Q{
+      class_eval "
       def #{attribute.to_s}
         @#{attribute} || profile['#{attribute.to_s}'] || default_attributes[:#{attribute}]
       end
-      }
+      "
 
       def dsChecksumValid
         profile(:validateChecksum=>true)['dsChecksumValid']
       end
     end
-
 
     # Create humanized accessors for the DS attribute  (dsState -> state, dsCreateDate -> createDate)
     (DS_ATTRIBUTES.keys + DS_READONLY_ATTRIBUTES).select { |k| k.to_s =~ /^ds/ }.each do |attribute|
@@ -69,13 +68,12 @@ module Rubydora
       end
     end
 
-
-    def asOfDateTime asOfDateTime = nil
-      if asOfDateTime == nil
+    def asOfDateTime(asOfDateTime = nil)
+      if asOfDateTime.nil?
         return @asOfDateTime
       end
 
-      return self.class.new(@digital_object, dsid, @options.merge(:asOfDateTime => asOfDateTime))
+      self.class.new(@digital_object, dsid, @options.merge(:asOfDateTime => asOfDateTime))
     end
 
     def self.default_attributes
@@ -86,7 +84,7 @@ module Rubydora
       @default_attributes ||= self.class.default_attributes
     end
 
-    def default_attributes= attributes
+    def default_attributes=(attributes)
       @default_attributes = default_attributes.merge attributes
     end
 
@@ -95,11 +93,11 @@ module Rubydora
     # may not already exist in the datastore.
     #
     # Provides `after_initialize` callback for extensions
-    # 
+    #
     # @param [Rubydora::DigitalObject]
     # @param [String] Datastream ID
     # @param [Hash] default attribute values (used esp. for creating new datastreams)
-    def initialize digital_object, dsid, options = {}, default_instance_attributes = {}
+    def initialize(digital_object, dsid, options = {}, default_instance_attributes = {})
       run_callbacks :initialize do
         @digital_object = digital_object
         @dsid = dsid
@@ -131,7 +129,7 @@ module Rubydora
     # @param [Boolean] ensure_fetch <true> if true, it will grab the content from the repository if is not already loaded
     # @return [String]
     def local_or_remote_content(ensure_fetch = true)
-      return @content if new? 
+      return @content if new?
 
       @content ||= ensure_fetch ? datastream_content : @datastream_content
 
@@ -169,16 +167,16 @@ module Rubydora
     end
 
     # Set the content of the datastream
-    # @param [String or IO] 
+    # @param [String or IO]
     # @return [String or IO]
-    def content= new_content
+    def content=(new_content)
       raise "Can't change values on older versions" if @asOfDateTime
-       @content = new_content
+      @content = new_content
     end
 
     def content_changed?
       return false if ['E','R'].include? controlGroup
-      return true if new? and !local_or_remote_content(false).blank? # new datastreams must have content
+      return true if new? && !local_or_remote_content(false).blank? # new datastreams must have content
 
       if controlGroup == "X"
         if self.eager_load_datastream_content
@@ -208,7 +206,7 @@ module Rubydora
       return dsLocation.present? if ['E','R'].include? controlGroup
 
       # type M has content if dsLocation is not empty
-      return true if controlGroup == 'M' and dsLocation.present?
+      return true if controlGroup == 'M' && dsLocation.present?
 
       # if we've set content, then we have content
       behaves_like_io?(@content) || content.present?
@@ -222,9 +220,9 @@ module Rubydora
     # it doesn't require holding the entire content in memory. If you specify the from and length
     # parameters it simulates a range request. Unfortunatly Fedora 3 doesn't have range requests,
     # so this method needs to download the whole thing and just seek to the part you care about.
-    # 
-    # @param [Integer] from (bytes) the starting point you want to return. 
-    # 
+    #
+    # @param [Integer] from (bytes) the starting point you want to return.
+    #
     def stream (from = 0, length = nil)
       counter = 0
       Enumerator.new do |blk|
@@ -246,7 +244,7 @@ module Rubydora
                 # At the end of what we beginning of what we need. Write the end of what was read.
                 offset = from - last_counter
                 blk << chunk[offset..-1]
-              else 
+              else
                 # In the middle. We need all of this
                 blk << chunk
               end
@@ -259,18 +257,18 @@ module Rubydora
     # Retrieve the datastream profile as a hash (and cache it)
     # @param opts [Hash] :validateChecksum if you want fedora to validate the checksum
     # @return [Hash] see Fedora #getDatastream documentation for keys
-    def profile opts= {}
+    def profile(opts= {})
       if @profile && !(opts[:validateChecksum] && !@profile.has_key?('dsChecksumValid'))
         ## Force a recheck of the profile if they've passed :validateChecksum and we don't have dsChecksumValid
         return @profile
       end
-      
+
       return @profile = {} unless digital_object.respond_to? :repository
-      
+
       @profile = repository.datastream_profile(pid, dsid, opts[:validateChecksum], asOfDateTime)
     end
 
-    def profile= profile_hash
+    def profile=(profile_hash)
       raise ArgumentError, "Must pass a profile, you passed #{profile_hash.class}" unless profile_hash.kind_of? Hash
       @profile = profile_hash
     end
@@ -285,7 +283,7 @@ module Rubydora
     def current_version?
       return true if new?
       vers = versions
-      return vers.empty? || dsVersionID == vers.first.dsVersionID
+      vers.empty? || dsVersionID == vers.first.dsVersionID
     end
 
     # Add datastream to Fedora
@@ -307,7 +305,7 @@ module Rubydora
       run_callbacks :save do
         raise RubydoraError.new("Unable to save #{self.inspect} without content") unless has_content?
         if new?
-          create 
+          create
         else
           p = repository.modify_datastream(to_api_params.merge({ :pid => pid, :dsid => dsid })) || {}
           reset_profile_attributes
@@ -353,15 +351,13 @@ module Rubydora
       controlGroup == 'X'
     end
 
-    
-
     protected
-    # datastream parameters 
+    # datastream parameters
     # @return [Hash]
     def to_api_params
       h = default_api_params
       valid_changed_attributes = changes.keys.map { |x| x.to_sym }.select { |x| DS_ATTRIBUTES.key? x }
-      valid_changed_attributes += [:content] if content_changed? and !valid_changed_attributes.include? :content
+      valid_changed_attributes += [:content] if content_changed? && !valid_changed_attributes.include?(:content)
       ## if we don't provide a mimeType, application/octet-stream will be used instead
       (valid_changed_attributes | [:mimeType]).each do |attribute|
         h[attribute.to_sym] = send(attribute) unless send(attribute).nil?
@@ -392,7 +388,7 @@ module Rubydora
       digital_object.repository
     end
 
-    def asOfDateTime= val
+    def asOfDateTime=(val)
       @asOfDateTime = val
     end
 
@@ -400,7 +396,7 @@ module Rubydora
       raise "Can't change values on older versions" if @asOfDateTime
     end
 
-    def validate_dsLocation! val
+    def validate_dsLocation!(val)
       URI.parse(val) unless val.nil?
     end
 
@@ -411,7 +407,7 @@ module Rubydora
       obj.is_a?(IO) || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
     end
 
-    def attribute_will_change! *args
+    def attribute_will_change!(*args)
       check_if_read_only
       super
     end
