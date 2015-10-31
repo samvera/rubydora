@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler'
 require 'jettywrapper'
+require 'yard'
 require 'bundler/gem_tasks'
 
 ZIP_URL = 'https://github.com/projecthydra/hydra-jetty/archive/v7.2.0.zip'
@@ -25,6 +26,11 @@ RSpec::Core::RakeTask.new do |t|
     t.rcov = true
     t.rcov_opts = %w{--exclude spec\/*,gems\/*,ruby\/* --aggregate coverage.data}
   end
+end
+
+YARD::Rake::YardocTask.new do |yt|
+  yt.files   = ['lib/**/*.rb']
+  yt.options = ['--readme', 'README.md']
 end
 
 desc 'Open an irb session preloaded with this library'
