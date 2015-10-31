@@ -46,7 +46,7 @@ task :ci => 'jetty:clean' do
 
   jetty_params = {
     :jetty_home   => File.expand_path(File.dirname(__FILE__) + '/jetty'),
-    :quiet        => false,
+    :quiet        => true,
     :jetty_port   => ENV['TEST_JETTY_PORT'] || 8983,
     :solr_home    => File.expand_path(File.dirname(__FILE__) + '/jetty/solr'),
     :fedora_home  => File.expand_path(File.dirname(__FILE__) + '/jetty/fedora/default'),
