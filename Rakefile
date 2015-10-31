@@ -1,7 +1,10 @@
 require 'rubygems'
 require 'bundler'
 require 'jettywrapper'
+require 'yard'
 require 'bundler/gem_tasks'
+
+ZIP_URL = 'https://github.com/projecthydra/hydra-jetty/archive/v7.2.0.zip'
 
 begin
   Bundler.setup(:default, :development)
@@ -25,6 +28,11 @@ RSpec::Core::RakeTask.new do |t|
   end
 end
 
+YARD::Rake::YardocTask.new do |yt|
+  yt.files   = ['lib/**/*.rb']
+  yt.options = ['--readme', 'README.md']
+end
+
 desc 'Open an irb session preloaded with this library'
 task :console do
   sh 'irb -rubygems -I lib -r rubydora.rb'
@@ -38,7 +46,7 @@ task :ci => 'jetty:clean' do
 
   jetty_params = {
     :jetty_home   => File.expand_path(File.dirname(__FILE__) + '/jetty'),
-    :quiet        => false,
+    :quiet        => true,
     :jetty_port   => ENV['TEST_JETTY_PORT'] || 8983,
     :solr_home    => File.expand_path(File.dirname(__FILE__) + '/jetty/solr'),
     :fedora_home  => File.expand_path(File.dirname(__FILE__) + '/jetty/fedora/default'),

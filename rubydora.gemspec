@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'deprecation'
 
   s.add_development_dependency 'rake'
+  s.add_development_dependency 'yard'
   s.add_development_dependency 'bundler', '>= 1.0.14'
   s.add_development_dependency 'rspec', '~> 2.0'
   s.add_development_dependency 'jettywrapper', '>= 1.4.0'
