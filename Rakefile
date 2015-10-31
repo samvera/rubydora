@@ -3,6 +3,8 @@ require 'bundler'
 require 'jettywrapper'
 require 'bundler/gem_tasks'
 
+ZIP_URL = 'https://github.com/projecthydra/hydra-jetty/archive/v7.2.0.zip'
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
