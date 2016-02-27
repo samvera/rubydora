@@ -31,13 +31,9 @@ module Rubydora
 
     # Run a raw SPARQL query and return a FasterCSV object
     # @param [String] query SPARQL query
-    # @return [FasterCSV::Table]
+    # @return [CSV::Table]
     def sparql(query)
-      if CSV.const_defined? :Reader
-        FasterCSV.parse(self.risearch(query), :headers => true)
-      else
-        CSV.parse(self.risearch(query), :headers => true)
-      end
+      CSV.parse(self.risearch(query), :headers => true)
     end
 
     # Run a raw query against the Fedora risearch resource index

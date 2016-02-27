@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_dependency 'fastercsv'
   s.add_dependency 'rest-client'
   s.add_dependency 'nokogiri'
   s.add_dependency 'equivalent-xml'
@@ -32,4 +31,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 2.0'
   s.add_development_dependency 'jettywrapper', '>= 1.4.0'
   s.add_development_dependency 'webmock'
+  s.add_development_dependency 'simplecov'
 end

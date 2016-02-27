@@ -1,9 +1,0 @@
-source 'https://rubygems.org'
-gemspec :path => '../'
-
-gem 'activemodel', '~> 3.2.13'
-
-group :development, :test do
-  gem 'simplecov'
-  gem 'simplecov-rcov'
-end
