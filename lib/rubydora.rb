@@ -23,9 +23,6 @@ module Rubydora
   require 'time'
   require 'hooks'
 
-  if CSV.const_defined? :Reader
-    require 'fastercsv'
-  end
   require 'restclient'
   require 'nokogiri'
 
