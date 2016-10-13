@@ -117,7 +117,10 @@ module Rubydora
     # Does this datastream already exist?
     # @return [Boolean]
     def new?
-      digital_object.nil? || digital_object.new_record? || profile.empty?
+      digital_object.nil? ||
+        (digital_object.respond_to?(:new_record?) && digital_object.new_record?) ||
+        (digital_object.respond_to?(:new?) && digital_object.new?) ||
+        profile.empty?
     end
 
     # This method is overridden in ActiveFedora, so we didn't

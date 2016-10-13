@@ -100,6 +100,7 @@ describe Rubydora::DigitalObject do
         end
         @object = Rubydora::DigitalObject.new 'pid', @mock_api
         @object.stub(:new_record? => false)
+        @object.stub(:new? => false)
       end
 
       it "should provide a hash populated by the existing datastreams" do
@@ -148,6 +149,7 @@ describe Rubydora::DigitalObject do
         end
         @object = Rubydora::DigitalObject.new 'pid', @mock_api
         @object.stub(:new_record? => false)
+        @object.stub(:new? => false)
       end
 
       it "should provide a hash populated by the existing datastreams" do
@@ -187,6 +189,7 @@ describe Rubydora::DigitalObject do
       XML
       @object = Rubydora::DigitalObject.new 'pid', @mock_api
       @object.stub(:new_record? => false)
+      @object.stub(:new? => false)
     end
     describe "datastreams" do
       it "should provide a hash populated by the existing datastreams" do
