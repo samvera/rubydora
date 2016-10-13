@@ -301,6 +301,11 @@ describe Rubydora::Datastream do
         XML
       end
 
+      it "does not retrieve content unnecessarily" do
+        @mock_api.should_not_receive(:datastream_dissemination)
+        @datastream.content_changed?.should == false
+      end
+
       it "should not be changed after a read-only access" do
         @mock_api.stub(:datastream_dissemination).with(hash_including(:pid => 'pid', :dsid => 'dsid')).and_return('asdf')
         @datastream.content
@@ -832,6 +837,7 @@ describe Rubydora::Datastream do
         @datastream = Rubydora::Datastream.new @mock_object, 'dsid'
         @datastream.stub(:new? => true )
         @datastream.stub(:local_or_remote_content => '123')
+        @datastream.stub(:content_loaded? => true)
         @datastream.stub(:profile) { {} }
       end
       it "should compile parameters to hash" do
