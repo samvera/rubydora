@@ -176,6 +176,7 @@ module Rubydora
 
     def content_changed?
       return false if ['E','R'].include? controlGroup
+      return false unless content_loaded?
       return true if new? && !local_or_remote_content(false).blank? # new datastreams must have content
 
       if controlGroup == "X"
@@ -210,6 +211,10 @@ module Rubydora
 
       # if we've set content, then we have content
       behaves_like_io?(@content) || content.present?
+    end
+
+    def content_loaded?
+      !@content.nil?
     end
 
     def empty?
