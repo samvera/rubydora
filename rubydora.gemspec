@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Fedora Commons REST API ruby library'
   s.description = 'Fedora Commons REST API ruby library'
   s.homepage    = 'http://github.com/projecthydra/rubydora'
+  s.license     = 'Apache-2.0'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
