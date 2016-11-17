@@ -14,8 +14,6 @@ module Rubydora
 
     DEFAULT_CONTENT_TYPE = "application/octet-stream"
 
-    VALID_CLIENT_OPTIONS = [:user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
-
     included do
       include ActiveSupport::Rescuable
 
@@ -54,7 +52,6 @@ module Rubydora
       if config.empty? || @config_hash.nil? || (client_config.hash == @config_hash)
         @config_hash = client_config.hash
         url = client_config[:url]
-        client_config.delete_if { |k,v| !VALID_CLIENT_OPTIONS.include?(k) }
         client_config[:open_timeout] ||= client_config[:timeout]
         @client ||= RestClient::Resource.new(url, client_config)
       else
