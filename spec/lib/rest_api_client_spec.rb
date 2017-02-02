@@ -240,11 +240,11 @@ describe Rubydora::RestApiClient do
       @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa'
     end
     describe "when a file is passed" do
-      let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand it for a real File (it has read, rewind and close)
-      it "should rewind the file" do
+      let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand in for a real File (it has read, rewind and close)
+      it "closes the file" do
         RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
         @mock_repository.add_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
-        lambda {file.read}.should_not raise_error
+        file.should be_closed
       end
       describe "and mimeType is not provided" do
         describe "and file responds to :content_type" do
@@ -282,10 +282,10 @@ describe Rubydora::RestApiClient do
     end
     describe "when a file is passed" do
       let!(:file) { StringIO.new('test', 'r') } # StringIO is a good stand it for a real File (it has read, rewind and close)
-      it "should rewind the file" do
+      it "closes the file" do
         RestClient::Request.any_instance.should_receive(:transmit) #stub transmit so that Request.execute can close the file we pass
         @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :content=>file
-        lambda {file.read}.should_not raise_error
+        file.should be_closed
       end
       describe "and mimeType is not provided" do
         describe "and file responds to :content_type" do
