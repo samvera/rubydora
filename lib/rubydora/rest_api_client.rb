@@ -309,6 +309,7 @@ module Rubydora
       dsid = query_options.delete(:dsid)
       method = query_options.delete(:method)
       method ||= :get
+      request_headers = query_options.delete(:headers) || {}
       raise self.class.name + "#datastream_dissemination requires a DSID" unless dsid
       if block_given?
         resource = safe_subresource(datastream_content_url(pid, dsid, query_options), :block_response => block_response)
@@ -317,7 +318,7 @@ module Rubydora
       end
       val = nil
       benchmark "Loaded datastream content #{pid}/#{dsid}", :level=>:debug do
-        val = resource.send(method)
+        val = resource.send(method, request_headers)
       end
       val
     rescue Exception => exception
