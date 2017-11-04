@@ -216,9 +216,15 @@ describe Rubydora::RestApiClient do
     end
   end
 
-  it "datastream_dissemination" do
-    RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_content_url('mypid', 'aaa')))
-    @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa'
+  describe "datastream_dissemination" do
+    it "works without request headers" do
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_content_url('mypid', 'aaa')))
+      @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa'
+    end
+    it "works with request headers" do
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_content_url('mypid', 'aaa'), :headers => {'Bat-Man' => 'Forever'}))
+      @mock_repository.datastream_dissemination :pid => 'mypid', :dsid => 'aaa', :headers => {'Bat-Man' => 'Forever'}
+    end
   end
   it "should allow http methods besides GET on datastream_dissemination" do
     RestClient::Request.should_receive(:execute).with(hash_including(:method => :head))
