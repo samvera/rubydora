@@ -1,7 +1,6 @@
 sudo: false
 language: ruby
 rvm:
-  - 2.2.10
   - 2.3.7
   - 2.4.4
   - 2.5.1
@@ -13,6 +12,8 @@ matrix:
   include:
     - rvm: 2.5.1
       env: ACTIVEMODEL_VERSION=5.1.6
+    - rvm: 2.2.10
+      env: ACTIVEMODEL_VERSION=4.2.10
 env:
   global:
     - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
