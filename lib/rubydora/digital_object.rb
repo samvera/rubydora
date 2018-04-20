@@ -198,7 +198,7 @@ module Rubydora
           p = to_api_params
           unless p.empty?
             mod_time = repository.modify_object p.merge(:pid => pid)
-            changed_attributes.clear
+            clear_changes_information
           end
         end
       end
@@ -206,7 +206,7 @@ module Rubydora
       # mod_time will be nil on new objects with no ds changes
       unless mod_time.nil?
         self.lastModifiedDate = mod_time
-        changed_attributes.delete 'lastModifiedDate'
+        clear_attribute_changes(['lastModifiedDate'])
       end
       self
     end
