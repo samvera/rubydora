@@ -387,7 +387,7 @@ module Rubydora
       @profile = nil
       @datastream_content = nil
       @content = nil
-      @changed_attributes = {}
+      clear_attribute_changes(DS_ATTRIBUTES.keys)
     end
 
     # repository reference from the digital object
