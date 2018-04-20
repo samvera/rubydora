@@ -6,5 +6,7 @@ end
 gemspec
 
 gem 'jruby-openssl', :platform => :jruby
-gem 'activesupport', '< 5' if RUBY_VERSION < '2.2.2'
+
+# We can remove this when we upgrade rspec.
+# See https://github.com/ruby/rake/issues/116
 gem 'rake', '< 12'
