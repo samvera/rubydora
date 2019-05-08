@@ -1,0 +1,79 @@
+---
+version: 2.1
+orbs:
+  samvera: samvera/circleci-orb@0
+jobs:
+  bundle:
+    parameters:
+      ruby_version:
+        type: string
+        default: 2.5.5
+      bundler_version:
+        type: string
+        default: 1.17.3
+      rails_version:
+        type: string
+        default: '5.2.2'
+    executor:
+      name: 'samvera/ruby'
+      ruby_version: << parameters.ruby_version >>
+    environment:
+      RAILS_VERSION: << parameters.rails_version >>
+      NOKOGIRI_USE_SYSTEM_LIBRARIES: true
+    steps:
+      - samvera/cached_checkout
+      - samvera/bundle_for_gem:
+          ruby_version: << parameters.ruby_version >>
+          bundler_version: << parameters.bundler_version >>
+          project: rubydora
+      - persist_to_workspace:
+          root: ~/
+          paths:
+          - project/*
+          - project/**/*
+  test:
+    parameters:
+      ruby_version:
+        type: string
+        default: 2.5.5
+      bundler_version:
+        type: string
+        default: 1.17.3
+    executor:
+      name: 'samvera/ruby'
+      ruby_version: << parameters.ruby_version >>
+    steps:
+      - attach_workspace:
+          at: ~/
+      - samvera/bundle_for_gem:
+          ruby_version: << parameters.ruby_version >>
+          bundler_version: << parameters.bundler_version >>
+          project: rubydora
+      - run:
+          name: Run RSpec
+          command: |
+            mkdir /tmp/test-results
+            bundle exec rake
+      - store_test_results:
+          path: /tmp/test-results
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: test-results
+
+workflows:
+  version: 2
+  ci:
+    jobs:
+      - bundle:
+          ruby_version: "2.5.5"
+          rails_version: "5.1.7"
+      - test:
+          name: "ruby2-5-5"
+          ruby_version: "2.5.5"
+          requires:
+            - bundle
+      - test:
+          name: "ruby2-6-2"
+          ruby_version: "2.6.2"
+          requires:
+            - bundle

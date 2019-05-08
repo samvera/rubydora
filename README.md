@@ -1,8 +1,7 @@
 # rubydora
-[<img src="https://travis-ci.org/projecthydra/rubydora.png?branch=master"
-alt="Build Status" />](https://travis-ci.org/projecthydra/rubydora) [<img
-src="https://badge.fury.io/rb/rubydora.png" alt="Gem Version"
-/>](http://badge.fury.io/rb/rubydora) [![Coverage Status](https://coveralls.io/repos/github/samvera/rubydora/badge.svg?branch=master)](https://coveralls.io/github/samvera/rubydora?branch=master)
+[![CircleCI](https://circleci.com/gh/samvera/rubydora.svg?style=svg)](https://circleci.com/gh/samvera/rubydora)
+[<img src="https://badge.fury.io/rb/rubydora.png" alt="Gem Version"/>](http://badge.fury.io/rb/rubydora)
+[![Coverage Status](https://coveralls.io/repos/github/samvera/rubydora/badge.svg?branch=master)](https://coveralls.io/github/samvera/rubydora?branch=master)
 
 Rubydora is a low-level Fedora Commons REST API consumer, providing direct
 access to REST API methods, as well as a primitive ruby abstraction.
