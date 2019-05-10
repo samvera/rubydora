@@ -5,17 +5,21 @@ orbs:
 jobs:
   bundle:
     parameters:
+      ruby_type:
+        type: string
+        default: ruby
       ruby_version:
         type: string
-        default: 2.5.5
+        default: 2.6.3
       bundler_version:
         type: string
         default: 1.17.3
       rails_version:
         type: string
-        default: '5.2.2'
+        default: '5.2.3'
     executor:
       name: 'samvera/ruby'
+      ruby_type: << parameters.ruby_type >>
       ruby_version: << parameters.ruby_version >>
     environment:
       RAILS_VERSION: << parameters.rails_version >>
@@ -33,14 +37,18 @@ jobs:
           - project/**/*
   test:
     parameters:
+      ruby_type:
+        type: string
+        default: ruby
       ruby_version:
         type: string
-        default: 2.5.5
+        default: 2.6.3
       bundler_version:
         type: string
         default: 1.17.3
     executor:
       name: 'samvera/ruby'
+      ruby_type: << parameters.ruby_type >>
       ruby_version: << parameters.ruby_version >>
     steps:
       - attach_workspace:
@@ -65,15 +73,100 @@ workflows:
   ci:
     jobs:
       - bundle:
+          name: "bundle_ruby2-6_rails5-2"
+          ruby_version: "2.6.3"
+          rails_version: "5.2.3"
+      - test:
+          name: "ruby2-6_rails5-2"
+          ruby_version: "2.6.3"
+          requires:
+            - bundle_ruby2-6_rails5-2
+      - bundle:
+          name: "bundle_ruby2-5_rails5-2"
+          ruby_version: "2.5.5"
+          rails_version: "5.2.3"
+      - test:
+          name: "ruby2-5_rails5-2"
+          ruby_version: "2.5.5"
+          requires:
+            - bundle_ruby2-5_rails5-2
+      - bundle:
+          name: "bundle_ruby2-4_rails5-2"
+          ruby_version: "2.4.6"
+          rails_version: "5.2.3"
+      - test:
+          name: "ruby2-4_rails5-2"
+          ruby_version: "2.4.6"
+          requires:
+            - bundle_ruby2-4_rails5-2
+      - bundle:
+          name: "bundle_ruby2-6_rails5-1"
+          ruby_version: "2.6.3"
+          rails_version: "5.1.7"
+      - test:
+          name: "ruby2-6_rails5-1"
+          ruby_version: "2.6.3"
+          requires:
+            - bundle_ruby2-6_rails5-1
+      - bundle:
+          name: "bundle_ruby2-5_rails5-1"
           ruby_version: "2.5.5"
           rails_version: "5.1.7"
       - test:
-          name: "ruby2-5-5"
+          name: "ruby2-5_rails5-1"
           ruby_version: "2.5.5"
           requires:
-            - bundle
+            - bundle_ruby2-5_rails5-1
+      - bundle:
+          name: "bundle_ruby2-4_rails5-1"
+          ruby_version: "2.4.6"
+          rails_version: "5.1.7"
       - test:
-          name: "ruby2-6-2"
-          ruby_version: "2.6.2"
+          name: "ruby2-4_rails5-1"
+          ruby_version: "2.4.6"
           requires:
-            - bundle
+            - bundle_ruby2-4_rails5-1
+      - bundle:
+          name: "bundle_jruby9-2_rails5-2"
+          ruby_type: "jruby"
+          ruby_version: "9.2.0.0"
+          rails_version: "5.2.3"
+      - test:
+          name: "jruby9-2_rails5-2"
+          ruby_version: "9.2.0.0"
+          ruby_type: "jruby"
+          requires:
+            - bundle_jruby9-2_rails5-2
+      - bundle:
+          name: "bundle_jruby9-2_rails5-1"
+          ruby_type: "jruby"
+          ruby_version: "9.2.7.0"
+          rails_version: "5.1.7"
+      - test:
+          name: "jruby9-2_rails5-1"
+          ruby_version: "9.2.7.0"
+          ruby_type: "jruby"
+          requires:
+            - bundle_jruby9-2_rails5-1
+      - bundle:
+          name: "bundle_jruby9-1_rails5-2"
+          ruby_type: "jruby"
+          ruby_version: "9.1.17.0"
+          rails_version: "5.2.3"
+      - test:
+          name: "jruby9-1_rails5-2"
+          ruby_version: "9.1.17.0"
+          ruby_type: "jruby"
+          requires:
+            - bundle_jruby9-1_rails5-2
+      - bundle:
+          name: "bundle_jruby9-1_rails5-1"
+          ruby_type: "jruby"
+          ruby_version: "9.1.17.0"
+          rails_version: "5.1.7"
+      - test:
+          name: "jruby9-1_rails5-1"
+          ruby_version: "9.1.17.0"
+          ruby_type: "jruby"
+          requires:
+            - bundle_jruby9-1_rails5-1
