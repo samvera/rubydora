@@ -54,11 +54,12 @@ task :ci => 'jetty:clean' do
     :java_opts    => ['-Xmx256m', '-XX:MaxPermSize=128m']
   }
 
-  error = Jettywrapper.wrap(jetty_params) do
-    Rake::Task['coverage'].invoke
-    Rake::Task['yard'].invoke
-  end
-  raise "test failures: #{error}" if error
+  #error = Jettywrapper.wrap(jetty_params) do
+  #  nil
+  #end
+  #raise "test failures: #{error}" if error
+  Rake::Task['coverage'].invoke
+  Rake::Task['yard'].invoke
 end
 
 desc 'Execute specs against Fedora under Docker'

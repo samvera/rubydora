@@ -17,13 +17,18 @@ jobs:
       rails_version:
         type: string
         default: '5.2.3'
-    executor:
-      name: 'samvera/ruby'
-      ruby_type: << parameters.ruby_type >>
-      ruby_version: << parameters.ruby_version >>
+    docker:
+      - image: circleci/<< parameters.ruby_type >>:<< parameters.ruby_version >>-node-browsers-legacy
+      - image: docuteam/fedora3-gsearch:master
     environment:
-      RAILS_VERSION: << parameters.rails_version >>
+      BUNDLE_PATH: vendor/bundle
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
       NOKOGIRI_USE_SYSTEM_LIBRARIES: true
+      RACK_ENV: test
+      RAILS_ENV: test
+      RAILS_VERSION: << parameters.rails_version >>
+      TEST_JETTY_PORT: 8080
     steps:
       - attach_workspace:
           at: ~/
