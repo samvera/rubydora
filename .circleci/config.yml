@@ -28,7 +28,9 @@ jobs:
       RACK_ENV: test
       RAILS_ENV: test
       RAILS_VERSION: << parameters.rails_version >>
+      SPEC_OPTS: --profile 10 --format RspecJunitFormatter --out /tmp/test-results/rspec.xml --format progress
       TEST_JETTY_PORT: 8080
+      RUBY_TYPE: << parameters.ruby_type >>
     steps:
       - attach_workspace:
           at: ~/
