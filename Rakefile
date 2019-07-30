@@ -4,7 +4,7 @@ require 'jettywrapper'
 require 'yard'
 require 'bundler/gem_tasks'
 
-ZIP_URL = 'https://github.com/projecthydra/hydra-jetty/archive/v7.2.0.zip'
+ZIP_URL = 'https://github.com/projecthydra/hydra-jetty/archive/v7.3.0.zip'
 
 begin
   Bundler.setup(:default, :development)
