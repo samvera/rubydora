@@ -19,3 +19,8 @@ if ENV['RAILS_VERSION']
     gem 'rails', ENV['RAILS_VERSION']
   end
 end
+
+case ENV['RAILS_VERSION']
+when /^5.2/
+  gem 'bundler', '~> 2.0'
+end
