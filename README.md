@@ -67,6 +67,27 @@ gem install rubydora
 => true
 ```
 
+## Running the Tests
+
+There is a Dockerfile included here to build a container that runs fcrepo3. It
+will listen on port 8983, so no additional configuration is required. You can
+run the continuous integration suite or the specs directly. An example of
+starting the server and running just the specs is included here:
+
+```
+docker build -t samvera/fcrepo3:latest .
+RUBYDORA_ID=$(docker run -d -p 8983:8983 samvera/fcrepo3:latest)
+bundle exec rspec && docker kill $RUBYDORA_ID
+```
+
+There are also Rake tasks for building the image and running the suite against
+a container:
+
+```
+bundle exec rake docker:build
+bundle exec rake docker:spec
+```
+
 ## Contributing to rubydora
 
 *   Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
