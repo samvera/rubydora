@@ -58,7 +58,7 @@ task 'docker:spec' do
   container = `docker run -d -p 8983:8983 samvera/fcrepo3:latest`.chomp
   puts "Waiting 10s for Fedora to start..."
   sleep 10
-  Rake::Task['spec'].invoke
+  Rake::Task['coverage'].invoke
   killed = `docker kill #{container}`.chomp
   unless container == killed
     puts "Container (#{container}) not cleaned up successfully..."

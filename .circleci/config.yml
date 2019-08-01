@@ -10,13 +10,11 @@ jobs:
         default: ruby
       ruby_version:
         type: string
-        default: 2.6.3
       bundler_version:
         type: string
         default: 1.17.3
       rails_version:
         type: string
-        default: '5.2.3'
     docker:
       - image: circleci/<< parameters.ruby_type >>:<< parameters.ruby_version >>-node-browsers-legacy
       - image: docuteam/fedora3-gsearch:master
@@ -29,7 +27,6 @@ jobs:
       RAILS_ENV: test
       RAILS_VERSION: << parameters.rails_version >>
       SPEC_OPTS: --profile 10 --format RspecJunitFormatter --out /tmp/test-results/rspec.xml --format progress
-      TEST_JETTY_PORT: 8080
       RUBY_TYPE: << parameters.ruby_type >>
     steps:
       - attach_workspace:
@@ -40,10 +37,13 @@ jobs:
           bundler_version: << parameters.bundler_version >>
           project: rubydora
       - run:
+          name: Build the Docker image
+          command: bundle exec rake docker:build
+      - run:
           name: Run RSpec
           command: |
             mkdir /tmp/test-results
-            bundle exec rake
+            bundle exec rake docker:spec
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
@@ -61,51 +61,51 @@ workflows:
     jobs:
       - test:
           name: "ruby2-6_rails5-2"
-          ruby_version: "2.6.3"
-          bundler_version: "2.0.2"
-          rails_version: "5.2.3"
+          ruby_version: 2.6.3
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
       - test:
           name: "ruby2-5_rails5-2"
-          ruby_version: "2.5.5"
-          bundler_version: "2.0.2"
-          rails_version: "5.2.3"
+          ruby_version: 2.5.5
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
       - test:
           name: "ruby2-4_rails5-2"
-          ruby_version: "2.4.6"
-          bundler_version: "2.0.2"
-          rails_version: "5.2.3"
+          ruby_version: 2.4.6
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
       - test:
           name: "ruby2-6_rails5-1"
-          ruby_version: "2.6.3"
-          rails_version: "5.1.7"
+          ruby_version: 2.6.3
+          rails_version: 5.1.7
       - test:
           name: "ruby2-5_rails5-1"
-          ruby_version: "2.5.5"
-          rails_version: "5.1.7"
+          ruby_version: 2.5.5
+          rails_version: 5.1.7
       - test:
           name: "ruby2-4_rails5-1"
-          ruby_version: "2.4.6"
-          rails_version: "5.1.7"
+          ruby_version: 2.4.6
+          rails_version: 5.1.7
       - test:
           name: "jruby9-2_rails5-2"
           ruby_type: "jruby"
-          ruby_version: "9.2.0.0"
-          bundler_version: "2.0.2"
-          rails_version: "5.2.3"
+          ruby_version: 9.2.0.0
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
       - test:
           name: "jruby9-2_rails5-1"
           ruby_type: "jruby"
-          ruby_version: "9.2.7.0"
-          rails_version: "5.1.7"
+          ruby_version: 9.2.7.0
+          rails_version: 5.1.7
       - test:
           name: "jruby9-1_rails5-2"
           ruby_type: "jruby"
-          ruby_version: "9.1.17.0"
-          bundler_version: "2.0.2"
-          rails_version: "5.2.3"
+          ruby_version: 9.1.17.0
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
       - test:
           name: "jruby9-1_rails5-1"
           ruby_type: "jruby"
-          ruby_version: "9.1.17.0"
-          bundler_version: "2.0.2"
-          rails_version: "5.1.7"
+          ruby_version: 9.1.17.0
+          bundler_version: 2.0.2
+          rails_version: 5.1.7
