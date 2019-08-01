@@ -61,6 +61,24 @@ task :ci => 'jetty:clean' do
   raise "test failures: #{error}" if error
 end
 
+desc 'Execute specs against Fedora under Docker'
+task 'docker:build' do
+  system("docker build -t samvera/fcrepo3:latest .")
+end
+
+desc 'Execute specs against Fedora under Docker'
+task 'docker:spec' do
+  container = `docker run -d -p 8983:8983 samvera/fcrepo3:latest`.chomp
+  puts "Waiting 10s for Fedora to start..."
+  sleep 10
+  Rake::Task['spec'].invoke
+  killed = `docker kill #{container}`.chomp
+  unless container == killed
+    puts "Container (#{container}) not cleaned up successfully..."
+    puts "It is likely still running and binding port 8983."
+  end
+end
+
 desc 'Execute specs with coverage'
 task :coverage do
   # Put spec opts in a file named .rspec in root
