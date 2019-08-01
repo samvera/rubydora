@@ -17,7 +17,7 @@ jobs:
         type: string
     docker:
       - image: circleci/<< parameters.ruby_type >>:<< parameters.ruby_version >>-node-browsers-legacy
-      - image: docuteam/fedora3-gsearch:master
+      - image: samveralabs/fcrepo3:latest
     environment:
       BUNDLE_PATH: vendor/bundle
       BUNDLE_JOBS: 4
@@ -36,9 +36,6 @@ jobs:
           ruby_version: << parameters.ruby_version >>
           bundler_version: << parameters.bundler_version >>
           project: rubydora
-      - run:
-          name: Build the Docker image
-          command: bundle exec rake docker:build
       - run:
           name: Run RSpec
           command: |

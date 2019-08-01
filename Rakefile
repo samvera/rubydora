@@ -50,12 +50,12 @@ end
 
 desc 'Execute specs against Fedora under Docker'
 task 'docker:build' do
-  system("docker build -t samvera/fcrepo3:latest .")
+  system("docker build -t samveralabs/fcrepo3:latest .")
 end
 
 desc 'Execute specs against Fedora under Docker'
 task 'docker:spec' do
-  container = `docker run -d -p 8983:8983 samvera/fcrepo3:latest`.chomp
+  container = `docker run -d -p 8983:8983 samveralabs/fcrepo3:latest`.chomp
   puts "Waiting 10s for Fedora to start..."
   sleep 10
   Rake::Task['coverage'].invoke
