@@ -3,48 +3,35 @@ version: 2.1
 orbs:
   samvera: samvera/circleci-orb@0
 jobs:
-  bundle:
+  test:
     parameters:
+      ruby_type:
+        type: string
+        default: ruby
       ruby_version:
         type: string
-        default: 2.5.5
       bundler_version:
         type: string
         default: 1.17.3
       rails_version:
         type: string
-        default: '5.2.2'
-    executor:
-      name: 'samvera/ruby'
-      ruby_version: << parameters.ruby_version >>
+    docker:
+      - image: circleci/<< parameters.ruby_type >>:<< parameters.ruby_version >>-node-browsers-legacy
+      - image: samveralabs/fcrepo3:latest
     environment:
-      RAILS_VERSION: << parameters.rails_version >>
+      BUNDLE_PATH: vendor/bundle
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
       NOKOGIRI_USE_SYSTEM_LIBRARIES: true
-    steps:
-      - samvera/cached_checkout
-      - samvera/bundle_for_gem:
-          ruby_version: << parameters.ruby_version >>
-          bundler_version: << parameters.bundler_version >>
-          project: rubydora
-      - persist_to_workspace:
-          root: ~/
-          paths:
-          - project/*
-          - project/**/*
-  test:
-    parameters:
-      ruby_version:
-        type: string
-        default: 2.5.5
-      bundler_version:
-        type: string
-        default: 1.17.3
-    executor:
-      name: 'samvera/ruby'
-      ruby_version: << parameters.ruby_version >>
+      RACK_ENV: test
+      RAILS_ENV: test
+      RAILS_VERSION: << parameters.rails_version >>
+      SPEC_OPTS: --profile 10 --format RspecJunitFormatter --out /tmp/test-results/rspec.xml --format progress
+      RUBY_TYPE: << parameters.ruby_type >>
     steps:
       - attach_workspace:
           at: ~/
+      - samvera/cached_checkout
       - samvera/bundle_for_gem:
           ruby_version: << parameters.ruby_version >>
           bundler_version: << parameters.bundler_version >>
@@ -53,27 +40,69 @@ jobs:
           name: Run RSpec
           command: |
             mkdir /tmp/test-results
-            bundle exec rake
+            bundle exec rake docker:spec
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
           destination: test-results
+      - persist_to_workspace:
+          root: ~/
+          paths:
+          - project/*
+          - project/**/*
 
 workflows:
   version: 2
   ci:
     jobs:
-      - bundle:
-          ruby_version: "2.5.5"
-          rails_version: "5.1.7"
       - test:
-          name: "ruby2-5-5"
-          ruby_version: "2.5.5"
-          requires:
-            - bundle
+          name: "ruby2-6_rails5-2"
+          ruby_version: 2.6.3
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
       - test:
-          name: "ruby2-6-2"
-          ruby_version: "2.6.2"
-          requires:
-            - bundle
+          name: "ruby2-5_rails5-2"
+          ruby_version: 2.5.5
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
+      - test:
+          name: "ruby2-4_rails5-2"
+          ruby_version: 2.4.6
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
+      - test:
+          name: "ruby2-6_rails5-1"
+          ruby_version: 2.6.3
+          rails_version: 5.1.7
+      - test:
+          name: "ruby2-5_rails5-1"
+          ruby_version: 2.5.5
+          rails_version: 5.1.7
+      - test:
+          name: "ruby2-4_rails5-1"
+          ruby_version: 2.4.6
+          rails_version: 5.1.7
+      - test:
+          name: "jruby9-2_rails5-2"
+          ruby_type: "jruby"
+          ruby_version: 9.2.0.0
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
+      - test:
+          name: "jruby9-2_rails5-1"
+          ruby_type: "jruby"
+          ruby_version: 9.2.7.0
+          rails_version: 5.1.7
+      - test:
+          name: "jruby9-1_rails5-2"
+          ruby_type: "jruby"
+          ruby_version: 9.1.17.0
+          bundler_version: 2.0.2
+          rails_version: 5.2.3
+      - test:
+          name: "jruby9-1_rails5-1"
+          ruby_type: "jruby"
+          ruby_version: 9.1.17.0
+          bundler_version: 2.0.2
+          rails_version: 5.1.7

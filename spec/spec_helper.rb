@@ -1,12 +1,18 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
-require 'simplecov'
-require 'coveralls'
+if ENV['COVERAGE'] == 'true'
+  require 'simplecov'
+  require 'coveralls'
 
-SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-
-SimpleCov.start
+  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+    [
+      SimpleCov::Formatter::HTMLFormatter,
+      Coveralls::SimpleCov::Formatter
+    ]
+  )
+  SimpleCov.start
+end
 
 require 'rspec/autorun'
 require 'rubydora'
