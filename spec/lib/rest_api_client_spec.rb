@@ -279,11 +279,11 @@ describe Rubydora::RestApiClient do
 
   describe "modify datastream" do
     it "should not set mime-type when it's not provided (and a file is not passed)" do
-      RestClient::Request.should_receive(:execute).with(:url => base_url + "/" + datastream_url('mypid', 'aaa'),:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa')))
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa'
     end
     it "should pass the provided mimeType header" do
-      RestClient::Request.should_receive(:execute).with(:url => base_url + "/" + datastream_url('mypid', 'aaa', :mimeType => 'application/json'),:open_timeout=>nil, :payload=>nil, :user=>@fedora_user, :password=>@fedora_password, :method=>:put, :headers=>{})
+      RestClient::Request.should_receive(:execute).with(hash_including(:url => base_url + "/" + datastream_url('mypid', 'aaa', :mimeType => 'application/json')))
       @mock_repository.modify_datastream :pid => 'mypid', :dsid => 'aaa', :mimeType=>'application/json'
     end
     describe "when a file is passed" do
