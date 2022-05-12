@@ -5,7 +5,7 @@ access to REST API methods, as well as a primitive ruby abstraction.
 
 [![CircleCI](https://circleci.com/gh/samvera/rubydora.svg?style=svg)](https://circleci.com/gh/samvera/rubydora)
 [<img src="https://badge.fury.io/rb/rubydora.png" alt="Gem Version"/>](http://badge.fury.io/rb/rubydora)
-[![Coverage Status](https://coveralls.io/repos/github/samvera/rubydora/badge.svg?branch=master)](https://coveralls.io/github/samvera/rubydora?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/samvera/rubydora/badge.svg?branch=main)](https://coveralls.io/github/samvera/rubydora?branch=main)
 
 Jump in: [![Slack Status](http://slack.samvera.org/badge.svg)](http://slack.samvera.org/)
 
@@ -28,22 +28,22 @@ gem install rubydora
 
 ```
 > repo = Rubydora.connect :url => 'http://localhost:8983/fedora', :user => 'fedoraAdmin', :password => 'fedoraAdmin'
-=> #<Rubydora::Repository:0x101859538 @config={:url=>"http://localhost:8983/fedora", :user=>"fedoraAdmin", :password=>"fedoraAdmin"}> 
+=> #<Rubydora::Repository:0x101859538 @config={:url=>"http://localhost:8983/fedora", :user=>"fedoraAdmin", :password=>"fedoraAdmin"}>
 
 > obj = repo.find('test:1')
-=> #<Rubydora::DigitalObject:0x101977230 @pid="test:1", @repository=#<Rubydora::Repository:0x1019beef0 @config={:user=>"fedoraAdmin", :url=>"http://localhost:8983/fedora", :password=>"fedora"}>> 
+=> #<Rubydora::DigitalObject:0x101977230 @pid="test:1", @repository=#<Rubydora::Repository:0x1019beef0 @config={:user=>"fedoraAdmin", :url=>"http://localhost:8983/fedora", :password=>"fedora"}>>
 
 > obj.new?
-=> true 
+=> true
 
 > obj = obj.save
-=> #<Rubydora::DigitalObject:0x1017601b8 @pid="test:1", @repository=#<Rubydora::Repository:0x1018e3058 @config={:url=>"http://localhost:8983/fedora", :user=>"fedoraAdmin", :password=>"fedoraAdmin"}, @client=#<RestClient::Resource:0x101882910 @options={:user=>"fedoraAdmin", :password=>"fedoraAdmin"}, @block=nil, @url="http://localhost:8983/fedora">>> 
+=> #<Rubydora::DigitalObject:0x1017601b8 @pid="test:1", @repository=#<Rubydora::Repository:0x1018e3058 @config={:url=>"http://localhost:8983/fedora", :user=>"fedoraAdmin", :password=>"fedoraAdmin"}, @client=#<RestClient::Resource:0x101882910 @options={:user=>"fedoraAdmin", :password=>"fedoraAdmin"}, @block=nil, @url="http://localhost:8983/fedora">>>
 
 > obj.profile
-=> {"objDissIndexViewURL"=>"http://localhost:8983/fedora/get/test:1/fedora-system:3/viewMethodIndex", "objLabel"=>"", "objModels"=>"info:fedora/fedora-system:FedoraObject-3.0", "objCreateDate"=>"2011-04-18T13:34:11.285Z", "objOwnerId"=>"fedoraAdmin", "objState"=>"A", "objItemIndexViewURL"=>"http://localhost:8983/fedora/get/test:1/fedora-system:3/viewItemIndex", "objLastModDate"=>"2011-04-18T13:47:30.110Z"} 
+=> {"objDissIndexViewURL"=>"http://localhost:8983/fedora/get/test:1/fedora-system:3/viewMethodIndex", "objLabel"=>"", "objModels"=>"info:fedora/fedora-system:FedoraObject-3.0", "objCreateDate"=>"2011-04-18T13:34:11.285Z", "objOwnerId"=>"fedoraAdmin", "objState"=>"A", "objItemIndexViewURL"=>"http://localhost:8983/fedora/get/test:1/fedora-system:3/viewItemIndex", "objLastModDate"=>"2011-04-18T13:47:30.110Z"}
 
 > obj.models
-=> ["info:fedora/fedora-system:FedoraObject-3.0"] 
+=> ["info:fedora/fedora-system:FedoraObject-3.0"]
 
 > obj.models << 'info:fedora/test:cmodel'
 => ["info:fedora/fedora-system:FedoraObject-3.0", "info:fedora/test:cmodel"]
@@ -67,8 +67,8 @@ gem install rubydora
 => "Example redirect datastream"
 > ds.mimeType = 'text/html'
 => "text/html"
-> ds.save 
-=> #<Rubydora::Datastream:0x10177a568 @dsid="File" ...> 
+> ds.save
+=> #<Rubydora::Datastream:0x10177a568 @dsid="File" ...>
 
 > obj.datastreams
 => {"DC"=>#<Rubydora::Datastream:0x101860180 @dsid="DC" ..., "File"=>#<Rubydora::Datastream:0x10177a568 @dsid="File" ...>}
@@ -102,7 +102,10 @@ bundle exec rake docker:spec
 
 ## Contributing to rubydora
 
-*   Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
+*   If you're working on PR for this project, create a feature branch off of `main`.
+
+  This repository follows the [Samvera Community Code of Conduct](https://samvera.atlassian.net/wiki/spaces/samvera/pages/405212316/Code+of+Conduct) and [language recommendations](https://github.com/samvera/maintenance/blob/main/templates/CONTRIBUTING.md#language).  Please ***do not*** create a branch called `master` for this repository or as part of your pull request; the branch will either need to be removed or renamed before it can be considered for inclusion in the code base and history of this repository.
+*   Check out the latest main branch to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 *   Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 *   Fork the project
 *   Start a feature/bugfix branch
