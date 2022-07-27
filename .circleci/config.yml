@@ -56,6 +56,12 @@ workflows:
   version: 2
   ci:
     jobs:
+      # Rails 6.1
+      - test:
+          name: "ruby2-7_rails6-1"
+          ruby_version: 2.7.5
+          bundler_version: 2.0.2
+          rails_version: 6.1.6.1
       # Rails 6.0
       - test:
           name: "ruby2-7_rails6-0"
@@ -140,6 +146,12 @@ workflows:
                 - main
 
     jobs:
+      # Rails 6.1
+      - test:
+          name: "ruby2-7_rails6-1"
+          ruby_version: 2.7.5
+          bundler_version: 2.0.2
+          rails_version: 6.1.6.1
       # Rails 6.0
       - test:
           name: "ruby2-7_rails6-0"

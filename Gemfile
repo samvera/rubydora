@@ -7,10 +7,6 @@ gemspec
 
 gem 'jruby-openssl', :platform => :jruby
 
-# We can remove this when we upgrade rspec.
-# See https://github.com/ruby/rake/issues/116
-gem 'rake', '< 12'
-
 if ENV['RAILS_VERSION']
   if ENV['RAILS_VERSION'] == 'edge'
     gem 'rails', github: 'rails/rails'
