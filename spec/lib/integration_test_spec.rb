@@ -75,6 +75,7 @@ describe "Integration testing against a live Fedora repository", :integration =>
     e_date = obj.lastModifiedDate
     obj = @repository.find('test:3')
     obj.label.should == 'qwerty'
+    obj.lastModifiedDate.should == "0"
     obj.lastModifiedDate.should == e_date
   end
 
