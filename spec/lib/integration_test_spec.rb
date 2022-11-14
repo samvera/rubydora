@@ -75,7 +75,9 @@ describe "Integration testing against a live Fedora repository", :integration =>
     e_date = obj.lastModifiedDate
     obj = @repository.find('test:3')
     obj.label.should == 'qwerty'
-    obj.lastModifiedDate.should == e_date
+    parsed_last_modified = Date.parse(obj.lastModifiedDate)
+    parsed_e_date = Date.parse(e_date)
+    parsed_last_modified.should == parsed_e_date
   end
 
   describe "datastream stuff" do
