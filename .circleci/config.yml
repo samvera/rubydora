@@ -16,7 +16,7 @@ jobs:
       rails_version:
         type: string
     docker:
-      - image: circleci/<< parameters.ruby_type >>:<< parameters.ruby_version >>-node-browsers-legacy
+      - image: cimg/<< parameters.ruby_type >>:<< parameters.ruby_version >>-browsers
       - image: samveralabs/fcrepo3:latest
     environment:
       BUNDLE_PATH: vendor/bundle
