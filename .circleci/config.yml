@@ -56,71 +56,98 @@ workflows:
   version: 2
   ci:
     jobs:
+      # Rails 7.0
+      - test:
+          name: "ruby3-2_rails7-0"
+          ruby_version: 3.2.0
+          rails_version: 7.0.4.1
+      - test:
+          name: "ruby3-1_rails7-0"
+          ruby_version: 3.1.3
+          rails_version: 7.0.4.1
+      - test:
+          name: "ruby3-0_rails7-0"
+          ruby_version: 3.0.5
+          rails_version: 7.0.4.1
       # Rails 6.1
       - test:
+          name: "ruby3-2_rails6-1"
+          ruby_version: 3.2.0
+          rails_version: 6.1.7.1
+      - test:
+          name: "ruby3-1_rails6-1"
+          ruby_version: 3.1.3
+          rails_version: 6.1.7.1
+      - test:
+          name: "ruby3-0_rails6-1"
+          ruby_version: 3.0.5
+          rails_version: 6.1.7.1
+      - test:
           name: "ruby2-7_rails6-1"
-          ruby_version: 2.7.5
-          bundler_version: 2.0.2
-          rails_version: 6.1.6.1
+          ruby_version: 2.7.7
+          rails_version: 6.1.7.1
       # Rails 6.0
       - test:
+          name: "ruby3-2_rails6-0"
+          ruby_version: 3.2.0
+          rails_version: 6.0.6.1
+      - test:
+          name: "ruby3-1_rails6-1"
+          ruby_version: 3.1.3
+          rails_version: 6.0.6.1
+      - test:
+          name: "ruby3-0_rails6-1"
+          ruby_version: 3.0.5
+          rails_version: 6.0.6.1
+      - test:
           name: "ruby2-7_rails6-0"
-          ruby_version: 2.7.5
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          ruby_version: 2.7.7
+          rails_version: 6.0.6.1
       - test:
           name: "ruby2-6_rails6-0"
-          ruby_version: 2.6.9
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          ruby_version: 2.6.10
+          rails_version: 6.0.6.1
       - test:
           name: "ruby2-5_rails6-0"
           ruby_version: 2.5.9
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          rails_version: 6.0.6.1
       - test:
           name: "jruby9-2_rails6-0"
           ruby_type: "jruby"
           ruby_version: 9.2.0.0
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          rails_version: 6.0.6.1
 
       # Rails 5.2
       - test:
           name: "ruby2-7_rails5-2"
-          ruby_version: 2.7.5
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          ruby_version: 2.7.7
+          rails_version: 5.2.8.1
       - test:
           name: "ruby2-6_rails5-2"
-          ruby_version: 2.6.9
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          ruby_version: 2.6.10
+          rails_version: 5.2.8.1
       - test:
           name: "ruby2-5_rails5-2"
           ruby_version: 2.5.9
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          rails_version: 5.2.8.1
       - test:
           name: "ruby2-4_rails5-2"
-          ruby_version: 2.4.6
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          ruby_version: 2.4.10
+          rails_version: 5.2.8.1
       - test:
           name: "jruby9-2_rails5-2"
           ruby_type: "jruby"
           ruby_version: 9.2.0.0
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          rails_version: 5.2.8.1
 
       # Rails 5.1
       - test:
           name: "ruby2-7_rails5-1"
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 5.1.7
       - test:
           name: "ruby2-6_rails5-1"
-          ruby_version: 2.6.9
+          ruby_version: 2.6.10
           rails_version: 5.1.7
       - test:
           name: "ruby2-5_rails5-1"
@@ -128,7 +155,7 @@ workflows:
           rails_version: 5.1.7
       - test:
           name: "ruby2-4_rails5-1"
-          ruby_version: 2.4.6
+          ruby_version: 2.4.10
           rails_version: 5.1.7
       - test:
           name: "jruby9-2_rails5-1"
@@ -146,71 +173,98 @@ workflows:
                 - main
 
     jobs:
+      # Rails 7.0
+      - test:
+          name: "ruby3-2_rails7-0"
+          ruby_version: 3.2.0
+          rails_version: 7.0.4.1
+      - test:
+          name: "ruby3-1_rails7-0"
+          ruby_version: 3.1.3
+          rails_version: 7.0.4.1
+      - test:
+          name: "ruby3-0_rails7-0"
+          ruby_version: 3.0.5
+          rails_version: 7.0.4.1
       # Rails 6.1
       - test:
+          name: "ruby3-2_rails6-1"
+          ruby_version: 3.2.0
+          rails_version: 6.1.7.1
+      - test:
+          name: "ruby3-1_rails6-1"
+          ruby_version: 3.1.3
+          rails_version: 6.1.7.1
+      - test:
+          name: "ruby3-0_rails6-1"
+          ruby_version: 3.0.5
+          rails_version: 6.1.7.1
+      - test:
           name: "ruby2-7_rails6-1"
-          ruby_version: 2.7.5
-          bundler_version: 2.0.2
-          rails_version: 6.1.6.1
+          ruby_version: 2.7.7
+          rails_version: 6.1.7.1
       # Rails 6.0
       - test:
+          name: "ruby3-2_rails6-0"
+          ruby_version: 3.2.0
+          rails_version: 6.0.6.1
+      - test:
+          name: "ruby3-1_rails6-1"
+          ruby_version: 3.1.3
+          rails_version: 6.0.6.1
+      - test:
+          name: "ruby3-0_rails6-1"
+          ruby_version: 3.0.5
+          rails_version: 6.0.6.1
+      - test:
           name: "ruby2-7_rails6-0"
-          ruby_version: 2.7.5
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          ruby_version: 2.7.7
+          rails_version: 6.0.6.1
       - test:
           name: "ruby2-6_rails6-0"
-          ruby_version: 2.6.9
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          ruby_version: 2.6.10
+          rails_version: 6.0.6.1
       - test:
           name: "ruby2-5_rails6-0"
           ruby_version: 2.5.9
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          rails_version: 6.0.6.1
       - test:
           name: "jruby9-2_rails6-0"
           ruby_type: "jruby"
           ruby_version: 9.2.0.0
-          bundler_version: 2.0.2
-          rails_version: 6.0.2
+          rails_version: 6.0.6.1
 
       # Rails 5.2
       - test:
           name: "ruby2-7_rails5-2"
-          ruby_version: 2.7.5
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          ruby_version: 2.7.7
+          rails_version: 5.2.8.1
       - test:
           name: "ruby2-6_rails5-2"
-          ruby_version: 2.6.9
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          ruby_version: 2.6.10
+          rails_version: 5.2.8.1
       - test:
           name: "ruby2-5_rails5-2"
           ruby_version: 2.5.9
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          rails_version: 5.2.8.1
       - test:
           name: "ruby2-4_rails5-2"
-          ruby_version: 2.4.6
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          ruby_version: 2.4.10
+          rails_version: 5.2.8.1
       - test:
           name: "jruby9-2_rails5-2"
           ruby_type: "jruby"
           ruby_version: 9.2.0.0
-          bundler_version: 2.0.2
-          rails_version: 5.2.4
+          rails_version: 5.2.8.1
 
       # Rails 5.1
       - test:
           name: "ruby2-7_rails5-1"
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 5.1.7
       - test:
           name: "ruby2-6_rails5-1"
-          ruby_version: 2.6.9
+          ruby_version: 2.6.10
           rails_version: 5.1.7
       - test:
           name: "ruby2-5_rails5-1"
@@ -218,11 +272,10 @@ workflows:
           rails_version: 5.1.7
       - test:
           name: "ruby2-4_rails5-1"
-          ruby_version: 2.4.6
+          ruby_version: 2.4.10
           rails_version: 5.1.7
       - test:
           name: "jruby9-2_rails5-1"
           ruby_type: "jruby"
           ruby_version: 9.2.7.0
           rails_version: 5.1.7
-
