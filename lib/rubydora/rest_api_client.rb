@@ -160,7 +160,7 @@ module Rubydora
       query_options = options.dup
       pid = query_options.delete(:pid)
       run_hook :before_modify_object, :pid => pid, :options => options
-      ProfileParser.canonicalize_date_string(client[object_url(pid, query_options)].put(nil))
+      ProfileParser.canonicalize_date_string(client[object_url(pid, query_options)].put(nil).to_s)
     rescue Exception => exception
       rescue_with_handler(exception) || raise
     end

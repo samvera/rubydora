@@ -12,7 +12,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should convert object profile to a simple hash" do
-      @mock_api.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
+      @mock_api.should_receive(:object).with({ pid: 'pid' }).and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
       h = @object.profile
 
       h.should have_key("a")
@@ -25,19 +25,19 @@ describe Rubydora::DigitalObject do
     end
 
     it "should be frozen (to prevent modification)" do
-      @mock_api.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
+      @mock_api.should_receive(:object).with({ pid: 'pid' }).and_return("<objectProfile><a>1</a><b>2</b><objModels><model>3</model><model>4</model></objectProfile>")
       h = @object.profile
 
       expect { h['asdf'] = 'asdf' }.to raise_error
     end
 
     it "should return nil for empty profile fields" do
-      @mock_api.should_receive(:object).with(:pid => 'pid').and_return("<objectProfile><a></a></objectProfile>")
+      @mock_api.should_receive(:object).with({ pid: 'pid' }).and_return("<objectProfile><a></a></objectProfile>")
       @object.profile['a'].should be_nil
     end
 
     it "should throw exceptions that arise" do
-      @mock_api.should_receive(:object).with(:pid => 'pid').and_raise(Net::HTTPBadResponse)
+      @mock_api.should_receive(:object).with({ pid: 'pid' }).and_raise(Net::HTTPBadResponse)
       expect { @object.profile }.to raise_error(Net::HTTPBadResponse)
     end
   end
@@ -111,7 +111,7 @@ describe Rubydora::DigitalObject do
       end
 
       it "should allow other datastreams to be added" do
-        @mock_api.should_receive(:datastream).with(:pid => 'pid', :dsid => 'z').and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:datastream).with({ pid: 'pid', dsid: 'z' }).and_raise(RestClient::ResourceNotFound)
 
         @object.datastreams.length.should == 3
 
@@ -339,7 +339,7 @@ describe Rubydora::DigitalObject do
     end
 
     it "should call the Fedora REST API" do
-      @mock_api.should_receive(:purge_object).with({:pid => 'pid'})
+      @mock_api.should_receive(:purge_object).with({ pid: 'pid' })
       @object.delete
     end
   end
@@ -481,7 +481,7 @@ describe Rubydora::DigitalObject do
       end
 
       it "should fall-back to the set of default attributes" do
-        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with({ pid: "pid" }).and_raise(RestClient::ResourceNotFound)
         Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(method.to_sym) { 'zxcv'}
         subject.send(method).should == 'zxcv'
       end
@@ -492,7 +492,7 @@ describe Rubydora::DigitalObject do
         subject.stub(:datastreams => [])
       end
       it "should mark the object as changed after setting" do
-        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with({ pid: "pid" }).and_raise(RestClient::ResourceNotFound)
         subject.send("#{method}=", 'new_value')
         subject.should be_changed
       end
@@ -504,7 +504,7 @@ describe Rubydora::DigitalObject do
 
       it "should appear in the save request" do
         @mock_api.should_receive(:ingest).with(hash_including(method.to_sym => 'new_value'))
-        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with({ pid: "pid" }).and_raise(RestClient::ResourceNotFound)
         subject.send("#{method}=", 'new_value')
         subject.save
       end
@@ -526,7 +526,7 @@ describe Rubydora::DigitalObject do
       end
 
       it "should fall-back to the set of default attributes" do
-        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with({ pid: "pid" }).and_raise(RestClient::ResourceNotFound)
         Rubydora::DigitalObject::OBJ_DEFAULT_ATTRIBUTES.should_receive(:[]).with(:state) { 'zxcv'}
         subject.state.should == 'zxcv'
       end
@@ -537,7 +537,7 @@ describe Rubydora::DigitalObject do
         subject.stub(:datastreams => [])
       end
       it "should mark the object as changed after setting" do
-        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with({ pid: "pid" }).and_raise(RestClient::ResourceNotFound)
         subject.state= 'D'
         subject.should be_changed
       end
@@ -554,7 +554,7 @@ describe Rubydora::DigitalObject do
 
       it "should appear in the save request" do
         @mock_api.should_receive(:ingest).with(hash_including(:state => 'A'))
-        @mock_api.should_receive(:object).with(:pid=>"pid").and_raise(RestClient::ResourceNotFound)
+        @mock_api.should_receive(:object).with({ pid: "pid" }).and_raise(RestClient::ResourceNotFound)
         subject.state='A'
         subject.save
       end

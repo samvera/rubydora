@@ -173,7 +173,7 @@ describe Rubydora::RestApiClient do
 
   context "Calling datastreams with a dsid" do
     it "warns of deprecated behavior" do
-      @mock_repository.should_receive(:datastream).with(:pid => 'mypid', :dsid => 'asdf')
+      @mock_repository.should_receive(:datastream).with({ pid: 'mypid', dsid: 'asdf' })
       Deprecation.should_receive(:warn)
       @mock_repository.datastreams :pid => 'mypid', :dsid => 'asdf'
     end
@@ -181,7 +181,7 @@ describe Rubydora::RestApiClient do
 
   context "Calling datastream without a dsid" do
     it "warns of deprecated behavior" do
-      @mock_repository.should_receive(:datastreams).with(:pid => 'mypid')
+      @mock_repository.should_receive(:datastreams).with({ pid: 'mypid' })
       Deprecation.should_receive(:warn)
       @mock_repository.datastream :pid => 'mypid'
     end
