@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
+  s.metadata      = { "rubygems_mfa_required" => "true" }
 
   s.add_dependency 'rest-client'
   s.add_dependency 'nokogiri'
