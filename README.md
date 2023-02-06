@@ -1,12 +1,10 @@
-# rubydora
+# rubydora (Deprecated)
+*This project has been deprecated and is no longer being maintained by the Samvera Community.*
 
-Rubydora is a low-level Fedora Commons REST API consumer, providing direct
-access to REST API methods, as well as a primitive ruby abstraction.
+Rubydora is a low-level Fedora Commons REST API consumer, providing direct access to REST API methods, as well as a primitive ruby abstraction.
 
 Code:
 [![Gem Version](https://badge.fury.io/rb/rubydora.png)](http://badge.fury.io/rb/rubydora)
-[![Build Status](https://circleci.com/gh/samvera/rubydora.svg?style=svg)](https://circleci.com/gh/samvera/rubydora)
-[![Coverage Status](https://coveralls.io/repos/github/samvera/rubydora/badge.svg?branch=main)](https://coveralls.io/github/samvera/rubydora?branch=main)
 
 Docs:
 [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guidelines-blue.svg)](./CONTRIBUTING.md)
@@ -132,8 +130,8 @@ Copyright (c) 2011 Chris Beer. See LICENSE.txt for further details.
 
 This software has been developed by and is brought to you by the Samvera community.  Learn more at the [Samvera website](http://samvera.org/).
 
-![Samvera Logo](https://wiki.duraspace.org/download/thumbnails/87459292/samvera-fall-font2-200w.png?version=1&modificationDate=1498550535816&api=v2)
+![Samvera Logo](https://samvera.github.io/images/company_logo.png)
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/samvera/rubydora/.
+Bug reports and pull requests are welcome on GitHub at https://github.com/samvera-deprecated/rubydora/.
