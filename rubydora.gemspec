@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'equivalent-xml'
   s.add_dependency 'mime-types'
   s.add_dependency 'activesupport'
-  s.add_dependency 'activemodel', '>= 4.2.10'
+  s.add_dependency 'activemodel', '>= 5.2'
   s.add_dependency 'hooks', '~> 0.3'
   s.add_dependency 'deprecation'
 
