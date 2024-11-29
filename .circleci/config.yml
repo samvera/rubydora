@@ -29,6 +29,16 @@ jobs:
       SPEC_OPTS: --profile 10 --format RspecJunitFormatter --out /tmp/test-results/rspec.xml --format progress
       RUBY_TYPE: << parameters.ruby_type >>
     steps:
+      - checkout
+      - run:
+          name: Check for 'master' branch
+          command: |
+              git fetch --all --quiet --prune --prune-tags
+              if [[ -n "$(git branch --all --list master */master)" ]]; then
+                  echo "A branch named 'master' was found. Please remove it."
+                  echo "$(git branch --all --list master */master)"
+              fi
+              [[ -z "$(git branch --all --list master */master)" ]]
       - attach_workspace:
           at: ~/
       - samvera/cached_checkout
